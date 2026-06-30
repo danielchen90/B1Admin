@@ -1,4 +1,5 @@
 import { Locale, UserHelper, Permissions } from "@churchapps/apphelper";
+import { canManageOrdinationTypes } from "./OrdinationHelper";
 
 interface MenuItem {
   url: string;
@@ -11,6 +12,7 @@ export class SecondaryMenuHelper {
     let result: { menuItems: MenuItem[]; label: string } = { menuItems: [], label: "" };
 
     if (path.startsWith("/people") || path.startsWith("/groups") || path.startsWith("/attendance") || path.startsWith("/forms")) result = this.getPeopleMenu(path, data);
+    else if (path.startsWith("/ordinations")) result = this.getOrdinationsMenu(path);
     else if (path.startsWith("/mobile")) result = this.getMobileMenu(path);
     else if (path.startsWith("/settings") || path.startsWith("/admin")) result = this.getSettingsMenu(path);
     else if (path.startsWith("/serving")) result = this.getServingMenu(path, data);
@@ -46,13 +48,23 @@ export class SecondaryMenuHelper {
     let label: string = "";
     if (UserHelper.checkAccess(Permissions.membershipApi.settings.edit)) menuItems.push({ url: "/settings", label: Locale.label("components.wrapper.set"), icon: "settings" });
     if (UserHelper.checkAccess(Permissions.membershipApi.roles.view)) menuItems.push({ url: "/settings/roles", label: Locale.label("settings.roles.roles"), icon: "lock" });
+    if (canManageOrdinationTypes()) menuItems.push({ url: "/settings/ordination-types", label: "Ordination Types", icon: "workspace_premium" });
     if (UserHelper.checkAccess(Permissions.membershipApi.server.admin)) menuItems.push({ url: "/admin", label: Locale.label("components.wrapper.servAdmin"), icon: "admin_panel_settings" });
 
     if (path.startsWith("/settings/roles") || path.startsWith("/settings/role")) label = Locale.label("settings.roles.roles");
     else if (path.startsWith("/settings/campuses")) label = Locale.label("settings.campuses.campuses");
+    else if (path.startsWith("/settings/ordination-types")) label = "Ordination Types";
     else if (path.startsWith("/settings")) label = Locale.label("components.wrapper.set");
     else if (path.startsWith("/admin")) label = Locale.label("components.wrapper.servAdmin");
 
+    return { menuItems, label };
+  };
+
+  static getOrdinationsMenu = (path: string) => {
+    const menuItems: MenuItem[] = [];
+    const label: string = "Ordinations";
+    menuItems.push({ url: "/ordinations", label: "Ordinations", icon: "workspace_premium" });
+    if (canManageOrdinationTypes()) menuItems.push({ url: "/settings/ordination-types", label: "Ordination Types", icon: "workspace_premium" });
     return { menuItems, label };
   };
 

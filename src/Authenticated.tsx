@@ -64,6 +64,7 @@ const RegistrationDetailsPage = React.lazy(() => import("./registrations/Registr
 const Site = React.lazy(() => import("./site").then((module) => ({ default: module.Site })));
 const Mobile = React.lazy(() => import("./mobile").then((module) => ({ default: module.Mobile })));
 const EmailTemplatesPage = React.lazy(() => import("./settings/EmailTemplatesPage").then((module) => ({ default: module.EmailTemplatesPage })));
+const OrdinationsHubPage = React.lazy(() => import("./ordinations/OrdinationsHubPage").then((m) => ({ default: m.OrdinationsHubPage })));
 
 // Suspense fallback shown while a route's lazy chunk loads.
 const LoadingFallback: React.FC = () => <PageSkeleton />;
@@ -114,6 +115,7 @@ export const Authenticated: React.FC = () => {
           <Route path="/people/demographics" element={<DemographicsPage />} />
           <Route path="/people/:id" element={<PersonPage />} />
           <Route path="/people" element={<PeoplePage />} />
+          <Route path="/ordinations" element={<OrdinationsHubPage />} />
           <Route path="/groups/pending" element={<PendingRequestsPage />} />
           <Route path="/groups/health" element={<GroupsHealthPage />} />
           <Route path="/groups/:id" element={<GroupPage />} />
