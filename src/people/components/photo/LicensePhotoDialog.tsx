@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Tab, Tabs } from "@mui/material";
+import { ApiHelper } from "@churchapps/apphelper";
 import { type PersonInterface } from "@churchapps/helpers";
 import { CameraCapture } from "./CameraCapture";
 import { PhotoCropper } from "./PhotoCropper";
 import { LICENSE_ASPECT, type PhotoCropTransform } from "./LicensePhotoInterfaces";
-import { validateImage, exifNormalize, dataUrlToBlob, PhotoDecodeError } from "./photoHelpers";
+import { validateImage, exifNormalize, downscale, toPngDataUrl, dataUrlToBlob, PhotoDecodeError } from "./photoHelpers";
 import { useLicensePhoto } from "./useLicensePhoto";
+import { parseApiError } from "../../../helpers/OrdinationHelper";
 
 // The License Photo dialog — the convergence point of Phase 4. It composes the Plan 03
 // capture/crop primitives (CameraCapture + PhotoCropper) with an Upload fallback and the
@@ -130,9 +132,56 @@ export const LicensePhotoDialog: React.FC<Props> = ({ person, open, onClose, onS
     }
   };
 
-  // Save handler is implemented in Task 2 (store-once source + crop transform).
+  // Two-part save (PHO-04 store-once): persist ONE source image through the EXISTING person
+  // photo seam, then ONE normalized crop transform row. No new upload endpoint is introduced —
+  // PersonController.savePhoto already writes the single file /{churchId}/membership/people/
+  // {personId}.png and stamps photoUpdated. Order matters: source FIRST (stamps photoUpdated),
+  // then the crop, so a later stale-crop check (Phase 6) compares against a real photoUpdated.
   const onSave = async () => {
-    // stubbed for Task 2
+    if (!sourceBlob || !transform) return;
+    setSaving(true);
+    setError("");
+    try {
+      // (1) Build the source to persist from the SINGLE EXIF-corrected blob: downscale the long
+      //     edge to ~1200px, then re-encode to a PNG data URL (savePhoto only fires for PNG —
+      //     Pitfall 5). This is the SAME upright blob the cropper measured against.
+      const downscaled = await downscale(sourceBlob, 1200);
+      const pngDataUrl = await toPngDataUrl(downscaled);
+
+      // (2) Store ONCE via the existing member-photo seam. Open Q1 (Plan 02) RESOLVED:
+      //     PersonAvatar is an MUI Avatar with object-fit:cover, so a wider source-only image is
+      //     safe — we deliberately do NOT also persist a centered purpose:'member' crop.
+      const updated = { ...person, photo: pngDataUrl };
+      await ApiHelper.post("/people/", [updated], "MembershipApi");
+
+      // (3) Persist the normalized license crop transform. Field names byte-match the Plan 01
+      //     contract; churchId is server-derived (never sent). BARE path — MembershipApi base
+      //     already ends in /membership (the doubled-prefix lesson).
+      await ApiHelper.post(
+        "/personPhotoCrops",
+        [
+          {
+            personId: person.id,
+            purpose: "license",
+            cropX: transform.cropX,
+            cropY: transform.cropY,
+            cropWidth: transform.cropWidth,
+            cropHeight: transform.cropHeight,
+            rotation: transform.rotation
+          }
+        ],
+        "MembershipApi"
+      );
+
+      onSaved?.();
+      onClose();
+    } catch (err: any) {
+      // Surface a friendly message but KEEP the user's crop (do not reset state on failure).
+      const code = parseApiError(err);
+      setError(code || err?.message || "Could not save the license photo. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const canSave = !!sourceBlob && !!transform && !saving;
