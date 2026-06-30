@@ -49,11 +49,13 @@ export class SecondaryMenuHelper {
     if (UserHelper.checkAccess(Permissions.membershipApi.settings.edit)) menuItems.push({ url: "/settings", label: Locale.label("components.wrapper.set"), icon: "settings" });
     if (UserHelper.checkAccess(Permissions.membershipApi.roles.view)) menuItems.push({ url: "/settings/roles", label: Locale.label("settings.roles.roles"), icon: "lock" });
     if (canManageOrdinationTypes()) menuItems.push({ url: "/settings/ordination-types", label: "Ordination Types", icon: "workspace_premium" });
+    if (canManageOrdinationTypes()) menuItems.push({ url: "/settings/license-templates", label: "License Templates", icon: "badge" });
     if (UserHelper.checkAccess(Permissions.membershipApi.server.admin)) menuItems.push({ url: "/admin", label: Locale.label("components.wrapper.servAdmin"), icon: "admin_panel_settings" });
 
     if (path.startsWith("/settings/roles") || path.startsWith("/settings/role")) label = Locale.label("settings.roles.roles");
     else if (path.startsWith("/settings/campuses")) label = Locale.label("settings.campuses.campuses");
     else if (path.startsWith("/settings/ordination-types")) label = "Ordination Types";
+    else if (path.startsWith("/settings/license-templates")) label = "License Templates";
     else if (path.startsWith("/settings")) label = Locale.label("components.wrapper.set");
     else if (path.startsWith("/admin")) label = Locale.label("components.wrapper.servAdmin");
 
