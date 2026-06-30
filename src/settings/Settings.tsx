@@ -5,6 +5,7 @@ import { RolesPage } from "./RolesPage";
 import { RolePage } from "./RolePage";
 import { AuditLogPage } from "./AuditLogPage";
 import { CampusesPage } from "./CampusesPage";
+import { OrdinationTypesPage } from "./OrdinationTypesPage";
 
 export const Settings: React.FC = () => (
   <Routes>
@@ -12,6 +13,7 @@ export const Settings: React.FC = () => (
     <Route path="/role/:roleId" element={<RolePage />} />
     <Route path="/audit-log" element={<AuditLogPage />} />
     <Route path="/campuses" element={<CampusesPage />} />
+    <Route path="/ordination-types" element={<OrdinationTypesPage />} />
     <Route path="/webhooks" element={<Navigate to="/settings#developer" replace />} />
     <Route path="/developer" element={<Navigate to="/settings#developer" replace />} />
     <Route path="/" element={<ManageChurch />} />
