@@ -1,11 +1,35 @@
 import React, { memo, useMemo, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AssociatedForms } from ".";
 import { type PersonInterface } from "@churchapps/helpers";
 import { PersonHelper, Loading, DisplayBox, DateHelper, Locale, PersonAvatar, ApiHelper } from "@churchapps/apphelper";
-import { Grid, Icon, Stack, Table, TableBody, TableRow, TableCell, Chip } from "@mui/material";
+import { Box, Grid, Icon, Stack, Table, TableBody, TableRow, TableCell, Chip } from "@mui/material";
 import { Edit as EditIcon } from "@mui/icons-material";
 import { AppIconButton } from "../../components/ui/AppIconButton";
 import { formattedPhoneNumber } from "./PersonEdit";
+import { useLicensePhoto } from "./photo/useLicensePhoto";
+import { type PhotoCropTransform } from "./photo/LicensePhotoInterfaces";
+
+// Render the stored license crop (a normalized 0..1 sub-rect of the member photo) inside a
+// fixed circular box via background scale+translate — the store-once way to reflect the crop
+// at display time without a second image file (PHO-04). Returns null when there is no usable
+// crop (no photo, no saved crop, or the crop covers the whole frame) so we fall back to the
+// plain PersonAvatar. Rotation is intentionally NOT applied to the circular avatar (it is a
+// license-card concern); pan + zoom are what the user frames here.
+const croppedAvatarStyle = (photoUrl: string | undefined, crop: PhotoCropTransform | null): Record<string, string> | null => {
+  if (!photoUrl || !crop) return null;
+  const cw = crop.cropWidth || 1;
+  const ch = crop.cropHeight || 1;
+  if (cw >= 0.999 && ch >= 0.999) return null; // full-frame crop → nothing to reflect
+  const posX = cw >= 1 ? 0 : (crop.cropX / (1 - cw)) * 100;
+  const posY = ch >= 1 ? 0 : (crop.cropY / (1 - ch)) * 100;
+  return {
+    backgroundImage: `url(${photoUrl})`,
+    backgroundRepeat: "no-repeat",
+    backgroundSize: `${(1 / cw) * 100}% ${(1 / ch) * 100}%`,
+    backgroundPosition: `${posX}% ${posY}%`,
+  };
+};
 
 interface Props {
   id?: string;
@@ -18,6 +42,8 @@ interface Props {
 
 export const PersonView = memo(({ person, editFunction, updatedFunction, showForms = true, headerActions }: Props) => {
   const [userEmail, setUserEmail] = useState<string>("");
+  const navigate = useNavigate();
+  const { crop, reload: reloadCrop } = useLicensePhoto(person?.id);
 
   useEffect(() => {
     if (person?.id) {
@@ -28,6 +54,16 @@ export const PersonView = memo(({ person, editFunction, updatedFunction, showFor
         .catch(() => setUserEmail(""));
     }
   }, [person?.id]);
+
+  // Re-fetch the saved crop after a License Photo save (the parent reloads the person, bumping
+  // photoUpdated) so the freshly framed avatar shows without a manual refresh.
+  useEffect(() => {
+    void reloadCrop();
+  }, [person?.photoUpdated, reloadCrop]);
+
+  const goToProfile = () => {
+    if (person?.id) navigate("/people/" + person.id);
+  };
 
   const leftAttributes = useMemo(() => {
     if (!person) return [];
@@ -189,15 +225,32 @@ export const PersonView = memo(({ person, editFunction, updatedFunction, showFor
   const personFields = useMemo(() => {
     if (!person) return <Loading />;
 
+    const cropStyle = croppedAvatarStyle(PersonHelper.getPhotoUrl(person), crop);
+    // Responsive size: a touch smaller on phones so the circle never overflows its column.
+    const avatarBoxSx = { width: { xs: 96, sm: 120 }, height: { xs: 96, sm: 120 } } as const;
+    const ringSx = { display: "inline-flex", border: "3px solid #fff", borderRadius: "50%", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" } as const;
+    const avatar = cropStyle ? (
+      <Box sx={ringSx}>
+        <Box
+          onClick={goToProfile}
+          role="button"
+          aria-label={(person?.name?.display || "Person") + " profile"}
+          sx={{ ...avatarBoxSx, ...cropStyle, borderRadius: "50%", cursor: "pointer", "&:hover": { opacity: 0.85, transition: "opacity 0.2s ease-in-out" } }}
+        />
+      </Box>
+    ) : (
+      <Box sx={ringSx}>
+        <PersonAvatar person={person} size="xxlarge" sx={avatarBoxSx} onClick={goToProfile} />
+      </Box>
+    );
+
     return (
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 3 }}>
-          <div style={{ display: "inline-flex", border: "3px solid #fff", borderRadius: "50%", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
-            <PersonAvatar person={person} size="xxlarge" />
-          </div>
+      <Grid container spacing={3} alignItems="center">
+        <Grid size={{ xs: 12, sm: 3 }} sx={{ display: "flex", justifyContent: { xs: "center", sm: "flex-start" } }}>
+          {avatar}
         </Grid>
-        <Grid size={{ xs: 9 }}>
-          <h2>{person?.name.display}</h2>
+        <Grid size={{ xs: 12, sm: 9 }}>
+          <h2 style={{ marginTop: 0 }}>{person?.name.display}</h2>
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 6 }}>
               {leftAttributes}
@@ -216,7 +269,7 @@ export const PersonView = memo(({ person, editFunction, updatedFunction, showFor
         </Grid>
       </Grid>
     );
-  }, [person, leftAttributes, contactMethods, userEmail]);
+  }, [person, leftAttributes, contactMethods, userEmail, crop, goToProfile]);
 
   return (
     <DisplayBox
