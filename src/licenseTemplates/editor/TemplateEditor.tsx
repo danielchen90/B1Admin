@@ -13,17 +13,34 @@
 // The LayersPanel reorders explicit z-order (background stays at the back — it is a
 // NAMED slot, not a reorderable element).
 //
-// Save/load-by-id wiring to the API is DEFERRED to 05-06; this component opens a brand
-// new template (newLayout()) or an optional initialLayout, fully usable in-memory with
-// sample-data preview.
+// Persistence (05-06, TPL-03/TPL-04):
+//   - Route :id === "new" opens newLayout(); any other id loads that template row.
+//   - Save POSTs the single template object; OMITTING id when creating (server's
+//     isNew = !item.id routes to create) and SENDING the loaded id on edit (routes to
+//     update under OCC). The reloaded bumped row updates state and the URL.
+//   - parseApiError classifies version_conflict / duplicate_default / duplicate_active_type.
+//   - Preview runs against SAMPLE_BINDINGS or a picked real person's resolved data.
+//
+// PATH CONTRACT (cross-plan, Rule 1): the apphelper MembershipApi base ALREADY ends in
+// /membership, so every resource path here is BARE "/licenseTemplates" — the plan's
+// literal "/membership/licenseTemplates" would double to .../membership/membership/...
+// and 404 (Phase 3 commit b113676d; reaffirmed in 04-02; matches useLicenseTemplates
+// and the 05-01/05-03 notes).
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, Button, Slider, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import { PageHeader, UniqueIdHelper } from "@churchapps/apphelper";
-import type { LayoutElement, LicenseTemplateLayout } from "../LicenseTemplateInterface";
+import { useNavigate, useParams } from "react-router-dom";
+import { Alert, Box, Button, Checkbox, CircularProgress, Collapse, FormControlLabel, MenuItem, Select, Slider, Snackbar, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { ApiHelper, PageHeader, PersonHelper, UniqueIdHelper, UserHelper } from "@churchapps/apphelper";
+import type { PersonInterface } from "@churchapps/helpers";
+import type { LayoutElement, LicenseTemplateInterface, LicenseTemplateLayout } from "../LicenseTemplateInterface";
 import { newLayout } from "../helpers/coords";
 import { BINDING_CATALOG, SAMPLE_BINDINGS } from "../helpers/bindings";
 import { loadEditorFonts } from "../helpers/fonts";
+import { useOrdinationTypes } from "../../hooks/useOrdinationTypes";
+import { useCampuses } from "../../hooks/useCampuses";
+import { parseApiError } from "../../helpers/OrdinationHelper";
+import { PersonAdd } from "../../components/PersonAdd";
+import type { PersonOrdinationInterface } from "../../people/components/PersonOrdinationInterface";
 import { Canvas } from "./Canvas";
 import { CanvasElement } from "./CanvasElement";
 import { PropertyPanel } from "./PropertyPanel";
@@ -31,44 +48,159 @@ import { BindingList } from "./BindingList";
 import { LayersPanel } from "./LayersPanel";
 
 interface Props {
-  initialLayout?: LicenseTemplateLayout; // 05-06 supplies a loaded template; default = new
+  initialLayout?: LicenseTemplateLayout; // optional override; the route normally loads by :id
 }
 
 // Default text styling for newly-added text elements (whitelist key + bundled weight).
 const DEFAULT_TEXT_STYLE = { family: "sans", sizePt: 10, weight: 400 as const, color: "#000000", align: "left" as const };
 
+// Build a flat preview map (same friendly keys as SAMPLE_BINDINGS) from a picked real
+// person + their active ordination, resolving type/campus GUIDs to names. Mirrors the
+// BINDING_REAL_PATHS contract from 05-03 (Person.name is a Name object; rest are flat).
+const buildRealPreview = (
+  person: PersonInterface,
+  ord: PersonOrdinationInterface,
+  typeName?: string,
+  typeCode?: string,
+  campusName?: string
+): Record<string, string> => ({
+  "person.lastName": person.name?.last || "",
+  "person.firstName": person.name?.first || "",
+  "person.displayName": person.name?.display || "",
+  "person.middleName": person.name?.middle || "",
+  "ordinationType.name": typeName || "",
+  "ordinationType.code": typeCode || "",
+  "campus.name": campusName || "",
+  credentialNumber: ord.credentialNumber || "",
+  "ordination.grantedDate": ord.grantedDate || "",
+  "ordination.expirationDate": ord.expirationDate || "",
+  "ordination.status": ord.status || "",
+  "church.name": (UserHelper.currentUserChurch as any)?.church?.name || "",
+});
+
 export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
   const [layout, setLayout] = useState<LicenseTemplateLayout>(() => initialLayout ?? newLayout());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [zoom, setZoom] = useState<number>(3); // fit-to-screen default (manual zoom, no snapping)
-  const [previewData] = useState<Record<string, string>>(SAMPLE_BINDINGS); // real-person preview lands in 05-06
-  const [previewMode, setPreviewMode] = useState<"sample">("sample");
+  const [previewData, setPreviewData] = useState<Record<string, string>>(SAMPLE_BINDINGS);
+  const [previewMode, setPreviewMode] = useState<"sample" | "person">("sample");
+
+  // ----- template row state (persisted alongside the layout) --------------------------
+  const [templateId, setTemplateId] = useState<string | undefined>(undefined);
+  const [name, setName] = useState<string>("");
+  const [ordinationTypeId, setOrdinationTypeId] = useState<string | null>(null);
+  const [isDefault, setIsDefault] = useState<boolean>(false);
+  const [active, setActive] = useState<boolean>(true);
+  const [currentVersion, setCurrentVersion] = useState<number | undefined>(undefined);
+  const [version, setVersion] = useState<number | undefined>(undefined);
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  // Caches for resolving type/campus names in the real-person preview + the binding Select.
+  const ordinationTypes = useOrdinationTypes();
+  const campuses = useCampuses();
+  const ordinationTypeMap = useMemo(() => Object.fromEntries(ordinationTypes.map((t) => [t.id, t])), [ordinationTypes]);
+  const campusMap = useMemo(() => Object.fromEntries(campuses.map((c) => [c.id, c])), [campuses]);
 
   // Load the curated families once so preview metrics match the Phase 6 render.
   useEffect(() => { loadEditorFonts(); }, []);
 
+  // ----- load-by-id (TPL-03) ---------------------------------------------------------
+  const applyRow = (row: LicenseTemplateInterface) => {
+    setTemplateId(row.id);
+    setName(row.name || "");
+    setOrdinationTypeId(row.ordinationTypeId ?? null);
+    setIsDefault(!!row.isDefault);
+    setActive(row.active !== false);
+    setCurrentVersion(row.currentVersion);
+    setVersion(row.version);
+    if (row.layoutJson) {
+      try { setLayout(JSON.parse(row.layoutJson)); } catch { /* keep current layout on parse failure */ }
+    }
+  };
+
+  const loadRow = (rowId: string) => {
+    setLoading(true);
+    ApiHelper.get("/licenseTemplates/" + rowId, "MembershipApi")
+      .then((row) => { if (row && row.id) applyRow(row); })
+      .catch((e: any) => setError(e?.message || "Failed to load template."))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    if (!id || id === "new") return;
+    loadRow(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  // ----- save (TPL-03 + TPL-04) ------------------------------------------------------
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    // CRITICAL id contract: OMIT id entirely when creating (server isNew = !item.id →
+    // create); SEND the loaded id on edit (→ update under OCC). churchId is server-derived.
+    const payload: LicenseTemplateInterface = {
+      ...(templateId ? { id: templateId } : {}),
+      name,
+      ordinationTypeId, // null = global default (applies to all types)
+      isDefault,
+      active,
+      currentVersion,
+      version,
+      layoutJson: JSON.stringify(layout),
+    };
+    try {
+      const result = await ApiHelper.post("/licenseTemplates", payload, "MembershipApi");
+      const row: LicenseTemplateInterface = Array.isArray(result) ? result[0] : result;
+      applyRow(row);
+      setSuccess("Template saved (version " + (row?.currentVersion ?? "?") + ").");
+      // Stay on the editor but reflect the saved id in the URL so reloads/edits route right.
+      if (row?.id && row.id !== id) navigate("/license-templates/" + row.id, { replace: true });
+    } catch (e: any) {
+      const code = parseApiError(e);
+      if (code === "version_conflict") {
+        setError("This template changed elsewhere; reload to get the latest.");
+        if (templateId) loadRow(templateId);
+      } else if (code === "duplicate_default") {
+        setError("Another template is already the default.");
+      } else if (code === "duplicate_active_type") {
+        setError("Another active template is already bound to this ordination type.");
+      } else {
+        setError(e?.message || "Save failed.");
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // ----- element mutation helpers (passed to children) -------------------------------
   const addElement = (partial: Omit<LayoutElement, "id" | "z">) => {
-    const id = UniqueIdHelper.shortId();
+    const newId = UniqueIdHelper.shortId();
     setLayout((prev) => {
       const z = prev.elements.reduce((m, e) => Math.max(m, e.z), 0) + 1;
-      return { ...prev, elements: [...prev.elements, { ...partial, id, z } as LayoutElement] };
+      return { ...prev, elements: [...prev.elements, { ...partial, id: newId, z } as LayoutElement] };
     });
-    setSelectedId(id);
+    setSelectedId(newId);
   };
 
-  const updateElement = (id: string, patch: Record<string, any>) =>
+  const updateElement = (elId: string, patch: Record<string, any>) =>
     setLayout((prev) => ({
       ...prev,
-      elements: prev.elements.map((e) => (e.id === id ? ({ ...e, ...patch } as LayoutElement) : e)),
+      elements: prev.elements.map((e) => (e.id === elId ? ({ ...e, ...patch } as LayoutElement) : e)),
     }));
 
-  const removeElement = (id: string) => {
-    setLayout((prev) => ({ ...prev, elements: prev.elements.filter((e) => e.id !== id) }));
-    setSelectedId((cur) => (cur === id ? null : cur));
+  const removeElement = (elId: string) => {
+    setLayout((prev) => ({ ...prev, elements: prev.elements.filter((e) => e.id !== elId) }));
+    setSelectedId((cur) => (cur === elId ? null : cur));
   };
 
-  const selectElement = (id: string | null) => setSelectedId(id);
+  const selectElement = (elId: string | null) => setSelectedId(elId);
 
   const setBackground = (src: string | undefined, fit: "cover" | "contain") =>
     setLayout((prev) => ({ ...prev, background: src ? { src, fit } : undefined }));
@@ -78,10 +210,10 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
   const reorder = (orderedIds: string[]) =>
     setLayout((prev) => ({ ...prev, elements: prev.elements.map((e) => ({ ...e, z: orderedIds.indexOf(e.id) })) }));
 
-  const bringToFront = (id: string) =>
+  const bringToFront = (elId: string) =>
     setLayout((prev) => {
       const maxZ = prev.elements.reduce((m, e) => Math.max(m, e.z), 0);
-      return { ...prev, elements: prev.elements.map((e) => (e.id === id ? { ...e, z: maxZ + 1 } : e)) };
+      return { ...prev, elements: prev.elements.map((e) => (e.id === elId ? { ...e, z: maxZ + 1 } : e)) };
     });
 
   // ----- toolbar add controls (distinct from the binding list) -----------------------
@@ -110,12 +242,67 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
     });
   };
 
+  // ----- real-person preview ---------------------------------------------------------
+  const handlePreviewMode = (mode: "sample" | "person" | null) => {
+    if (!mode) return;
+    setPreviewMode(mode);
+    if (mode === "sample") setPreviewData(SAMPLE_BINDINGS);
+  };
+
+  const handlePickPerson = async (person: PersonInterface) => {
+    try {
+      const ords = await ApiHelper.get("/personOrdinations?personId=" + person.id, "MembershipApi");
+      const list: PersonOrdinationInterface[] = Array.isArray(ords) ? ords : [];
+      const ord = list.find((o) => o.status === "active") || list[0];
+      if (!ord) {
+        setPreviewData(SAMPLE_BINDINGS);
+        setError("That person has no ordination on record — showing sample data instead.");
+        return;
+      }
+      const type = ord.ordinationTypeId ? ordinationTypeMap[ord.ordinationTypeId] : undefined;
+      const campus = ord.campusId ? campusMap[ord.campusId] : undefined;
+      setPreviewData(buildRealPreview(person, ord, type?.name, type?.code, campus?.name));
+    } catch (e: any) {
+      setPreviewData(SAMPLE_BINDINGS);
+      setError(e?.message || "Could not load that person's data — showing sample data.");
+    }
+  };
+
   const selectedEl = useMemo(() => layout.elements.find((e) => e.id === selectedId) ?? null, [layout.elements, selectedId]);
   const sortedElements = useMemo(() => [...layout.elements].sort((a, b) => a.z - b.z), [layout.elements]);
 
   return (
     <>
       <PageHeader title="License Template Editor" subtitle="Design a CR80 ministerial-license card: bound fields, logo, background, photo, and fonts." />
+
+      <Collapse in={!!error}>
+        <Alert severity="error" onClose={() => setError(null)} sx={{ m: 1.5 }}>{error}</Alert>
+      </Collapse>
+
+      {/* Lifecycle row: name + default/active + ordination-type binding (TPL-04). */}
+      <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" sx={{ p: 1.5, borderBottom: "1px solid", borderColor: "divider" }}>
+        <TextField size="small" label="Template name" value={name} onChange={(e) => setName(e.target.value)} sx={{ minWidth: 220 }} />
+        <FormControlLabel control={<Checkbox checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} />} label="Default" />
+        <FormControlLabel control={<Checkbox checked={active} onChange={(e) => setActive(e.target.checked)} />} label="Active" />
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Typography variant="caption">Type binding</Typography>
+          <Select
+            size="small"
+            value={ordinationTypeId ?? ""}
+            onChange={(e) => setOrdinationTypeId(e.target.value === "" ? null : (e.target.value as string))}
+            displayEmpty
+            sx={{ minWidth: 220 }}>
+            <MenuItem value="">All types (global default)</MenuItem>
+            {ordinationTypes.map((t) => (
+              <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
+            ))}
+          </Select>
+        </Stack>
+        <Box sx={{ flexGrow: 1 }} />
+        {loading && <CircularProgress size={20} />}
+        {currentVersion != null && <Typography variant="caption" color="text.secondary">v{currentVersion}</Typography>}
+        <Button size="small" variant="contained" onClick={handleSave} disabled={saving || loading}>{saving ? "Saving…" : "Save"}</Button>
+      </Stack>
 
       {/* Toolbar: add controls, zoom, preview mode. */}
       <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" sx={{ p: 1.5, borderBottom: "1px solid", borderColor: "divider" }}>
@@ -134,13 +321,21 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
         </Stack>
         <Typography variant="caption" color="text.secondary">{layout.canvas.widthMm.toFixed(1)} × {layout.canvas.heightMm.toFixed(1)} mm</Typography>
 
-        <ToggleButtonGroup size="small" exclusive value={previewMode} onChange={(_e, v) => v && setPreviewMode(v)}>
+        <ToggleButtonGroup size="small" exclusive value={previewMode} onChange={(_e, v) => handlePreviewMode(v)}>
           <ToggleButton value="sample">Sample data</ToggleButton>
+          <ToggleButton value="person">Pick a real person</ToggleButton>
         </ToggleButtonGroup>
       </Stack>
 
+      {/* Real-person picker — shown only in person-preview mode (resolves real Phase-2 data). */}
+      {previewMode === "person" && (
+        <Box sx={{ p: 1.5, borderBottom: "1px solid", borderColor: "divider", maxWidth: 420 }}>
+          <PersonAdd getPhotoUrl={PersonHelper.getPhotoUrl} addFunction={handlePickPerson} actionLabel="Preview" />
+        </Box>
+      )}
+
       {/* Three-pane body: binding list + layers | canvas | property panel. */}
-      <Box sx={{ display: "flex", alignItems: "stretch", height: "calc(100vh - 200px)" }}>
+      <Box sx={{ display: "flex", alignItems: "stretch", height: "calc(100vh - 260px)" }}>
         <Box sx={{ width: 250, flexShrink: 0, overflow: "auto", borderRight: "1px solid", borderColor: "divider" }}>
           <BindingList onAdd={addBinding} />
           <LayersPanel elements={layout.elements} selectedId={selectedId} onSelect={selectElement} onReorder={reorder} onBringToFront={bringToFront} />
@@ -164,6 +359,8 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
           />
         </Box>
       </Box>
+
+      <Snackbar open={!!success} autoHideDuration={3000} onClose={() => setSuccess(null)} message={success ?? ""} anchorOrigin={{ vertical: "bottom", horizontal: "center" }} />
     </>
   );
 };
