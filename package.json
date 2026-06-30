@@ -37,6 +37,7 @@
     "react-google-recaptcha": "^3.1.0",
     "react-hook-form": "^7.75.0",
     "react-image-file-resizer": "^0.4.8",
+    "react-rnd": "10.5.3",
     "react-router-dom": "^7.15.0",
     "react-select": "^5.8.1",
     "react-select-material-ui": "^9.3.1",
