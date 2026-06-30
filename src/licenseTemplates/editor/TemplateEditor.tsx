@@ -64,10 +64,13 @@ const buildRealPreview = (
   typeCode?: string,
   campusName?: string
 ): Record<string, string> => ({
+  "person.fullName": [person.name?.first, person.name?.last].filter(Boolean).join(" "),
   "person.lastName": person.name?.last || "",
   "person.firstName": person.name?.first || "",
   "person.displayName": person.name?.display || "",
   "person.middleName": person.name?.middle || "",
+  // The person's stored picture (the "license picture" — Phase 6 applies the saved crop transform).
+  "person.photoUrl": PersonHelper.getPhotoUrl(person) || "",
   "ordinationType.name": typeName || "",
   "ordinationType.code": typeCode || "",
   "campus.name": campusName || "",
@@ -309,7 +312,7 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
         <Button size="small" variant="outlined" onClick={addStaticText}>Add static text</Button>
         <Button size="small" variant="outlined" onClick={addLogo}>Add logo</Button>
         <Button size="small" variant="outlined" onClick={editBackground}>Background</Button>
-        <Button size="small" variant="outlined" onClick={addPhoto}>Add photo placeholder</Button>
+        <Button size="small" variant="outlined" onClick={addPhoto}>Add person picture</Button>
         <Button size="small" color="error" variant="outlined" disabled={!selectedId} onClick={() => selectedId && removeElement(selectedId)}>Delete selected</Button>
 
         <Box sx={{ flexGrow: 1 }} />

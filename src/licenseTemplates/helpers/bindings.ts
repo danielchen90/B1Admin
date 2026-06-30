@@ -17,6 +17,7 @@ export interface BindingDef {
 // Required (locked) keys first, then justified extensions. Date keys flagged.
 export const BINDING_CATALOG: BindingDef[] = [
   // --- person ---
+  { key: "person.fullName", label: "Person — Full Name" }, // first + last (composite)
   { key: "person.lastName", label: "Person — Last Name" }, // required
   { key: "person.firstName", label: "Person — First Name" }, // extension
   { key: "person.displayName", label: "Person — Display Name" }, // extension
@@ -59,6 +60,7 @@ export const BINDING_REAL_PATHS: Record<string, string> = {
 
 // Sample values for the default live preview (flat keys matching BINDING_CATALOG).
 export const SAMPLE_BINDINGS: Record<string, string> = {
+  "person.fullName": "Jordan Sample",
   "person.lastName": "Sample",
   "person.firstName": "Jordan",
   "person.displayName": "Jordan Sample",

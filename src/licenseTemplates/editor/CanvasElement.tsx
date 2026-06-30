@@ -68,7 +68,18 @@ const renderByType = (el: LayoutElement, previewData: Record<string, string>): R
       );
     case "photo": {
       const radius = el.shape === "circle" ? "50%" : el.shape === "rounded" ? 8 : 0;
-      return <div style={{ ...placeholderCss("#1976d2"), borderRadius: radius }}>Member Photo</div>;
+      // The person's stored picture. Phase 6 applies the saved crop transform; the editor
+      // previews the source picture (real-person preview only — sample mode shows the box).
+      const photoUrl = previewData["person.photoUrl"];
+      return photoUrl ? (
+        <img
+          src={resolveSrc(photoUrl)}
+          alt=""
+          style={{ width: "100%", height: "100%", objectFit: el.fit, display: "block", borderRadius: radius }}
+        />
+      ) : (
+        <div style={{ ...placeholderCss("#1976d2"), borderRadius: radius }}>Person Picture</div>
+      );
     }
   }
 };

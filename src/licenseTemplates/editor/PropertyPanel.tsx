@@ -12,7 +12,11 @@
 // stores it to FileStorage and swaps in a key ref on save.
 
 import React, { useState } from "react";
-import Resizer from "react-image-file-resizer";
+import ResizerModule from "react-image-file-resizer";
+// Vite/esbuild CJS interop quirk: this package ships as { __esModule, default: { imageFileResizer } },
+// so the default import can resolve to the outer object. Unwrap defensively to the layer that
+// actually carries imageFileResizer (works whether Vite hands back the inner or outer object).
+const Resizer: any = (ResizerModule as any)?.imageFileResizer ? ResizerModule : (ResizerModule as any)?.default;
 import { Box, Button, Divider, MenuItem, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { HexColorPicker } from "react-colorful";
 import { ImageEditor } from "@churchapps/apphelper";
