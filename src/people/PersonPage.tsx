@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import { PersonBanner } from "./components/PersonBanner";
 import { PersonNavigation } from "./components/PersonNavigation";
 import { PersonDetails } from "./components/PersonDetails";
+import { PersonOrdinations } from "./components/PersonOrdinations";
 import UserContext from "../UserContext";
 import { useQuery } from "@tanstack/react-query";
 
@@ -20,6 +21,14 @@ export const PersonPage = () => {
     queryKey: ["/people/" + params.id, "MembershipApi"],
     enabled: !!(params.id && params.id !== "add"),
     placeholderData: null
+  });
+
+  // Count query on the SAME key PersonOrdinations uses -> one shared cache. Drives
+  // the count-gated Ordinations tab visibility (shown only when >=1 credential).
+  const ords = useQuery<any[]>({
+    queryKey: ["/membership/personOrdinations?personId=" + params.id, "MembershipApi"],
+    enabled: !!(personData.data?.id),
+    placeholderData: []
   });
 
   const refetch = useCallback(() => {
@@ -146,6 +155,7 @@ export const PersonPage = () => {
       case "attendance": currentTab = <PersonAttendance key="attendance" personId={person.id} updatedFunction={refetch} />; break;
       case "donations": currentTab = <PersonDonations key="donations" personId={person.id} />; break;
       case "groups": currentTab = <Groups key="groups" personId={person?.id} updatedFunction={refetch} />; break;
+      case "ordinations": currentTab = <PersonOrdinations key="ordinations" personId={person.id} updatedFunction={() => { refetch(); ords.refetch(); }} />; break;
       default: currentTab = <div key="default">{Locale.label("people.tabs.noImplement")}</div>; break;
     }
     return currentTab;
@@ -160,6 +170,7 @@ export const PersonPage = () => {
       <PersonNavigation
         selectedTab={selectedTab}
         onTabChange={setSelectedTab}
+        ordinationCount={ords.data?.length || 0}
       />
       <div style={{ padding: "24px" }}>
         {getCurrentTab()}
