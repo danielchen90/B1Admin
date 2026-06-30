@@ -3,7 +3,8 @@ import { Household, Merge, PersonEdit, PersonExportDialog, PersonProfileTabs, Pe
 import { type PersonInterface } from "@churchapps/helpers";
 import { ImageEditor, Locale, Permissions, PersonHelper, UserHelper } from "@churchapps/apphelper";
 import { Button } from "@mui/material";
-import { FileDownload as ExportIcon } from "@mui/icons-material";
+import { FileDownload as ExportIcon, PhotoCamera as LicensePhotoIcon } from "@mui/icons-material";
+import { LicensePhotoDialog } from "./photo/LicensePhotoDialog";
 
 interface Props {
   person: PersonInterface;
@@ -17,8 +18,11 @@ export const PersonDetails = memo((props: Props) => {
   const [person, setPerson] = React.useState<PersonInterface>(props.person);
   const [showMergeSearch, setShowMergeSearch] = React.useState<boolean>(false);
   const [showExportDialog, setShowExportDialog] = React.useState(false);
+  const [licensePhotoOpen, setLicensePhotoOpen] = React.useState(false);
   const { inPhotoEditMode, setInPhotoEditMode, editMode, setEditMode } = props;
   const formPermission = UserHelper.checkAccess(Permissions.membershipApi.forms.admin) || UserHelper.checkAccess(Permissions.membershipApi.forms.edit);
+  // People/Edit gates the License Photo capture affordance (complementary to the member ImageEditor).
+  const canEditPeople = UserHelper.checkAccess(Permissions.membershipApi.people.edit);
 
   React.useEffect(() => setPerson(props.person), [props.person]);
 
@@ -63,6 +67,7 @@ export const PersonDetails = memo((props: Props) => {
       {addMergeSearch}
       {imageEditor}
       <PersonExportDialog open={showExportDialog} onClose={() => setShowExportDialog(false)} person={person} />
+      <LicensePhotoDialog person={person} open={licensePhotoOpen} onClose={() => setLicensePhotoOpen(false)} onSaved={() => { setLicensePhotoOpen(false); props.updatedFunction(); }} />
 
       {editMode === "edit" ? (
         <PersonEdit id="personDetailsBox" person={person} updatedFunction={handleUpdated} togglePhotoEditor={togglePhotoEditor} showMergeSearch={handleShowSearch} />
@@ -77,10 +82,19 @@ export const PersonDetails = memo((props: Props) => {
                 editFunction={() => setEditMode("edit")}
                 updatedFunction={props.updatedFunction}
                 showForms={false}
-                headerActions={formPermission ? (
-                  <Button size="small" variant="outlined" startIcon={<ExportIcon />} onClick={() => setShowExportDialog(true)} sx={{ minWidth: "auto" }}>
-                    {Locale.label("people.peoplePage.export") || "Export"}
-                  </Button>
+                headerActions={(formPermission || canEditPeople) ? (
+                  <>
+                    {canEditPeople && (
+                      <Button size="small" variant="outlined" startIcon={<LicensePhotoIcon />} onClick={() => setLicensePhotoOpen(true)} sx={{ minWidth: "auto" }} data-testid="license-photo-open-button">
+                        License Photo
+                      </Button>
+                    )}
+                    {formPermission && (
+                      <Button size="small" variant="outlined" startIcon={<ExportIcon />} onClick={() => setShowExportDialog(true)} sx={{ minWidth: "auto" }}>
+                        {Locale.label("people.peoplePage.export") || "Export"}
+                      </Button>
+                    )}
+                  </>
                 ) : undefined}
               />
               <Household person={person} reload={person?.photoUpdated} />
