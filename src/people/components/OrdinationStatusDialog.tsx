@@ -59,7 +59,7 @@ export const OrdinationStatusDialog: React.FC<Props> = (props) => {
     try {
       // Pitfall 5: send the row's current version; the response is the reloaded,
       // version-bumped row.
-      const updated: PersonOrdinationInterface = await ApiHelper.post("/membership/personOrdinations/" + ordination.id + "/status", {
+      const updated: PersonOrdinationInterface = await ApiHelper.post("/personOrdinations/" + ordination.id + "/status", {
         status: values.status,
         version: ordination.version,
         credentialNumber: values.credentialNumber || undefined,

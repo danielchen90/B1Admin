@@ -7,11 +7,15 @@ import { UserHelper, Permissions } from "@churchapps/apphelper";
 // Pitfall 1 (make-or-break): ApiHelper DISCARDS the HTTP status code and throws
 // `new Error(rawResponseBody)`. The body for our handled errors is JSON like
 // {"error":"version_conflict"}; a 401 throws Error("Unauthorized") which is NOT
-// JSON. parseApiError extracts the singular `error` code, returning "" for any
+// JSON. parseApiError extracts the singular `error` CODE, returning "" for any
 // non-JSON message (callers then fall back to e.message for display).
+// NOTE: framework errors use a different envelope — {"error":{message,status,...}}
+// where `error` is an OBJECT. We must return ONLY a string code; returning the
+// object would crash React ("Objects are not valid as a React child").
 export const parseApiError = (e: any): string => {
   try {
-    return JSON.parse(e?.message)?.error ?? "";
+    const code = JSON.parse(e?.message)?.error;
+    return typeof code === "string" ? code : "";
   } catch {
     return "";
   }

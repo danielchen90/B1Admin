@@ -26,7 +26,7 @@ export const PersonPage = () => {
   // Count query on the SAME key PersonOrdinations uses -> one shared cache. Drives
   // the count-gated Ordinations tab visibility (shown only when >=1 credential).
   const ords = useQuery<any[]>({
-    queryKey: ["/membership/personOrdinations?personId=" + params.id, "MembershipApi"],
+    queryKey: ["/personOrdinations?personId=" + params.id, "MembershipApi"],
     enabled: !!(personData.data?.id),
     placeholderData: []
   });

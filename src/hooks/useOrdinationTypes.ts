@@ -7,6 +7,6 @@ import { type OrdinationTypeInterface } from "../settings/components/OrdinationT
 // Keyed on /all (NOT /active) because the admin screen must also list inactive
 // types so they can be re-activated.
 export const useOrdinationTypes = (): OrdinationTypeInterface[] => {
-  const query = useQuery<OrdinationTypeInterface[]>({ queryKey: ["/membership/ordinationTypes/all", "MembershipApi"], placeholderData: [] });
+  const query = useQuery<OrdinationTypeInterface[]>({ queryKey: ["/ordinationTypes/all", "MembershipApi"], placeholderData: [] });
   return query.data || [];
 };

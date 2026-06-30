@@ -16,7 +16,7 @@ export const OrdinationTypesSection: React.FC = () => {
   const canManage = canManageOrdinationTypes();
 
   const ordinationTypes = useQuery<OrdinationTypeInterface[]>({
-    queryKey: ["/membership/ordinationTypes/all", "MembershipApi"],
+    queryKey: ["/ordinationTypes/all", "MembershipApi"],
     placeholderData: []
   });
 

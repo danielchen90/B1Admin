@@ -46,7 +46,7 @@ export const OrdinationIssueDialog: React.FC<Props> = (props) => {
     setIsSubmitting(true);
     setErrorMsg("");
     try {
-      await ApiHelper.post("/membership/personOrdinations", {
+      await ApiHelper.post("/personOrdinations", {
         personId: props.personId,
         ordinationTypeId: values.ordinationTypeId,
         campusId: values.campusId || undefined,

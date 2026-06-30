@@ -35,7 +35,7 @@ const fmtDate = (v?: string | null): string => {
 export const PersonOrdinations: React.FC<Props> = (props) => {
   const ordinations = useQuery<PersonOrdinationInterface[]>({
     // SAME key PersonPage uses for the count -> one shared cache.
-    queryKey: ["/membership/personOrdinations?personId=" + props.personId, "MembershipApi"],
+    queryKey: ["/personOrdinations?personId=" + props.personId, "MembershipApi"],
     enabled: !UniqueIdHelper.isMissing(props.personId),
     placeholderData: []
   });

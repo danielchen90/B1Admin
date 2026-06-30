@@ -33,7 +33,7 @@ export const OrdinationTypeEdit: React.FC<Props> = (props) => {
     setErrorMessage(null);
     const { churchId, ...rest } = props.ordinationType;
     const merged = { ...rest, ...values, sortOrder: Number(values.sortOrder) || 0 };
-    return ApiHelper.post("/membership/ordinationTypes", [merged], "MembershipApi")
+    return ApiHelper.post("/ordinationTypes", [merged], "MembershipApi")
       .then(props.updatedFunction)
       .catch((err: any) => { setErrorMessage(parseApiError(err) || err.message); })
       .finally(() => { setIsSubmitting(false); });
