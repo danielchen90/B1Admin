@@ -2558,6 +2558,7 @@ __metadata:
     react-dnd: "npm:^16.0.1"
     react-dnd-html5-backend: "npm:^16.0.1"
     react-dom: "npm:^19.2.6"
+    react-easy-crop: "npm:^6.0.2"
     react-ga4: "npm:^3.0.1"
     react-google-charts: "npm:^5.2.1"
     react-google-recaptcha: "npm:^3.1.0"
@@ -2567,6 +2568,7 @@ __metadata:
     react-select: "npm:^5.8.1"
     react-select-material-ui: "npm:^9.3.1"
     react-to-print: "npm:^3.3.0"
+    react-webcam: "npm:^7.2.0"
     serve: "npm:^14.2.4"
     sourcemap-codec: "npm:^1.4.8"
     typescript: "npm:^6.0.3"
@@ -4657,6 +4659,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"normalize-wheel@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "normalize-wheel@npm:1.0.1"
+  checksum: 10c0/5daf4c97e39f36658a5263a6499bbc148676ae2bd85f12c8d03c46ffe7bc3c68d44564c00413d88d0457ac0d94450559bb1c24c2ce7ae0c107031f82d093ac06
+  languageName: node
+  linkType: hard
+
 "npm-run-path@npm:^4.0.1":
   version: 4.0.1
   resolution: "npm-run-path@npm:4.0.1"
@@ -5083,6 +5092,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-easy-crop@npm:^6.0.2":
+  version: 6.0.2
+  resolution: "react-easy-crop@npm:6.0.2"
+  dependencies:
+    normalize-wheel: "npm:^1.0.1"
+  peerDependencies:
+    react: ">=16.4.0"
+    react-dom: ">=16.4.0"
+  checksum: 10c0/45d25be073409185a84089a3e2a58f8fb36c3bb3c8153a900c8423e9812da1dbb35fc295c3be2c4e6ca6a2a6386dff7be669b66307d4f0e0ee27ede9b29e79c3
+  languageName: node
+  linkType: hard
+
 "react-error-boundary@npm:^3.1.4":
   version: 3.1.4
   resolution: "react-error-boundary@npm:3.1.4"
@@ -5313,6 +5334,16 @@ __metadata:
     react: ">=16.6.0"
     react-dom: ">=16.6.0"
   checksum: 10c0/2ba754ba748faefa15f87c96dfa700d5525054a0141de8c75763aae6734af0740e77e11261a1e8f4ffc08fd9ab78510122e05c21c2d79066c38bb6861a886c82
+  languageName: node
+  linkType: hard
+
+"react-webcam@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "react-webcam@npm:7.2.0"
+  peerDependencies:
+    react: ">=16.2.0"
+    react-dom: ">=16.2.0"
+  checksum: 10c0/d639a9e4cd545f66a5ecbfdc6c38344f6ae40e6609ba5fb26db730b48723158dedeeecdecba94e4d117517f4db0be828169db270c329b9b71d847e54aba6f7f0
   languageName: node
   linkType: hard
 
