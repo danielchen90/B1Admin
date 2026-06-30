@@ -15,7 +15,10 @@ const STATUS_KIND: Record<string, StatusKind> = {
   active: "success",
   visitor: "warning",
   pending: "warning",
-  staff: "info"
+  staff: "info",
+  suspended: "warning",
+  revoked: "default",
+  emeritus: "info"
 };
 
 const headerSx = {
