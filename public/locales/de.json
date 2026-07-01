@@ -415,7 +415,7 @@
       "ariaSend": "Nachricht senden",
       "errorAnswer": "Entschuldigung, ich konnte keine Antwort finden.",
       "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
-      "intro": "Hallo, ich bin Bez! Ich kann Ihnen helfen, durch B1 Admin zu navigieren. Versuchen Sie, mich zu fragen:",
+      "intro": "Hallo, ich bin Bez! Ich kann Ihnen helfen, durch Church Admin zu navigieren. Versuchen Sie, mich zu fragen:",
       "placeholderInput": "Stellen Sie Bez eine Frage...",
       "sampleCsv": "\"Wie importiere ich Mitglieder aus einer CSV-Datei?\"",
       "sampleGiving": "\"Wie richte ich Online-Spenden ein?\"",
@@ -429,7 +429,7 @@
       "composing": "Antwort wird verfasst...",
       "errorAnswer": "Entschuldigung, ich konnte keine Antwort finden.",
       "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
-      "intro": "Stellen Sie eine beliebige Frage zu B1 Admin. Zum Beispiel:",
+      "intro": "Stellen Sie eine beliebige Frage zu Church Admin. Zum Beispiel:",
       "placeholderInput": "Stellen Sie eine Frage...",
       "sampleCsv": "\"Wie importiere ich Mitglieder aus einer CSV-Datei?\"",
       "sampleGiving": "\"Wie richte ich Online-Spenden ein?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Laden Sie ein Profilbild hoch, damit Ihr Team Sie erkennen kann.",
       "setAvatarTitle": "Avatar festlegen",
       "subtitle": "Lassen Sie uns Ihre Kirche einrichten. Hier sind einige Dinge, die Sie wahrscheinlich zuerst tun möchten.",
-      "title": "Willkommen bei B1.church!",
+      "title": "Willkommen bei Huro!",
       "uploadSermonDesc": "Teilen Sie Ihre Predigten online, damit Menschen sie jederzeit ansehen können.",
       "uploadSermonTitle": "Predigt hochladen",
       "yourChurch": "Ihre Kirche",
@@ -555,7 +555,7 @@
       "dash": "Dashboard"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Holen Sie sich die B1.church-App auf Ihr Telefon, um überall in Verbindung zu bleiben.",
+      "downloadAppDesc": "Holen Sie sich die Huro-App auf Ihr Telefon, um überall in Verbindung zu bleiben.",
       "downloadAppTitle": "Mobile App herunterladen",
       "fallbackChurchName": "Ihre Kirche",
       "findPeopleDesc": "Durchsuchen Sie das Kirchenverzeichnis, um andere in der Gemeinde zu finden und sich mit ihnen zu verbinden.",
@@ -1197,7 +1197,7 @@
         "templates": "Vorlagen",
         "welcome_volunteers": {
           "heading": "Willkommen Freiwillige",
-          "message": "Willkommen Vielen Dank für Ihre Freiwilligenarbeit.\n\nBitte laden Sie die B1.Church-App herunter und melden Sie sich an, um Ihren Zeitplan zu verwalten. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Willkommen Vielen Dank für Ihre Freiwilligenarbeit.\n\nBitte laden Sie die Huro-App herunter und melden Sie sich an, um Ihren Zeitplan zu verwalten. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Unbekannt"

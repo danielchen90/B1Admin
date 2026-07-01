@@ -85,7 +85,7 @@ export const ChurchInfoSection: React.FC<Props> = ({ church, onSaved }) => {
     <DisplayBox headerText={Locale.label("settings.churchSettingsEdit.churchInfo")} headerIcon="business" editFunction={() => setEditing(true)}>
       <Box>
         <DisplayRow label={Locale.label("settings.churchSettingsEdit.churchName")} value={church?.name} />
-        <DisplayRow label={Locale.label("settings.churchSettingsEdit.subdom")} value={church?.subDomain ? `${church.subDomain}.b1.church` : ""} />
+        <DisplayRow label={Locale.label("settings.churchSettingsEdit.subdom")} value={church?.subDomain ? `${church.subDomain}.huro.church` : ""} />
       </Box>
       <Typography variant="subtitle2" sx={{ mt: 2.5, mb: 0.5, fontWeight: 600, color: "text.secondary" }}>
         {Locale.label("person.address")}

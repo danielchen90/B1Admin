@@ -415,7 +415,7 @@
       "ariaSend": "发送消息",
       "errorAnswer": "抱歉，我找不到答案。",
       "errorGeneric": "出了点问题。请重试。",
-      "intro": "您好，我是 Bez！我可以帮助您导航 B1 Admin。请尝试问我：",
+      "intro": "您好，我是 Bez！我可以帮助您导航 Church Admin。请尝试问我：",
       "placeholderInput": "向 Bez 提问...",
       "sampleCsv": "“如何从 CSV 导入成员？”",
       "sampleGiving": "“如何设置在线奉献？”",
@@ -429,7 +429,7 @@
       "composing": "正在编写答案...",
       "errorAnswer": "抱歉，我找不到答案。",
       "errorGeneric": "出了点问题。请重试。",
-      "intro": "询问关于 B1 Admin 的任何问题。例如：",
+      "intro": "询问关于 Church Admin 的任何问题。例如：",
       "placeholderInput": "提出问题...",
       "sampleCsv": "“如何从 CSV 导入成员？”",
       "sampleGiving": "“如何设置在线奉献？”",
@@ -488,7 +488,7 @@
       "ariaSend": "发送消息",
       "errorAnswer": "即使是超级英雄有时也会碰壁。请重试！",
       "errorGeneric": "出了点问题。但别担心 — 我会变得更强大归来！",
-      "intro": "嘿，冠军！我是 SuperBee — 您的 B1 Admin 强力助手。把您最棘手的问题交给我！",
+      "intro": "嘿，冠军！我是 SuperBee — 您的 Church Admin 强力助手。把您最棘手的问题交给我！",
       "placeholderInput": "向 SuperBee 提问任何问题...",
       "sampleCsv": "“如何从 CSV 导入成员？”",
       "sampleGiving": "“如何设置在线奉献？”",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "上传个人资料照片，以便您的团队可以认出您。",
       "setAvatarTitle": "设置您的头像",
       "subtitle": "让我们设置您的教会。以下是您可能首先要做的事情。",
-      "title": "欢迎来到 B1.church！",
+      "title": "欢迎来到 Huro！",
       "uploadSermonDesc": "在线分享您的讲道，以便人们随时观看。",
       "uploadSermonTitle": "上传讲道",
       "yourChurch": "您的教会",
@@ -555,7 +555,7 @@
       "dash": "仪表板"
     },
     "memberWelcome": {
-      "downloadAppDesc": "在您的手机上获取 B1.church 应用，无论身处何地都能保持联系。",
+      "downloadAppDesc": "在您的手机上获取 Huro 应用，无论身处何地都能保持联系。",
       "downloadAppTitle": "下载移动应用",
       "fallbackChurchName": "您的教会",
       "findPeopleDesc": "搜索教会通讯录，查找并联系会众中的其他人。",
@@ -1197,7 +1197,7 @@
         "templates": "模板",
         "welcome_volunteers": {
           "heading": "欢迎志愿者",
-          "message": "欢迎 感谢您志愿服务。\n\n请下载 B1.Church 应用并登录以管理您的日程安排。https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "欢迎 感谢您志愿服务。\n\n请下载 Huro 应用并登录以管理您的日程安排。https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "未知"

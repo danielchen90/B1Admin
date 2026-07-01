@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, FormControl, InputLabel, OutlinedInput, Card, CardContent, Typography, Box, Stack } from "@mui/material";
 import { Person as PersonIcon, Search as SearchIcon } from "@mui/icons-material";
-import { B1AdminPersonHelper } from "../../helpers";
+import { HuroPersonHelper } from "../../helpers";
 import { ApiHelper, Locale, Loading } from "@churchapps/apphelper";
 import type { PersonInterface, SearchCondition } from "@churchapps/helpers";
 import { PeopleSearchResults } from "../../people/components";
@@ -21,7 +21,7 @@ export const PeopleSearch = () => {
       if (!searchTerm) return [];
       const condition: SearchCondition = { field: "displayName", operator: "contains", value: searchTerm };
       const data: PersonInterface[] = await ApiHelper.post("/people/advancedSearch", [condition], "MembershipApi");
-      return data.map((d: PersonInterface) => B1AdminPersonHelper.getExpandedPersonObject(d));
+      return data.map((d: PersonInterface) => HuroPersonHelper.getExpandedPersonObject(d));
     }
   });
 

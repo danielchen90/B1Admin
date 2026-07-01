@@ -164,7 +164,7 @@ export const DomainSettingsEdit: React.FC<Props> = (props) => {
         borderColor: "divider"
       }}>
         <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-          {Locale.label("settings.domainSettingsEdit.domMsg")} <code style={{ backgroundColor: "rgba(0,0,0,0.08)", padding: "2px 6px", borderRadius: 4, fontFamily: "monospace" }}>CNAME: proxy.b1.church</code>
+          {Locale.label("settings.domainSettingsEdit.domMsg")} <code style={{ backgroundColor: "rgba(0,0,0,0.08)", padding: "2px 6px", borderRadius: 4, fontFamily: "monospace" }}>CNAME: proxy.huro.church</code>
           {Locale.label("settings.domainSettingsEdit.domMsg2")} <code style={{ backgroundColor: "rgba(0,0,0,0.08)", padding: "2px 6px", borderRadius: 4, fontFamily: "monospace" }}>A: 3.23.251.61</code>
           {Locale.label("settings.domainSettingsEdit.domMsg3")}{" "}
           <Typography

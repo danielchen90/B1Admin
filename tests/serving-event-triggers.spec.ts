@@ -107,7 +107,7 @@ test.describe.serial("Serving Management - Event Triggers", () => {
   // card lands on the seeded workflow — no UI path involved.
   test("creating a Visitor person via the API drops a card on the workflow", async () => {
     const ctx = await request.newContext();
-    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: "demo@b1.church", password: "password" } });
+    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: "demo@huro.church", password: "password" } });
     expect(loginRes.ok()).toBeTruthy();
     const body = await loginRes.json();
     const uc = (body.userChurches || []).find((c: any) => c.church?.id === "CHU00000001") || body.userChurches?.[0];
@@ -138,7 +138,7 @@ test.describe.serial("Serving Management - Event Triggers", () => {
   // bulk-applies; retry succeeds once a step exists; pause-all parks queued retries.
   test("executions record, retry, run-now and pause-all on a temp workflow", async () => {
     const ctx = await request.newContext();
-    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: "demo@b1.church", password: "password" } });
+    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: "demo@huro.church", password: "password" } });
     const body = await loginRes.json();
     const uc = (body.userChurches || []).find((c: any) => c.church?.id === "CHU00000001") || body.userChurches?.[0];
     const auth = { headers: { Authorization: "Bearer " + (uc?.jwt as string) } };

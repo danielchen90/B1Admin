@@ -56,19 +56,19 @@ export const Login: React.FC = () => {
             <br />
             {Locale.label("app.login.demoTestChurch")}
             <br />
-            <span dangerouslySetInnerHTML={{ __html: Locale.label("app.login.demoCredentials").replace("{email}", "<b>demo@b1.church</b>").replace("{password}", "<b>password</b>") }} />
+            <span dangerouslySetInnerHTML={{ __html: Locale.label("app.login.demoCredentials").replace("{email}", "<b>demo@huro.church</b>").replace("{password}", "<b>password</b>") }} />
           </Alert>
         )}
         <LoginPage
           auth={auth}
           context={context}
           jwt={jwt}
-          appName="B1Admin"
+          appName="Huro"
           appUrl={window.location.href}
           callbackErrors={errors}
           returnUrl={returnUrl}
           handleRedirect={handleRedirect}
-          defaultEmail={process.env.REACT_APP_STAGE === "demo" ? "demo@b1.church" : undefined}
+          defaultEmail={process.env.REACT_APP_STAGE === "demo" ? "demo@huro.church" : undefined}
           defaultPassword={process.env.REACT_APP_STAGE === "demo" ? "password" : undefined}
           showFooter={true}
           containerStyle={{ minHeight: "auto", flex: 1 }}

@@ -16,7 +16,7 @@ export const MemberWelcome: React.FC = () => {
     { icon: <Groups fontSize="small" />, title: Locale.label("dashboard.memberWelcome.joinGroupTitle"), linkUrl: b1Url + "/groups", external: true, show: true },
     { icon: <VolunteerActivism fontSize="small" />, title: Locale.label("dashboard.memberWelcome.onlineGivingTitle"), linkUrl: b1Url + "/donate", external: true, show: true },
     { icon: <Event fontSize="small" />, title: Locale.label("dashboard.memberWelcome.upcomingEventsTitle"), linkUrl: b1Url, external: true, show: true },
-    { icon: <PhoneIphone fontSize="small" />, title: Locale.label("dashboard.memberWelcome.downloadAppTitle"), linkUrl: "https://b1.church/app", external: true, show: true }
+    { icon: <PhoneIphone fontSize="small" />, title: Locale.label("dashboard.memberWelcome.downloadAppTitle"), linkUrl: "https://huro.church/app", external: true, show: true }
   ];
 
   return (

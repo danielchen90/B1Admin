@@ -415,7 +415,7 @@
       "ariaSend": "Gửi tin nhắn",
       "errorAnswer": "Xin lỗi, tôi không thể tìm thấy câu trả lời.",
       "errorGeneric": "Đã có lỗi xảy ra. Vui lòng thử lại.",
-      "intro": "Chào, tôi là Bez! Tôi có thể giúp bạn điều hướng B1 Admin. Hãy thử hỏi tôi:",
+      "intro": "Chào, tôi là Bez! Tôi có thể giúp bạn điều hướng Church Admin. Hãy thử hỏi tôi:",
       "placeholderInput": "Hỏi Bez một câu hỏi...",
       "sampleCsv": "\"Làm cách nào để nhập thành viên từ CSV?\"",
       "sampleGiving": "\"Làm cách nào để thiết lập đóng góp trực tuyến?\"",
@@ -429,7 +429,7 @@
       "composing": "Đang soạn câu trả lời...",
       "errorAnswer": "Xin lỗi, tôi không thể tìm thấy câu trả lời.",
       "errorGeneric": "Đã có lỗi xảy ra. Vui lòng thử lại.",
-      "intro": "Hỏi bất kỳ câu hỏi nào về B1 Admin. Ví dụ:",
+      "intro": "Hỏi bất kỳ câu hỏi nào về Church Admin. Ví dụ:",
       "placeholderInput": "Hỏi một câu hỏi...",
       "sampleCsv": "\"Làm cách nào để nhập thành viên từ CSV?\"",
       "sampleGiving": "\"Làm cách nào để thiết lập đóng góp trực tuyến?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Gửi tin nhắn",
       "errorAnswer": "Ngay cả siêu anh hùng đôi khi cũng gặp khó khăn. Hãy thử lại!",
       "errorGeneric": "Đã có lỗi xảy ra. Nhưng đừng lo — Tôi sẽ trở lại mạnh mẽ hơn!",
-      "intro": "Chào bạn, nhà vô địch! Tôi là SuperBee — sức mạnh B1 Admin của bạn. Hãy hỏi tôi những câu hỏi khó nhất của bạn!",
+      "intro": "Chào bạn, nhà vô địch! Tôi là SuperBee — sức mạnh Church Admin của bạn. Hãy hỏi tôi những câu hỏi khó nhất của bạn!",
       "placeholderInput": "Hỏi SuperBee bất cứ điều gì...",
       "sampleCsv": "\"Làm cách nào để nhập thành viên từ CSV?\"",
       "sampleGiving": "\"Làm cách nào để thiết lập đóng góp trực tuyến?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Tải lên ảnh hồ sơ để nhóm của bạn có thể nhận ra bạn.",
       "setAvatarTitle": "Đặt ảnh đại diện của bạn",
       "subtitle": "Hãy bắt đầu thiết lập nhà thờ của bạn. Đây là một số việc bạn có thể muốn làm trước.",
-      "title": "Chào mừng đến B1.church!",
+      "title": "Chào mừng đến Huro!",
       "uploadSermonDesc": "Chia sẻ bài giảng của bạn trực tuyến để mọi người có thể xem bất cứ lúc nào.",
       "uploadSermonTitle": "Tải lên một bài giảng",
       "yourChurch": "Nhà thờ của bạn",
@@ -555,7 +555,7 @@
       "dash": "Bảng điều khiển"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Tải ứng dụng B1.church trên điện thoại của bạn để giữ kết nối ở mọi nơi.",
+      "downloadAppDesc": "Tải ứng dụng Huro trên điện thoại của bạn để giữ kết nối ở mọi nơi.",
       "downloadAppTitle": "Tải xuống ứng dụng di động",
       "fallbackChurchName": "nhà thờ của bạn",
       "findPeopleDesc": "Tìm kiếm danh bạ nhà thờ để tìm và kết nối với những người khác trong hội chúng.",
@@ -1197,7 +1197,7 @@
         "templates": "Templates",
         "welcome_volunteers": {
           "heading": "Welcome Volunteers",
-          "message": "Welcome Thank you for volunteering.\n\nPlease Tải xuống the B1.Church app and Đăng nhập to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welcome Thank you for volunteering.\n\nPlease Tải xuống the Huro app and Đăng nhập to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Không xác định"

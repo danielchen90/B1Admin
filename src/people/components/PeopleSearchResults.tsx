@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, memo, type JSX } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { B1AdminPersonHelper } from ".";
+import { HuroPersonHelper } from ".";
 import { CreatePerson } from "../../components";
 import { type PersonInterface } from "@churchapps/helpers";
 import { PersonHelper, Loading, ApiHelper, ArrayHelper, Locale, PersonAvatar } from "@churchapps/apphelper";
@@ -152,8 +152,8 @@ const PeopleSearchResults = memo(function PeopleSearchResults(props: Props) {
             </Stack>
           );
           break;
-        case "birthDate": result = <>{p.birthDate === null ? "" : B1AdminPersonHelper.getDateStringFromDate(new Date(p.birthDate))}</>; break;
-        case "birthDay": result = <>{B1AdminPersonHelper.getBirthDay(p)}</>; break;
+        case "birthDate": result = <>{p.birthDate === null ? "" : HuroPersonHelper.getDateStringFromDate(new Date(p.birthDate))}</>; break;
+        case "birthDay": result = <>{HuroPersonHelper.getBirthDay(p)}</>; break;
         case "age":
           result = (
             <Typography variant="body2" color="text.secondary">
@@ -167,7 +167,7 @@ const PeopleSearchResults = memo(function PeopleSearchResults(props: Props) {
           break;
         case "maritalStatus": result = <>{p.maritalStatus}</>; break;
         case "campus": result = <>{p.campusId ? (campusMap[p.campusId] || "") : ""}</>; break;
-        case "anniversary": result = <>{p.anniversary === null ? "" : B1AdminPersonHelper.getDateStringFromDate(new Date(p.anniversary))}</>; break;
+        case "anniversary": result = <>{p.anniversary === null ? "" : HuroPersonHelper.getDateStringFromDate(new Date(p.anniversary))}</>; break;
         case "nametagNotes": result = <>{p.nametagNotes}</>; break;
         case "deleteOption":
           result = (

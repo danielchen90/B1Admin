@@ -49,7 +49,7 @@ export const LoginHeroPanel: React.FC = () => (
     })}>
     <Box sx={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: 420 }}>
       <Box sx={{ mb: 4 }}>
-        <Box component="img" src="/images/logo-white.png" alt="B1.church" sx={{ maxWidth: 280, height: "auto" }} />
+        <Box component="img" src="/images/logo-white.png" alt="Huro" sx={{ maxWidth: 280, height: "auto" }} />
       </Box>
       <Typography component="h1" variant="h3" sx={{ fontSize: "2.125rem", mt: 0, mb: 2, lineHeight: 1.2 }}>
         {Locale.label("components.loginHeroPanel.title")}

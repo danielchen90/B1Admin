@@ -1,8 +1,8 @@
 <img align="right" width="150" src="https://raw.githubusercontent.com/ChurchApps/B1Admin/main/public/images/logo.png">
 
-# B1Admin
+# Huro
 
-> **B1Admin** is completely free, open-source church management software that allows you to manage key data on church members and visitors. It offers comprehensive features including member and guest information tracking, attendance management with a self check-in app, group coordination, donation tracking with detailed reports, and custom form creation. Visit <a href="https://b1.church/">https://b1.church/</a> to learn more.
+> **Huro** is completely free, open-source church management software that allows you to manage key data on church members and visitors. It offers comprehensive features including member and guest information tracking, attendance management with a self check-in app, group coordination, donation tracking with detailed reports, and custom form creation. Visit <a href="https://huro.church/">https://huro.church/</a> to learn more.
 
 <div style="display: flex;gap: 10px;">
     <img style="width: 49%;" src="https://github.com/ChurchApps/B1Admin/assets/1447203/ccb5dc7b-8c0d-4320-abac-a3128c42beff">
@@ -50,15 +50,15 @@ To accept online donations you must first register for developer credentials wit
   1. Visit the Kingdom Funding signup page (https://kingdomfunding.org/begin-registration/?sponsor=b1) and fill out the application form.
   2. Kingdom Funding will walk you through the account onboarding process, including identity verification and bank account setup.
   3. Once your account is approved, you will receive your API Source Key (private key) and Tokenization Key (public key) from the merchant portal.
-  4. In B1Admin, go to **Settings → Giving Settings**, select **Kingdom Funding** as the provider, paste in your Public Key (Tokenization Key) and Private Key (API Source Key), and save.
+  4. In Huro, go to **Settings → Giving Settings**, select **Kingdom Funding** as the provider, paste in your Public Key (Tokenization Key) and Private Key (API Source Key), and save.
   5. **Configure the webhook URL in your Kingdom Funding (NMI) merchant portal** so the system gets notified about transaction state changes (recurring charges, ACH settlements, returns):
-     - URL: `https://api.churchapps.org/giving/donate/webhook/kingdomfunding?churchId={YOUR_CHURCH_ID}` (replace `{YOUR_CHURCH_ID}` with the church ID from B1Admin — the exact URL is also shown with a copy button in Giving Settings when Kingdom Funding is selected)
-     - Kingdom Funding does not generate a signing key for you: choose your own secret, enter it on the webhook endpoint in the merchant portal, and paste the same value into the **Webhook Key** field in B1Admin's Giving Settings. Both sides must match — webhooks are rejected if the key is missing or wrong.
+     - URL: `https://api.churchapps.org/giving/donate/webhook/kingdomfunding?churchId={YOUR_CHURCH_ID}` (replace `{YOUR_CHURCH_ID}` with the church ID from Huro — the exact URL is also shown with a copy button in Giving Settings when Kingdom Funding is selected)
+     - Kingdom Funding does not generate a signing key for you: choose your own secret, enter it on the webhook endpoint in the merchant portal, and paste the same value into the **Webhook Key** field in Huro's Giving Settings. Both sides must match — webhooks are rejected if the key is missing or wrong.
      - Subscribe at minimum to: `transaction.sale.success`, `transaction.auth.success`, the refund events, and the ACH `check.*` status events (e.g. `check.status.settled`, `check.status.returned`).
 
-After obtaining your tokens, open **Settings → Giving Settings** in B1Admin, select the provider, paste in your Public and Private keys, and toggle "Pay Fees" as desired. Finally, configure your fee parameters in **Fee Options**.
+After obtaining your tokens, open **Settings → Giving Settings** in Huro, select the provider, paste in your Public and Private keys, and toggle "Pay Fees" as desired. Finally, configure your fee parameters in **Fee Options**.
 
-[![B1Admin Dev Setup](https://img.youtube.com/vi/5zsEJEp6yMw/0.jpg)](https://www.youtube.com/watch?v=5zsEJEp6yMw)
+[![Huro Dev Setup](https://img.youtube.com/vi/5zsEJEp6yMw/0.jpg)](https://www.youtube.com/watch?v=5zsEJEp6yMw)
 
 ### 🚀 Self-Hosting (Beta)
 

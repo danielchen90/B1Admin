@@ -5,7 +5,7 @@ import { test, expect, type BrowserContext, type Page } from "@playwright/test";
  * project owner reported as broken: two staff each viewing the same person's
  * Notes tab; one posts a note; the other should see it instantly.
  *
- * Both demo@b1.church and tester@b1.church are Domain Admins in Grace Community
+ * Both demo@huro.church and tester@huro.church are Domain Admins in Grace Community
  * Church (per the membership demo seed), so both can open /people/PER00000081
  * (Carol Clark) and reach the Notes tab.
  */
@@ -81,8 +81,8 @@ test.describe("Realtime — cross-user person notes", () => {
     testerPage = await testerContext.newPage();
 
     await Promise.all([
-      signIn(demoPage, "demo@b1.church"),
-      signIn(testerPage, "tester@b1.church"),
+      signIn(demoPage, "demo@huro.church"),
+      signIn(testerPage, "tester@huro.church"),
     ]);
 
     await Promise.all([

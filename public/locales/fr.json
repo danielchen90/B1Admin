@@ -415,7 +415,7 @@
       "ariaSend": "Envoyer un message",
       "errorAnswer": "Désolé, je n'ai pas trouvé de réponse.",
       "errorGeneric": "Une erreur est survenue. Veuillez réessayer.",
-      "intro": "Salut, je suis Bez ! Je peux vous aider à naviguer dans B1 Admin. Essayez de me demander :",
+      "intro": "Salut, je suis Bez ! Je peux vous aider à naviguer dans Church Admin. Essayez de me demander :",
       "placeholderInput": "Posez une question à Bez...",
       "sampleCsv": "\"Comment importer des membres depuis un CSV ?\"",
       "sampleGiving": "\"Comment configurer les dons en ligne ?\"",
@@ -429,7 +429,7 @@
       "composing": "Composition de la réponse...",
       "errorAnswer": "Désolé, je n'ai pas trouvé de réponse.",
       "errorGeneric": "Une erreur est survenue. Veuillez réessayer.",
-      "intro": "Posez n'importe quelle question sur B1 Admin. Par exemple :",
+      "intro": "Posez n'importe quelle question sur Church Admin. Par exemple :",
       "placeholderInput": "Posez une question...",
       "sampleCsv": "\"Comment importer des membres depuis un CSV ?\"",
       "sampleGiving": "\"Comment configurer les dons en ligne ?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Envoyer un message",
       "errorAnswer": "Même un super-héros se heurte parfois à un mur. Réessayez !",
       "errorGeneric": "Une erreur est survenue. Mais pas d'inquiétude — je reviendrai en force !",
-      "intro": "Bonjour champion ! Je suis SuperBee — votre assistant B1 Admin surpuissant. Posez-moi vos questions les plus difficiles !",
+      "intro": "Bonjour champion ! Je suis SuperBee — votre assistant Church Admin surpuissant. Posez-moi vos questions les plus difficiles !",
       "placeholderInput": "Demandez n'importe quoi à SuperBee...",
       "sampleCsv": "\"Comment importer des membres depuis un CSV ?\"",
       "sampleGiving": "\"Comment configurer les dons en ligne ?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Téléchargez une photo de profil afin que votre équipe puisse vous reconnaître.",
       "setAvatarTitle": "Définir votre avatar",
       "subtitle": "Configurons votre église. Voici quelques choses que vous voudrez probablement faire en premier.",
-      "title": "Bienvenue sur B1.church !",
+      "title": "Bienvenue sur Huro !",
       "uploadSermonDesc": "Partagez vos sermons en ligne pour que les gens puissent les regarder à tout moment.",
       "uploadSermonTitle": "Téléverser un sermon",
       "yourChurch": "Votre église",
@@ -555,7 +555,7 @@
       "dash": "Tableau de bord"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Obtenez l'application B1.church sur votre téléphone pour rester connecté où que vous soyez.",
+      "downloadAppDesc": "Obtenez l'application Huro sur votre téléphone pour rester connecté où que vous soyez.",
       "downloadAppTitle": "Télécharger l'application mobile",
       "fallbackChurchName": "votre église",
       "findPeopleDesc": "Recherchez dans l'annuaire de l'église pour trouver et entrer en contact avec d'autres membres de la congrégation.",
@@ -1197,7 +1197,7 @@
         "templates": "Modèles",
         "welcome_volunteers": {
           "heading": "Bienvenue Bénévoles",
-          "message": "Bienvenue ! Merci d'être bénévole.\n\nVeuillez télécharger l'application B1.Church et vous connecter pour gérer votre emploi du temps. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Bienvenue ! Merci d'être bénévole.\n\nVeuillez télécharger l'application Huro et vous connecter pour gérer votre emploi du temps. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Inconnu"

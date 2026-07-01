@@ -415,7 +415,7 @@
       "ariaSend": "Lähetä viesti",
       "errorAnswer": "Valitettavasti en löytänyt vastausta.",
       "errorGeneric": "Jokin meni pieleen. Yritä uudelleen.",
-      "intro": "Hei, olen Bez! Voin auttaa sinua navigoimaan B1 Adminissa. Kokeile kysyä minulta:",
+      "intro": "Hei, olen Bez! Voin auttaa sinua navigoimaan Church Adminissa. Kokeile kysyä minulta:",
       "placeholderInput": "Kysy Beziltä jotain...",
       "sampleCsv": "\"Miten tuon jäsenet CSV-tiedostosta?\"",
       "sampleGiving": "\"Miten otan käyttöön verkkolahjoitukset?\"",
@@ -429,7 +429,7 @@
       "composing": "Laaditaan vastausta...",
       "errorAnswer": "Valitettavasti en löytänyt vastausta.",
       "errorGeneric": "Jokin meni pieleen. Yritä uudelleen.",
-      "intro": "Kysy mitä tahansa B1 Administa. Esimerkiksi:",
+      "intro": "Kysy mitä tahansa Church Administa. Esimerkiksi:",
       "placeholderInput": "Kysy kysymys...",
       "sampleCsv": "\"Miten tuon jäsenet CSV-tiedostosta?\"",
       "sampleGiving": "\"Miten otan käyttöön verkkolahjoitukset?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Lähetä viesti",
       "errorAnswer": "Joskus jopa supersankari kohtaa vastoinkäymisiä. Yritä uudelleen!",
       "errorGeneric": "Jokin meni pieleen. Mutta älä huoli — palaan vahvempana!",
-      "intro": "Hei mestari! Olen SuperBee — sinun B1 Admin -voimavarasi. Anna tulla vaikeimmat kysymyksesi!",
+      "intro": "Hei mestari! Olen SuperBee — sinun Church Admin -voimavarasi. Anna tulla vaikeimmat kysymyksesi!",
       "placeholderInput": "Kysy SuperBeeltä mitä tahansa...",
       "sampleCsv": "\"Miten tuon jäsenet CSV-tiedostosta?\"",
       "sampleGiving": "\"Miten otan käyttöön verkkolahjoitukset?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Lataa profiilikuva, jotta tiimisi voi tunnistaa sinut.",
       "setAvatarTitle": "Aseta avatarisi",
       "subtitle": "Otetaanpa seurakuntasi käyttöön. Tässä on muutamia asioita, jotka haluat luultavasti tehdä ensin.",
-      "title": "Tervetuloa B1.churchiin!",
+      "title": "Tervetuloa Huroiin!",
       "uploadSermonDesc": "Jaa saarnasi verkossa, jotta ihmiset voivat katsoa niitä milloin tahansa.",
       "uploadSermonTitle": "Lataa saarna",
       "yourChurch": "Seurakuntasi",
@@ -555,7 +555,7 @@
       "dash": "Kojelauta"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Hanki B1.church-sovellus puhelimellesi pysyäksesi yhteydessä missä tahansa oletkin.",
+      "downloadAppDesc": "Hanki Huro-sovellus puhelimellesi pysyäksesi yhteydessä missä tahansa oletkin.",
       "downloadAppTitle": "Lataa mobiilisovellus",
       "fallbackChurchName": "seurakuntasi",
       "findPeopleDesc": "Etsi seurakunnan hakemistosta löytääksesi ja yhdistääksesi muiden seurakuntalaisten kanssa.",
@@ -1197,7 +1197,7 @@
         "templates": "Templates",
         "welcome_volunteers": {
           "heading": "Welcome Volunteers",
-          "message": "Welcome Thank you for volunteering.\n\nPlease download the B1.Church app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welcome Thank you for volunteering.\n\nPlease download the Huro app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Tuntematon"

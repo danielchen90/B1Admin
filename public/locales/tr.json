@@ -415,7 +415,7 @@
       "ariaSend": "Mesaj gönder",
       "errorAnswer": "Üzgünüm, bir cevap bulamadım.",
       "errorGeneric": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
-      "intro": "Merhaba, ben Bez! B1 Admin'de gezinmenize yardımcı olabilirim. Bana sormayı deneyin:",
+      "intro": "Merhaba, ben Bez! Church Admin'de gezinmenize yardımcı olabilirim. Bana sormayı deneyin:",
       "placeholderInput": "Bez'e bir soru sorun...",
       "sampleCsv": "\"CSV'den üyeleri nasıl içe aktarırım?\"",
       "sampleGiving": "\"Online bağışı nasıl ayarlarım?\"",
@@ -429,7 +429,7 @@
       "composing": "Cevap oluşturuluyor...",
       "errorAnswer": "Üzgünüm, bir cevap bulamadım.",
       "errorGeneric": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
-      "intro": "B1 Admin hakkında her türlü soruyu sorun. Örneğin:",
+      "intro": "Church Admin hakkında her türlü soruyu sorun. Örneğin:",
       "placeholderInput": "Bir soru sorun...",
       "sampleCsv": "\"CSV'den üyeleri nasıl içe aktarırım?\"",
       "sampleGiving": "\"Online bağışı nasıl ayarlarım?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Mesaj gönder",
       "errorAnswer": "Bir süper kahraman bile bazen duvara çarpar. Tekrar deneyin!",
       "errorGeneric": "Bir şeyler ters gitti. Ama endişelenme — daha güçlü olarak geri döneceğim!",
-      "intro": "Merhaba şampiyon! Ben SuperBee — senin B1 Admin güç merkezin. Bana en zorlu sorularını sor!",
+      "intro": "Merhaba şampiyon! Ben SuperBee — senin Church Admin güç merkezin. Bana en zorlu sorularını sor!",
       "placeholderInput": "SuperBee'ye bir şey sor...",
       "sampleCsv": "\"CSV'den üyeleri nasıl içe aktarırım?\"",
       "sampleGiving": "\"Online bağışı nasıl ayarlarım?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Ekibinizin sizi tanıyabilmesi için bir profil fotoğrafı yükleyin.",
       "setAvatarTitle": "Avatarınızı Ayarlayın",
       "subtitle": "Kilisenizi kuralım. Muhtemelen önce yapmak isteyeceğiniz bazı şeyler burada.",
-      "title": "B1.church'e Hoş Geldiniz!",
+      "title": "Huro'e Hoş Geldiniz!",
       "uploadSermonDesc": "Vaazlarınızı çevrimiçi paylaşın, böylece insanlar istedikleri zaman izleyebilirler.",
       "uploadSermonTitle": "Bir Vaaz Yükleyin",
       "yourChurch": "Kiliseniz",
@@ -555,7 +555,7 @@
       "dash": "Pano"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Nereye giderseniz gidin bağlantıda kalmak için B1.church uygulamasını telefonunuza alın.",
+      "downloadAppDesc": "Nereye giderseniz gidin bağlantıda kalmak için Huro uygulamasını telefonunuza alın.",
       "downloadAppTitle": "Mobil Uygulamayı İndir",
       "fallbackChurchName": "kiliseniz",
       "findPeopleDesc": "Cemaatteki diğer kişileri bulmak ve onlarla bağlantı kurmak için kilise rehberinde arama yapın.",
@@ -1197,7 +1197,7 @@
         "templates": "Templates",
         "welcome_volunteers": {
           "heading": "Welcome Volunteers",
-          "message": "Welcome Thank you for volunteering.\n\nPlease download the B1.Church app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welcome Thank you for volunteering.\n\nPlease download the Huro app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Bilinmiyor"

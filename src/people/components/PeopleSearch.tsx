@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useRef } from "react";
-import { B1AdminPersonHelper } from ".";
+import { HuroPersonHelper } from ".";
 import { type SearchCondition, type PersonInterface } from "@churchapps/helpers";
 import { ApiHelper, Locale } from "@churchapps/apphelper";
 import { FormCard } from "../../components/ui";
@@ -32,14 +32,14 @@ export function PeopleSearch(props: Props) {
     if (advancedConditions && advancedConditions.length > 0) {
       // Advanced search with conditions
       ApiHelper.post("/people/advancedSearch", advancedConditions, "MembershipApi").then((data: any) => {
-        props.updateSearchResults(data.map((d: PersonInterface) => B1AdminPersonHelper.getExpandedPersonObject(d)));
+        props.updateSearchResults(data.map((d: PersonInterface) => HuroPersonHelper.getExpandedPersonObject(d)));
       });
     } else if (term.trim()) {
       // Simple search by name
       const conditions: SearchCondition[] = [{ field: "displayName", operator: "contains", value: term.trim() }];
       props.onReportCriteria?.(conditions);
       ApiHelper.post("/people/advancedSearch", conditions, "MembershipApi").then((data: any) => {
-        props.updateSearchResults(data.map((d: PersonInterface) => B1AdminPersonHelper.getExpandedPersonObject(d)));
+        props.updateSearchResults(data.map((d: PersonInterface) => HuroPersonHelper.getExpandedPersonObject(d)));
       });
     } else {
       props.onReportCriteria?.(null);

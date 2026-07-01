@@ -415,7 +415,7 @@
       "ariaSend": "メッセージを送信",
       "errorAnswer": "申し訳ありません、回答が見つかりませんでした。",
       "errorGeneric": "問題が発生しました。もう一度お試しください。",
-      "intro": "こんにちは、Bezです！B1 Adminのナビゲーションをお手伝いします。試しに聞いてみてください：",
+      "intro": "こんにちは、Bezです！Church Adminのナビゲーションをお手伝いします。試しに聞いてみてください：",
       "placeholderInput": "Bezに質問する...",
       "sampleCsv": "「CSVからメンバーをインポートするには？」",
       "sampleGiving": "「オンライン献金を設定するには？」",
@@ -429,7 +429,7 @@
       "composing": "回答を作成中...",
       "errorAnswer": "申し訳ありません、回答が見つかりませんでした。",
       "errorGeneric": "問題が発生しました。もう一度お試しください。",
-      "intro": "B1 Adminについて質問してください。例：",
+      "intro": "Church Adminについて質問してください。例：",
       "placeholderInput": "質問する...",
       "sampleCsv": "「CSVからメンバーをインポートするには？」",
       "sampleGiving": "「オンライン献金を設定するには？」",
@@ -488,7 +488,7 @@
       "ariaSend": "メッセージを送信",
       "errorAnswer": "スーパーヒーローでも時には壁にぶつかります。もう一度お試しください！",
       "errorGeneric": "問題が発生しました。でも心配しないで、もっと強くなって戻ってきます！",
-      "intro": "やあ、チャンピオン！僕はSuperBee、B1 Adminのスーパーパワー。一番難しい質問でぶつけてきて！",
+      "intro": "やあ、チャンピオン！僕はSuperBee、Church Adminのスーパーパワー。一番難しい質問でぶつけてきて！",
       "placeholderInput": "SuperBeeに何でも聞いて...",
       "sampleCsv": "「CSVからメンバーをインポートするには？」",
       "sampleGiving": "「オンライン献金を設定するには？」",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "チームがあなたを認識できるように、プロフィール写真をアップロードします。",
       "setAvatarTitle": "アバターを設定",
       "subtitle": "教会のセットアップを始めましょう。最初に行いたいことをいくつか紹介します。",
-      "title": "B1.churchへようこそ！",
+      "title": "Huroへようこそ！",
       "uploadSermonDesc": "説教をオンラインで共有して、いつでも視聴できるようにします。",
       "uploadSermonTitle": "説教をアップロード",
       "yourChurch": "あなたの教会",
@@ -555,7 +555,7 @@
       "dash": "ダッシュボード"
     },
     "memberWelcome": {
-      "downloadAppDesc": "外出先でもつながりを保つために、お使いの電話にB1.churchアプリをダウンロードします。",
+      "downloadAppDesc": "外出先でもつながりを保つために、お使いの電話にHuroアプリをダウンロードします。",
       "downloadAppTitle": "モバイルアプリをダウンロード",
       "fallbackChurchName": "あなたの教会",
       "findPeopleDesc": "教会ディレクトリを検索して、会衆の他のメンバーを見つけてつながりましょう。",
@@ -1197,7 +1197,7 @@
         "templates": "Templates",
         "welcome_volunteers": {
           "heading": "Welcome Volunteers",
-          "message": "Welcome Thank you for volunteering.\n\nPlease download the B1.Church app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welcome Thank you for volunteering.\n\nPlease download the Huro app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "不明"

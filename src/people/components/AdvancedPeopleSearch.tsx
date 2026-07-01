@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useState, useMemo, useEffect, useRef } from "react";
-import { B1AdminPersonHelper } from ".";
+import { HuroPersonHelper } from ".";
 import { useCampuses } from "../../hooks/useCampuses";
 import { type GroupMemberInterface, type SearchCondition, type GroupInterface, type ServiceInterface, type ServiceTimeInterface, type QuestionInterface, type FormSubmissionInterface } from "@churchapps/helpers";
 import { ArrayHelper, ApiHelper, Locale, DateHelper, Permissions } from "@churchapps/apphelper";
@@ -467,7 +467,7 @@ export const AdvancedPeopleSearch = memo(function AdvancedPeopleSearch(props: Pr
       debounceTimerRef.current = setTimeout(async () => {
         const postConditions = await convertConditions();
         ApiHelper.post("/people/advancedSearch", postConditions, "MembershipApi").then((data: any) => {
-          props.updateSearchResults(data.map((d: PersonInterface) => B1AdminPersonHelper.getExpandedPersonObject(d)));
+          props.updateSearchResults(data.map((d: PersonInterface) => HuroPersonHelper.getExpandedPersonObject(d)));
         });
       }, 500);
     } else {
@@ -629,7 +629,7 @@ export const AdvancedPeopleSearch = memo(function AdvancedPeopleSearch(props: Pr
     props.onReportCriteria?.(activeFilters);
     const postConditions = await convertConditions();
     ApiHelper.post("/people/advancedSearch", postConditions, "MembershipApi").then((data: any) => {
-      props.updateSearchResults(data.map((d: PersonInterface) => B1AdminPersonHelper.getExpandedPersonObject(d)));
+      props.updateSearchResults(data.map((d: PersonInterface) => HuroPersonHelper.getExpandedPersonObject(d)));
     });
   }, [convertConditions, props.updateSearchResults, activeFilters]);
 

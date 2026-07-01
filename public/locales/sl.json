@@ -415,7 +415,7 @@
       "ariaSend": "Pošlji sporočilo",
       "errorAnswer": "Žal mi je, nisem mogel najti odgovora.",
       "errorGeneric": "Nekaj je šlo narobe. Poskusite znova.",
-      "intro": "Pozdravljeni, jaz sem Bez! Pomagam vam pri navigaciji po B1 Adminu. Poskusite me vprašati:",
+      "intro": "Pozdravljeni, jaz sem Bez! Pomagam vam pri navigaciji po Church Adminu. Poskusite me vprašati:",
       "placeholderInput": "Vprašajte Beza...",
       "sampleCsv": "\"Kako uvozim člane iz CSV?\"",
       "sampleGiving": "\"Kako nastavim spletno darovanje?\"",
@@ -429,7 +429,7 @@
       "composing": "Sestavljanje odgovora...",
       "errorAnswer": "Žal mi je, nisem mogel najti odgovora.",
       "errorGeneric": "Nekaj je šlo narobe. Poskusite znova.",
-      "intro": "Postavite katero koli vprašanje o B1 Adminu. Na primer:",
+      "intro": "Postavite katero koli vprašanje o Church Adminu. Na primer:",
       "placeholderInput": "Postavite vprašanje...",
       "sampleCsv": "\"Kako uvozim člane iz CSV?\"",
       "sampleGiving": "\"Kako nastavim spletno darovanje?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Pošlji sporočilo",
       "errorAnswer": "Tudi superjunak včasih naleti na zid. Poskusi znova!",
       "errorGeneric": "Nekaj je šlo narobe. A brez skrbi — vrnem se močnejši!",
-      "intro": "Pozdravljen, prvak! Sem SuperBee — tvoja moč v B1 Adminu. Vrzi mi najtežja vprašanja!",
+      "intro": "Pozdravljen, prvak! Sem SuperBee — tvoja moč v Church Adminu. Vrzi mi najtežja vprašanja!",
       "placeholderInput": "Vprašaj SuperBee karkoli...",
       "sampleCsv": "\"Kako uvozim člane iz CSV?\"",
       "sampleGiving": "\"Kako nastavim spletno darovanje?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Naložite profilno fotografijo, da vas bo ekipa prepoznala.",
       "setAvatarTitle": "Nastavite svoj avatar",
       "subtitle": "Pripravimo vašo cerkev. Tu je nekaj stvari, ki jih boste verjetno želeli storiti najprej.",
-      "title": "Dobrodošli v B1.church!",
+      "title": "Dobrodošli v Huro!",
       "uploadSermonDesc": "Delite svoje pridige na spletu, da si jih ljudje lahko ogledajo kadar koli.",
       "uploadSermonTitle": "Naloži pridigo",
       "yourChurch": "Vaša cerkev",
@@ -555,7 +555,7 @@
       "dash": "Armaturna plošča"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Pridobite aplikacijo B1.church na svoj telefon, da ostanete povezani povsod.",
+      "downloadAppDesc": "Pridobite aplikacijo Huro na svoj telefon, da ostanete povezani povsod.",
       "downloadAppTitle": "Prenesite mobilno aplikacijo",
       "fallbackChurchName": "vaša cerkev",
       "findPeopleDesc": "Iskanje cerkvenega imenika za iskanje in povezovanje z drugimi v občini.",
@@ -1197,7 +1197,7 @@
         "templates": "Templates",
         "welcome_volunteers": {
           "heading": "Welcome Volunteers",
-          "message": "Welcome Thank you for volunteering.\n\nPlease download the B1.Church app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welcome Thank you for volunteering.\n\nPlease download the Huro app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Neznano"

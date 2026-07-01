@@ -12,7 +12,7 @@ const WORSHIP_MINISTRY_ID = "GRP0000000a";
 const PLAN_TYPE_NAME = "ZZ Reminder Test Type";
 
 async function apiAuth(ctx: APIRequestContext) {
-  const res = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: "demo@b1.church", password: "password" } });
+  const res = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: "demo@huro.church", password: "password" } });
   const body = await res.json();
   const uc = (body.userChurches || []).find((c: any) => c.church?.id === "CHU00000001") || body.userChurches?.[0];
   return { headers: { Authorization: "Bearer " + (uc?.jwt as string) } };

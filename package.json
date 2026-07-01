@@ -1,5 +1,5 @@
 {
-  "name": "b1admin",
+  "name": "huro-church-admin",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -74,7 +74,7 @@
     "vite": "^8.0.11"
   },
   "scripts": {
-    "preinstall": "node -e \"if(!(process.env.npm_config_user_agent||'').startsWith('yarn')){console.error('\\n[B1Admin] This project uses Yarn (Berry). Run \\'yarn install\\' instead of npm/pnpm.\\n');process.exit(1)}\"",
+    "preinstall": "node -e \"if(!(process.env.npm_config_user_agent||'').startsWith('yarn')){console.error('\\n[Huro] This project uses Yarn (Berry). Run \\'yarn install\\' instead of npm/pnpm.\\n');process.exit(1)}\"",
     "start": "vite",
     "build": "vite build",
     "serve": "serve -s dist -l ${PORT:-3101}",

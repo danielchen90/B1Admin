@@ -278,7 +278,7 @@ test.describe.serial('Serving Management - Workflows', () => {
     const API_BASE = 'http://localhost:8084';
     const ctx = await request.newContext();
     // Log in as the seeded "Workflow Volunteer" — DoingApi/Tasks/View only, person PER00000069.
-    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: 'volunteer@b1.church', password: 'password' } });
+    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: 'volunteer@huro.church', password: 'password' } });
     expect(loginRes.ok()).toBeTruthy();
     const body = await loginRes.json();
     const jwt = body.userChurches?.[0]?.jwt as string;
@@ -358,7 +358,7 @@ test.describe.serial('Serving Management - Workflows', () => {
   test('a cross-workflow outcome hands the card off to another workflow (API)', async () => {
     const API_BASE = 'http://localhost:8084';
     const ctx = await request.newContext();
-    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: 'demo@b1.church', password: 'password' } });
+    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: 'demo@huro.church', password: 'password' } });
     expect(loginRes.ok()).toBeTruthy();
     const body = await loginRes.json();
     const uc = (body.userChurches || []).find((c: any) => c.church?.id === 'CHU00000001') || body.userChurches?.[0];
@@ -388,7 +388,7 @@ test.describe.serial('Serving Management - Workflows', () => {
   test('cards stay out of plain-task surfaces and the generic save endpoint (API)', async () => {
     const API_BASE = 'http://localhost:8084';
     const ctx = await request.newContext();
-    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: 'demo@b1.church', password: 'password' } });
+    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: 'demo@huro.church', password: 'password' } });
     expect(loginRes.ok()).toBeTruthy();
     const body = await loginRes.json();
     const uc = (body.userChurches || []).find((c: any) => c.church?.id === 'CHU00000001') || body.userChurches?.[0];
@@ -412,7 +412,7 @@ test.describe.serial('Serving Management - Workflows', () => {
   test('a manual send-back does not re-trigger the target step onEnter route (API)', async () => {
     const API_BASE = 'http://localhost:8084';
     const ctx = await request.newContext();
-    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: 'demo@b1.church', password: 'password' } });
+    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: 'demo@huro.church', password: 'password' } });
     expect(loginRes.ok()).toBeTruthy();
     const body = await loginRes.json();
     const uc = (body.userChurches || []).find((c: any) => c.church?.id === 'CHU00000001') || body.userChurches?.[0];
@@ -437,7 +437,7 @@ test.describe.serial('Serving Management - Workflows', () => {
   test('a personMatch route auto-advances a matching card on entry (API)', async () => {
     const API_BASE = 'http://localhost:8084';
     const ctx = await request.newContext();
-    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: 'demo@b1.church', password: 'password' } });
+    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: 'demo@huro.church', password: 'password' } });
     expect(loginRes.ok()).toBeTruthy();
     const body = await loginRes.json();
     const uc = (body.userChurches || []).find((c: any) => c.church?.id === 'CHU00000001') || body.userChurches?.[0];
@@ -462,7 +462,7 @@ test.describe.serial('Serving Management - Workflows', () => {
 
   const API_BASE = 'http://localhost:8084';
   async function apiAuth(ctx: any) {
-    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: 'demo@b1.church', password: 'password' } });
+    const loginRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: 'demo@huro.church', password: 'password' } });
     expect(loginRes.ok()).toBeTruthy();
     const body = await loginRes.json();
     const uc = (body.userChurches || []).find((c: any) => c.church?.id === 'CHU00000001') || body.userChurches?.[0];

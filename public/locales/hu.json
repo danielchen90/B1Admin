@@ -415,7 +415,7 @@
       "ariaSend": "Üzenet küldése",
       "errorAnswer": "Sajnálom, nem találtam választ.",
       "errorGeneric": "Valami elromlott. Kérjük, próbálja újra.",
-      "intro": "Üdv, Bez vagyok! Segíthetek eligazodni a B1 Adminban. Próbáljon kérdezni tőlem:",
+      "intro": "Üdv, Bez vagyok! Segíthetek eligazodni a Church Adminban. Próbáljon kérdezni tőlem:",
       "placeholderInput": "Tegyen fel egy kérdést Beznek...",
       "sampleCsv": "\"Hogyan importálok tagokat egy CSV-ből?\"",
       "sampleGiving": "\"Hogyan állítsam be az online adományozást?\"",
@@ -429,7 +429,7 @@
       "composing": "Válasz írása...",
       "errorAnswer": "Sajnálom, nem találtam választ.",
       "errorGeneric": "Valami elromlott. Kérjük, próbálja újra.",
-      "intro": "Tegyen fel bármilyen kérdést a B1 Adminról. Például:",
+      "intro": "Tegyen fel bármilyen kérdést a Church Adminról. Például:",
       "placeholderInput": "Tegyen fel egy kérdést...",
       "sampleCsv": "\"Hogyan importálok tagokat egy CSV-ből?\"",
       "sampleGiving": "\"Hogyan állítsam be az online adományozást?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Üzenet küldése",
       "errorAnswer": "Néha még a szuperhős is falba ütközik. Próbálja újra!",
       "errorGeneric": "Valami elromlott. De ne aggódj — még erősebben térek vissza!",
-      "intro": "Szia bajnok! Én vagyok SuperBee — a B1 Admin erőforrása. Tegye fel a legnehezebb kérdéseit!",
+      "intro": "Szia bajnok! Én vagyok SuperBee — a Church Admin erőforrása. Tegye fel a legnehezebb kérdéseit!",
       "placeholderInput": "Kérdezz bármit SuperBee-től...",
       "sampleCsv": "\"Hogyan importálok tagokat egy CSV-ből?\"",
       "sampleGiving": "\"Hogyan állítsam be az online adományozást?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Töltsön fel profilképet, hogy csapata felismerhesse Önt.",
       "setAvatarTitle": "Avatár beállítása",
       "subtitle": "Állítsuk be a gyülekezetét. Itt van néhány dolog, amit valószínűleg először szeretne megtenni.",
-      "title": "Üdvözöljük a B1.church-ön!",
+      "title": "Üdvözöljük a Huro-ön!",
       "uploadSermonDesc": "Ossza meg igehirdetéseit online, hogy az emberek bármikor megnézhessék.",
       "uploadSermonTitle": "Igehirdetés feltöltése",
       "yourChurch": "Az Ön gyülekezete",
@@ -555,7 +555,7 @@
       "dash": "Dashboard"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Töltse le a B1.church alkalmazást a telefonjára, hogy bárhol kapcsolatban maradhasson.",
+      "downloadAppDesc": "Töltse le a Huro alkalmazást a telefonjára, hogy bárhol kapcsolatban maradhasson.",
       "downloadAppTitle": "Mobilalkalmazás letöltése",
       "fallbackChurchName": "az Ön gyülekezete",
       "findPeopleDesc": "Keressen a gyülekezeti névjegyzékben, hogy másokat találjon és kapcsolatba lépjen velük a gyülekezetben.",
@@ -1197,7 +1197,7 @@
         "templates": "Templates",
         "welcome_volunteers": {
           "heading": "Welcome Volunteers",
-          "message": "Welcome Thank you for volunteering.\n\nPlease download the B1.Church app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welcome Thank you for volunteering.\n\nPlease download the Huro app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Ismeretlen"

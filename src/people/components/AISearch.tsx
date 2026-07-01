@@ -2,7 +2,7 @@ import React from "react";
 import { type SearchCondition, type PersonInterface } from "@churchapps/helpers";
 import { ApiHelper, DisplayBox, ErrorMessages, Locale } from "@churchapps/apphelper";
 import { Button, Stack, TextField, Typography } from "@mui/material";
-import { B1AdminPersonHelper } from "../../helpers";
+import { HuroPersonHelper } from "../../helpers";
 
 interface Props {
   updateSearchResults: (people: PersonInterface[]) => void;
@@ -27,7 +27,7 @@ export const AISearch = (props: Props) => {
       // Then use those filters to search for people
       const response = await ApiHelper.post("/people/advancedSearch", filters, "MembershipApi");
 
-      props.updateSearchResults(response?.map((p: PersonInterface) => B1AdminPersonHelper.getExpandedPersonObject(p)));
+      props.updateSearchResults(response?.map((p: PersonInterface) => HuroPersonHelper.getExpandedPersonObject(p)));
       if (filters?.length) props.onReportCriteria?.(filters);
       setIsSearched(true);
     } catch (error) {

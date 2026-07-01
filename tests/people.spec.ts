@@ -773,7 +773,7 @@ test.describe("People Management", () => {
       await expect(removeDialog).toHaveCount(0, { timeout: 20000 });
 
       const ctx = await request.newContext();
-      const loginRes = await ctx.post("http://localhost:8084/membership/users/login", { data: { email: "demo@b1.church", password: "password" } });
+      const loginRes = await ctx.post("http://localhost:8084/membership/users/login", { data: { email: "demo@huro.church", password: "password" } });
       const loginBody = await loginRes.json();
       const uc = (loginBody.userChurches || []).find((c: any) => c.church?.id === "CHU00000001") || loginBody.userChurches?.[0];
       const auth = { headers: { Authorization: "Bearer " + uc?.jwt } };

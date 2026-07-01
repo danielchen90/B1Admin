@@ -415,7 +415,7 @@
       "ariaSend": "Odoslať správu",
       "errorAnswer": "Prepáčte, nepodarilo sa mi nájsť odpoveď.",
       "errorGeneric": "Niečo sa pokazilo. Skúste to znova.",
-      "intro": "Ahoj, som Bez! Môžem ti pomôcť orientovať sa v B1 Admin. Skús sa ma opýtať:",
+      "intro": "Ahoj, som Bez! Môžem ti pomôcť orientovať sa v Church Admin. Skús sa ma opýtať:",
       "placeholderInput": "Opýtaj sa Bez otázku...",
       "sampleCsv": "\"Ako importujem členov z CSV?\"",
       "sampleGiving": "\"Ako nastavím online dávanie?\"",
@@ -429,7 +429,7 @@
       "composing": "Skladá sa odpoveď...",
       "errorAnswer": "Prepáčte, nepodarilo sa mi nájsť odpoveď.",
       "errorGeneric": "Niečo sa pokazilo. Skúste to znova.",
-      "intro": "Položte akúkoľvek otázku o B1 Admin. Napríklad:",
+      "intro": "Položte akúkoľvek otázku o Church Admin. Napríklad:",
       "placeholderInput": "Položiť otázku...",
       "sampleCsv": "\"Ako importujem členov z CSV?\"",
       "sampleGiving": "\"Ako nastavím online dávanie?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Odoslať správu",
       "errorAnswer": "Aj superhrdina niekedy narazí na stenu. Skúste to znova!",
       "errorGeneric": "Niečo sa pokazilo. Ale neboj sa — vrátim sa silnejší!",
-      "intro": "Ahoj, šampión! Som SuperBee — tvoja sila B1 Admin. Daj mi tie najťažšie otázky!",
+      "intro": "Ahoj, šampión! Som SuperBee — tvoja sila Church Admin. Daj mi tie najťažšie otázky!",
       "placeholderInput": "Opýtaj sa SuperBee čokoľvek...",
       "sampleCsv": "\"Ako importujem členov z CSV?\"",
       "sampleGiving": "\"Ako nastavím online dávanie?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Nahrajte profilovú fotku, aby vás váš tím mohol spoznať.",
       "setAvatarTitle": "Nastavte svoj avatar",
       "subtitle": "Poďme nastaviť vašu cirkev. Tu sú niektoré veci, ktoré budete pravdepodobne chcieť urobiť ako prvé.",
-      "title": "Vitajte v B1.church!",
+      "title": "Vitajte v Huro!",
       "uploadSermonDesc": "Zdieľajte svoje kázne online, aby ich ľudia mohli sledovať kedykoľvek.",
       "uploadSermonTitle": "Nahrajte kázeň",
       "yourChurch": "Vaša cirkev",
@@ -555,7 +555,7 @@
       "dash": "Prístrojová doska"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Získajte aplikáciu B1.church na svoj telefón, aby ste zostali v spojení kdekoľvek.",
+      "downloadAppDesc": "Získajte aplikáciu Huro na svoj telefón, aby ste zostali v spojení kdekoľvek.",
       "downloadAppTitle": "Stiahnite si mobilnú aplikáciu",
       "fallbackChurchName": "vaša cirkev",
       "findPeopleDesc": "Vyhľadajte v adresári cirkvi, aby ste našli a spojili sa s ostatnými v zhromaždení.",
@@ -1197,7 +1197,7 @@
         "templates": "Templates",
         "welcome_volunteers": {
           "heading": "Welcome Volunteers",
-          "message": "Welcome Thank you for volunteering.\n\nPlease download the B1.Church app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welcome Thank you for volunteering.\n\nPlease download the Huro app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Neznámy"

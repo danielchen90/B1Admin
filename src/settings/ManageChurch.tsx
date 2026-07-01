@@ -181,14 +181,14 @@ export const ManageChurch = () => {
 
   return (
     <>
-      <PageHeader title={church.data.name || Locale.label("settings.manageChurch.title")} subtitle={church.data.subDomain ? `${church.data.subDomain}.b1.church` : Locale.label("settings.manageChurch.subtitle")}>
+      <PageHeader title={church.data.name || Locale.label("settings.manageChurch.title")} subtitle={church.data.subDomain ? `${church.data.subDomain}.huro.church` : Locale.label("settings.manageChurch.subtitle")}>
         <Stack direction="row" spacing={1}>
           {UserHelper.checkAccess(Permissions.membershipApi.server.admin) && (
             <Button variant="outlined" startIcon={<HistoryIcon />} onClick={() => navigate("/settings/audit-log")} sx={headerButtonSx}>
               {Locale.label("settings.manageChurch.auditLog")}
             </Button>
           )}
-          <Button variant="outlined" startIcon={<PlayArrowIcon />} href={`https://transfer.b1.church/login?jwt=${jwt}&churchId=${churchId}`} target="_blank" rel="noreferrer noopener" sx={headerButtonSx}>
+          <Button variant="outlined" startIcon={<PlayArrowIcon />} href={`https://transfer.huro.church/login?jwt=${jwt}&churchId=${churchId}`} target="_blank" rel="noreferrer noopener" sx={headerButtonSx}>
             {Locale.label("settings.manageChurch.imEx")}
           </Button>
         </Stack>

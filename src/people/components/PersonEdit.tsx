@@ -1,7 +1,7 @@
 import React, { useState, memo, useCallback } from "react";
 import { useForm, Controller, useFormState } from "react-hook-form";
 import { MuiTelInput, matchIsValidTel } from "mui-tel-input";
-import { B1AdminPersonHelper, UpdateHouseHold } from ".";
+import { HuroPersonHelper, UpdateHouseHold } from ".";
 import { type PersonInterface } from "@churchapps/helpers";
 import { PersonHelper, DateHelper, ApiHelper, Loading, ErrorMessages, Locale, PersonAvatar } from "@churchapps/apphelper";
 import { FormCard } from "../../components/ui";
@@ -122,7 +122,7 @@ export const PersonEdit = memo((props: Props) => {
     setIsSubmitting(true);
     const p = buildPerson(values);
 
-    if (B1AdminPersonHelper.getExpandedPersonObject(p).id === context.person?.id) context.setPerson(p);
+    if (HuroPersonHelper.getExpandedPersonObject(p).id === context.person?.id) context.setPerson(p);
 
     if (members && members.length > 1 && PersonHelper.compareAddress(props.person.contactInfo, p.contactInfo)) {
       setModalText(
@@ -137,7 +137,7 @@ export const PersonEdit = memo((props: Props) => {
 
   const handleDelete = useCallback(() => {
     if (!props.person?.id) return;
-    if (B1AdminPersonHelper.getExpandedPersonObject(props.person).id === context.person?.id) {
+    if (HuroPersonHelper.getExpandedPersonObject(props.person).id === context.person?.id) {
       alert(Locale.label("people.personEdit.cannotDeleteSelf"));
       return;
     }

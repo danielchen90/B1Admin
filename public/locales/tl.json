@@ -415,7 +415,7 @@
       "ariaSend": "Magpadala ng mensahe",
       "errorAnswer": "Pasensya na, hindi ako makahanap ng sagot.",
       "errorGeneric": "May nangyaring mali. Subukan ulit.",
-      "intro": "Hi, ako si Bez! Maaari kitang tulungan sa pag-navigate ng B1 Admin. Subukang itanong sa akin:",
+      "intro": "Hi, ako si Bez! Maaari kitang tulungan sa pag-navigate ng Church Admin. Subukang itanong sa akin:",
       "placeholderInput": "Magtanong kay Bez...",
       "sampleCsv": "\"Paano mag-import ng mga miyembro mula sa CSV?\"",
       "sampleGiving": "\"Paano mag-set up ng online giving?\"",
@@ -429,7 +429,7 @@
       "composing": "Bumubuo ng sagot...",
       "errorAnswer": "Pasensya na, hindi ako makahanap ng sagot.",
       "errorGeneric": "May nangyaring mali. Subukan ulit.",
-      "intro": "Magtanong tungkol sa B1 Admin. Halimbawa:",
+      "intro": "Magtanong tungkol sa Church Admin. Halimbawa:",
       "placeholderInput": "Magtanong...",
       "sampleCsv": "\"Paano mag-import ng mga miyembro mula sa CSV?\"",
       "sampleGiving": "\"Paano mag-set up ng online giving?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Magpadala ng mensahe",
       "errorAnswer": "Kahit ang superhero minsan ay nakakaranas ng pader. Subukan ulit!",
       "errorGeneric": "May nangyaring mali. Pero huwag mag-alala — babalik ako nang mas malakas!",
-      "intro": "Kumusta, kampeon! Ako si SuperBee — ang iyong B1 Admin powerhouse. Tanungin mo ako ng pinakamahirap na mga tanong!",
+      "intro": "Kumusta, kampeon! Ako si SuperBee — ang iyong Church Admin powerhouse. Tanungin mo ako ng pinakamahirap na mga tanong!",
       "placeholderInput": "Magtanong kay SuperBee...",
       "sampleCsv": "\"Paano mag-import ng mga miyembro mula sa CSV?\"",
       "sampleGiving": "\"Paano mag-set up ng online giving?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Mag-upload ng profile photo upang makilala ka ng iyong team.",
       "setAvatarTitle": "I-set ang Iyong Avatar",
       "subtitle": "Simulan natin ang pag-set up ng iyong simbahan. Narito ang ilang bagay na malamang gusto mong gawin muna.",
-      "title": "Maligayang pagdating sa B1.church!",
+      "title": "Maligayang pagdating sa Huro!",
       "uploadSermonDesc": "Ibahagi ang iyong mga sermon online upang makapanood ang mga tao kahit kailan.",
       "uploadSermonTitle": "Mag-upload ng Sermon",
       "yourChurch": "Ang Iyong Simbahan",
@@ -555,7 +555,7 @@
       "dash": "Dashboard"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Kunin ang B1.church app sa iyong telepono upang manatiling konektado kahit saan ka magpunta.",
+      "downloadAppDesc": "Kunin ang Huro app sa iyong telepono upang manatiling konektado kahit saan ka magpunta.",
       "downloadAppTitle": "I-download ang Mobile App",
       "fallbackChurchName": "ang iyong simbahan",
       "findPeopleDesc": "Hanapin sa church directory upang makakita at makipag-ugnayan sa iba sa kongregasyon.",
@@ -1197,7 +1197,7 @@
         "templates": "Mga Template",
         "welcome_volunteers": {
           "heading": "Maligayang pagdating sa mga Boluntaryo",
-          "message": "Maligayang pagdating! Salamat sa pagboluntaryo.\n\nMangyaring i-download ang B1.Church app at mag-login upang pamahalaan ang iyong iskedyul. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Maligayang pagdating! Salamat sa pagboluntaryo.\n\nMangyaring i-download ang Huro app at mag-login upang pamahalaan ang iyong iskedyul. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Hindi alam"

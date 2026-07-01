@@ -49,7 +49,7 @@ export async function login(page: Page) {
   if (winner === null) throw new Error("Neither login form nor authenticated nav appeared within 15s");
 
   // Full login flow
-  await emailInput.fill("demo@b1.church");
+  await emailInput.fill("demo@huro.church");
   await page.fill('input[type="password"]', "password");
   await page.click('button[type="submit"]');
 

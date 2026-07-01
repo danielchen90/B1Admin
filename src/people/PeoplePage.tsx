@@ -4,7 +4,7 @@ import { Permissions, UserHelper, type PersonInterface, type SearchCondition } f
 import { ApiHelper, Locale } from "@churchapps/apphelper";
 import { PeopleSearchResults, PeopleColumns } from "./components";
 import { Grid, Box, Typography, Card, Stack, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, CircularProgress, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select } from "@mui/material";
-import { B1AdminPersonHelper, EnvironmentHelper } from "../helpers";
+import { HuroPersonHelper, EnvironmentHelper } from "../helpers";
 import { PeopleSearch } from "./components/PeopleSearch";
 import { SavedLists, type ListConditions, type ListInterface } from "./components/SavedLists";
 import { buildRulesFromCriteria } from "./components/listRules";
@@ -157,7 +157,7 @@ export const PeoplePage = memo(() => {
     if (peopleQuery.isPlaceholderData) return;
     const data = peopleQuery.data;
     if (!data) return;
-    const expanded = data.map((d: PersonInterface) => B1AdminPersonHelper.getExpandedPersonObject(d));
+    const expanded = data.map((d: PersonInterface) => HuroPersonHelper.getExpandedPersonObject(d));
     setAllPeople(expanded);
     setMaybeMore(!loadAll && data.length === INITIAL_PAGE_SIZE);
   }, [peopleQuery.data, peopleQuery.isPlaceholderData, loadAll]);
@@ -188,13 +188,13 @@ export const PeoplePage = memo(() => {
       setSaveableCriteria(null);
       setSelectedListFilters(undefined);
       ApiHelper.get(`/lists/${list.id}/people`, "MembershipApi").then((data: any) => {
-        setSearchResults(data.map((d: PersonInterface) => B1AdminPersonHelper.getExpandedPersonObject(d)));
+        setSearchResults(data.map((d: PersonInterface) => HuroPersonHelper.getExpandedPersonObject(d)));
       });
     } else if (Array.isArray(conditions)) {
       setSaveableCriteria(conditions);
       setSelectedListFilters(undefined);
       ApiHelper.post("/people/advancedSearch", conditions, "MembershipApi").then((data: any) => {
-        setSearchResults(data.map((d: PersonInterface) => B1AdminPersonHelper.getExpandedPersonObject(d)));
+        setSearchResults(data.map((d: PersonInterface) => HuroPersonHelper.getExpandedPersonObject(d)));
       });
     } else {
       // Advanced list: seed the advanced panel (new ref each time so re-selecting re-seeds).

@@ -415,7 +415,7 @@
       "ariaSend": "Wyślij wiadomość",
       "errorAnswer": "Przepraszam, nie udało mi się znaleźć odpowiedzi.",
       "errorGeneric": "Coś poszło nie tak. Spróbuj ponownie.",
-      "intro": "Cześć, jestem Bez! Mogę pomóc Ci poruszać się po B1 Admin. Spróbuj mnie zapytać:",
+      "intro": "Cześć, jestem Bez! Mogę pomóc Ci poruszać się po Church Admin. Spróbuj mnie zapytać:",
       "placeholderInput": "Zapytaj Bez o coś...",
       "sampleCsv": "\"Jak importować członków z pliku CSV?\"",
       "sampleGiving": "\"Jak skonfigurować dawanie online?\"",
@@ -429,7 +429,7 @@
       "composing": "Tworzenie odpowiedzi...",
       "errorAnswer": "Przepraszam, nie udało mi się znaleźć odpowiedzi.",
       "errorGeneric": "Coś poszło nie tak. Spróbuj ponownie.",
-      "intro": "Zadaj dowolne pytanie dotyczące B1 Admin. Na przykład:",
+      "intro": "Zadaj dowolne pytanie dotyczące Church Admin. Na przykład:",
       "placeholderInput": "Zadaj pytanie...",
       "sampleCsv": "\"Jak importować członków z pliku CSV?\"",
       "sampleGiving": "\"Jak skonfigurować dawanie online?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Wyślij wiadomość",
       "errorAnswer": "Nawet superbohater czasem trafia na ścianę. Spróbuj ponownie!",
       "errorGeneric": "Coś poszło nie tak. Ale nie martw się — wrócę silniejszy!",
-      "intro": "Cześć, mistrzu! Jestem SuperBee — twoja moc B1 Admin. Zadaj mi najtrudniejsze pytania!",
+      "intro": "Cześć, mistrzu! Jestem SuperBee — twoja moc Church Admin. Zadaj mi najtrudniejsze pytania!",
       "placeholderInput": "Zapytaj SuperBee o cokolwiek...",
       "sampleCsv": "\"Jak importować członków z pliku CSV?\"",
       "sampleGiving": "\"Jak skonfigurować dawanie online?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Prześlij zdjęcie profilowe, aby twój zespół mógł cię rozpoznać.",
       "setAvatarTitle": "Ustaw swój awatar",
       "subtitle": "Skonfigurujmy twój kościół. Oto kilka rzeczy, które prawdopodobnie chcesz zrobić najpierw.",
-      "title": "Witamy w B1.church!",
+      "title": "Witamy w Huro!",
       "uploadSermonDesc": "Udostępniaj swoje kazania online, aby ludzie mogli je oglądać w dowolnym momencie.",
       "uploadSermonTitle": "Prześlij kazanie",
       "yourChurch": "Twój kościół",
@@ -555,7 +555,7 @@
       "dash": "Pulpit"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Pobierz aplikację B1.church na swój telefon, aby pozostać w kontakcie wszędzie, gdzie jesteś.",
+      "downloadAppDesc": "Pobierz aplikację Huro na swój telefon, aby pozostać w kontakcie wszędzie, gdzie jesteś.",
       "downloadAppTitle": "Pobierz aplikację mobilną",
       "fallbackChurchName": "twój kościół",
       "findPeopleDesc": "Przeszukaj katalog kościoła, aby znaleźć i nawiązać kontakt z innymi w zgromadzeniu.",
@@ -1197,7 +1197,7 @@
         "templates": "Szablony",
         "welcome_volunteers": {
           "heading": "Powitaj wolontariuszy",
-          "message": "Welcome Thank you for volunteering.\n\nPlease download the B1.Church app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welcome Thank you for volunteering.\n\nPlease download the Huro app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Nieznany"

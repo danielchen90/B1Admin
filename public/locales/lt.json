@@ -415,7 +415,7 @@
       "ariaSend": "Siųsti žinutę",
       "errorAnswer": "Atsiprašau, atsakymo rasti nepavyko.",
       "errorGeneric": "Kažkas nutiko. Bandykite dar kartą.",
-      "intro": "Sveiki, aš Bez! Galiu padėti naršyti B1 Admin. Pabandykite paklausti:",
+      "intro": "Sveiki, aš Bez! Galiu padėti naršyti Church Admin. Pabandykite paklausti:",
       "placeholderInput": "Užduokite Bez klausimą...",
       "sampleCsv": "„Kaip importuoti narius iš CSV?\"",
       "sampleGiving": "„Kaip nustatyti aukojimą internetu?\"",
@@ -429,7 +429,7 @@
       "composing": "Rengiamas atsakymas...",
       "errorAnswer": "Atsiprašau, atsakymo rasti nepavyko.",
       "errorGeneric": "Kažkas nutiko. Bandykite dar kartą.",
-      "intro": "Užduokite klausimą apie B1 Admin. Pavyzdžiui:",
+      "intro": "Užduokite klausimą apie Church Admin. Pavyzdžiui:",
       "placeholderInput": "Užduokite klausimą...",
       "sampleCsv": "„Kaip importuoti narius iš CSV?\"",
       "sampleGiving": "„Kaip nustatyti aukojimą internetu?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Siųsti žinutę",
       "errorAnswer": "Net superherojus kartais atsitrenkia į sieną. Bandykite dar kartą!",
       "errorGeneric": "Kažkas nutiko. Bet nesijaudinkite — sugrįšiu stipresnis!",
-      "intro": "Sveikas, čempione! Aš SuperBee — jūsų B1 Admin galiūnas. Užduokite man sudėtingiausius klausimus!",
+      "intro": "Sveikas, čempione! Aš SuperBee — jūsų Church Admin galiūnas. Užduokite man sudėtingiausius klausimus!",
       "placeholderInput": "Klauskite SuperBee bet ko...",
       "sampleCsv": "„Kaip importuoti narius iš CSV?\"",
       "sampleGiving": "„Kaip nustatyti aukojimą internetu?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Įkelkite profilio nuotrauką, kad komanda galėtų jus atpažinti.",
       "setAvatarTitle": "Nustatykite avatarą",
       "subtitle": "Nustatykime jūsų bažnyčią. Štai keletas dalykų, kuriuos tikriausiai norėsite padaryti pirmiausia.",
-      "title": "Sveiki atvykę į B1.church!",
+      "title": "Sveiki atvykę į Huro!",
       "uploadSermonDesc": "Dalykitės pamokslais internete, kad žmonės galėtų juos žiūrėti bet kuriuo metu.",
       "uploadSermonTitle": "Įkelkite pamokslą",
       "yourChurch": "Jūsų bažnyčia",
@@ -555,7 +555,7 @@
       "dash": "Dashboard"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Atsisiųskite B1.church programėlę į telefoną, kad palaikytumėte ryšį, kur bebūtumėte.",
+      "downloadAppDesc": "Atsisiųskite Huro programėlę į telefoną, kad palaikytumėte ryšį, kur bebūtumėte.",
       "downloadAppTitle": "Atsisiųskite mobiliąją programėlę",
       "fallbackChurchName": "jūsų bažnyčia",
       "findPeopleDesc": "Naršykite bažnyčios katalogą, kad rastumėte ir susisiektumėte su kitais bendruomenės nariais.",
@@ -1197,7 +1197,7 @@
         "templates": "Templates",
         "welcome_volunteers": {
           "heading": "Welcome Volunteers",
-          "message": "Welcome Thank you for volunteering.\n\nPlease download the B1.Church app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welcome Thank you for volunteering.\n\nPlease download the Huro app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Nežinoma"

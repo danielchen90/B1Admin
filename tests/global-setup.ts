@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const STORAGE_STATE_PATH = path.join(__dirname, ".auth-state.json");
 
 /**
- * Global setup: verify Api is in demo mode, then log in once as demo@b1.church
+ * Global setup: verify Api is in demo mode, then log in once as demo@huro.church
  * and save the browser storage state (cookies + localStorage) so every test
  * worker can reuse it instead of logging in again.
  */
@@ -15,7 +15,7 @@ async function globalSetup(config: FullConfig) {
   await verifyEnv({ fullCheck: true });
 
   const ctx = await request.newContext();
-  const loginRes = await ctx.post("http://localhost:8084/membership/users/login", { data: { email: "demo@b1.church", password: "password" } });
+  const loginRes = await ctx.post("http://localhost:8084/membership/users/login", { data: { email: "demo@huro.church", password: "password" } });
   if (loginRes.ok()) {
     const loginBody = await loginRes.json();
     const uc = (loginBody.userChurches || []).find((c: any) => c.church?.id === "CHU00000001") || loginBody.userChurches?.[0];
@@ -40,7 +40,7 @@ async function globalSetup(config: FullConfig) {
   // Wait for login form
   await emailInput.waitFor({ state: "visible", timeout: 15000 });
 
-  await page.fill('input[type="email"]', "demo@b1.church");
+  await page.fill('input[type="email"]', "demo@huro.church");
   await page.fill('input[type="password"]', "password");
   await page.click('button[type="submit"]');
 

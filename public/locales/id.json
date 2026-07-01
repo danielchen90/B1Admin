@@ -415,7 +415,7 @@
       "ariaSend": "Kirim pesan",
       "errorAnswer": "Maaf, saya tidak dapat menemukan jawaban.",
       "errorGeneric": "Ada yang salah. Silakan coba lagi.",
-      "intro": "Hai, saya Bez! Saya dapat membantu Anda menavigasi B1 Admin. Coba tanyakan kepada saya:",
+      "intro": "Hai, saya Bez! Saya dapat membantu Anda menavigasi Church Admin. Coba tanyakan kepada saya:",
       "placeholderInput": "Tanyakan kepada Bez...",
       "sampleCsv": "\"Bagaimana cara mengimpor anggota dari CSV?\"",
       "sampleGiving": "\"Bagaimana cara mengatur persembahan online?\"",
@@ -429,7 +429,7 @@
       "composing": "Menyusun jawaban...",
       "errorAnswer": "Maaf, saya tidak dapat menemukan jawaban.",
       "errorGeneric": "Ada yang salah. Silakan coba lagi.",
-      "intro": "Tanyakan apa pun tentang B1 Admin. Misalnya:",
+      "intro": "Tanyakan apa pun tentang Church Admin. Misalnya:",
       "placeholderInput": "Ajukan pertanyaan...",
       "sampleCsv": "\"Bagaimana cara mengimpor anggota dari CSV?\"",
       "sampleGiving": "\"Bagaimana cara mengatur persembahan online?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Kirim pesan",
       "errorAnswer": "Bahkan superhero pun terkadang menabrak tembok. Coba lagi!",
       "errorGeneric": "Ada yang salah. Tapi jangan khawatir — saya akan kembali lebih kuat!",
-      "intro": "Halo, juara! Saya SuperBee — pusat kekuatan B1 Admin Anda. Tanyakan pertanyaan tersulit Anda!",
+      "intro": "Halo, juara! Saya SuperBee — pusat kekuatan Church Admin Anda. Tanyakan pertanyaan tersulit Anda!",
       "placeholderInput": "Tanyakan apa saja kepada SuperBee...",
       "sampleCsv": "\"Bagaimana cara mengimpor anggota dari CSV?\"",
       "sampleGiving": "\"Bagaimana cara mengatur persembahan online?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Unggah foto profil agar tim Anda dapat mengenali Anda.",
       "setAvatarTitle": "Atur Avatar Anda",
       "subtitle": "Mari kita siapkan gereja Anda. Berikut beberapa hal yang mungkin ingin Anda lakukan terlebih dahulu.",
-      "title": "Selamat datang di B1.church!",
+      "title": "Selamat datang di Huro!",
       "uploadSermonDesc": "Bagikan khotbah Anda secara online sehingga orang dapat menontonnya kapan saja.",
       "uploadSermonTitle": "Unggah Khotbah",
       "yourChurch": "Gereja Anda",
@@ -555,7 +555,7 @@
       "dash": "Dasbor"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Dapatkan aplikasi B1.church di ponsel Anda untuk tetap terhubung di mana pun Anda berada.",
+      "downloadAppDesc": "Dapatkan aplikasi Huro di ponsel Anda untuk tetap terhubung di mana pun Anda berada.",
       "downloadAppTitle": "Unduh Aplikasi Mobile",
       "fallbackChurchName": "gereja Anda",
       "findPeopleDesc": "Cari direktori gereja untuk menemukan dan terhubung dengan orang lain dalam jemaat.",
@@ -1197,7 +1197,7 @@
         "templates": "Templates",
         "welcome_volunteers": {
           "heading": "Welcome Volunteers",
-          "message": "Welcome Thank you for volunteering.\n\nPlease download the B1.Church app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welcome Thank you for volunteering.\n\nPlease download the Huro app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Tidak diketahui"

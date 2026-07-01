@@ -12,13 +12,13 @@ test.describe.serial("Event permission gate (POST /content/events)", () => {
   test.beforeAll(async () => {
     ctx = await request.newContext();
 
-    const volRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: "volunteer@b1.church", password: "password" } });
+    const volRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: "volunteer@huro.church", password: "password" } });
     expect(volRes.ok()).toBeTruthy();
     const volBody = await volRes.json();
     volunteerJwt = volBody.userChurches?.[0]?.jwt as string;
     expect(volunteerJwt).toBeTruthy();
 
-    const staffRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: "demo@b1.church", password: "password" } });
+    const staffRes = await ctx.post(`${API_BASE}/membership/users/login`, { data: { email: "demo@huro.church", password: "password" } });
     expect(staffRes.ok()).toBeTruthy();
     const staffBody = await staffRes.json();
     staffJwt = staffBody.userChurches?.[0]?.jwt as string;

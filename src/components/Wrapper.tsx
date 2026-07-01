@@ -82,5 +82,5 @@ export const Wrapper: React.FC<Props> = (props) => {
 
   const navContent = <><List component="nav" sx={Themes.NavBarStyle}>{tabs}</List></>
 
-  return <SiteWrapper navContent={navContent} context={context} appName="B1Admin" appearance={{wrapperBackground:"#333"}}>{props.children}</SiteWrapper>
+  return <SiteWrapper navContent={navContent} context={context} appName="Huro" appearance={{wrapperBackground:"#333"}}>{props.children}</SiteWrapper>
   */

@@ -415,7 +415,7 @@
       "ariaSend": "إرسال رسالة",
       "errorAnswer": "آسف، لم أتمكن من العثور على إجابة.",
       "errorGeneric": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
-      "intro": "مرحبًا، أنا Bez! يمكنني مساعدتك في التنقل في B1 Admin. حاول أن تسألني:",
+      "intro": "مرحبًا، أنا Bez! يمكنني مساعدتك في التنقل في Church Admin. حاول أن تسألني:",
       "placeholderInput": "اسأل Bez سؤالاً...",
       "sampleCsv": "\"كيف أستورد الأعضاء من ملف CSV؟\"",
       "sampleGiving": "\"كيف أُعدّ التبرعات عبر الإنترنت؟\"",
@@ -429,7 +429,7 @@
       "composing": "جارٍ تأليف الإجابة...",
       "errorAnswer": "آسف، لم أتمكن من العثور على إجابة.",
       "errorGeneric": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
-      "intro": "اطرح أي سؤال حول B1 Admin. على سبيل المثال:",
+      "intro": "اطرح أي سؤال حول Church Admin. على سبيل المثال:",
       "placeholderInput": "اطرح سؤالاً...",
       "sampleCsv": "\"كيف أستورد الأعضاء من ملف CSV؟\"",
       "sampleGiving": "\"كيف أُعدّ التبرعات عبر الإنترنت؟\"",
@@ -488,7 +488,7 @@
       "ariaSend": "إرسال رسالة",
       "errorAnswer": "حتى الأبطال الخارقون يصطدمون بالجدار أحيانًا. حاول مرة أخرى!",
       "errorGeneric": "حدث خطأ ما. لكن لا تقلق - سأعود أقوى!",
-      "intro": "مرحبًا، أيها البطل! أنا SuperBee - قوتك في B1 Admin. اطرح علي أصعب أسئلتك!",
+      "intro": "مرحبًا، أيها البطل! أنا SuperBee - قوتك في Church Admin. اطرح علي أصعب أسئلتك!",
       "placeholderInput": "اسأل SuperBee أي شيء...",
       "sampleCsv": "\"كيف أستورد الأعضاء من ملف CSV؟\"",
       "sampleGiving": "\"كيف أُعدّ التبرعات عبر الإنترنت؟\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "قم بتحميل صورة شخصية حتى يتمكن فريقك من التعرف عليك.",
       "setAvatarTitle": "حدد صورتك الرمزية",
       "subtitle": "لنقم بإعداد كنيستك. إليك بعض الأشياء التي قد ترغب في القيام بها أولاً.",
-      "title": "مرحبًا بك في B1.church!",
+      "title": "مرحبًا بك في Huro!",
       "uploadSermonDesc": "شارك خطبك عبر الإنترنت ليتمكن الناس من مشاهدتها في أي وقت.",
       "uploadSermonTitle": "حمّل خطبة",
       "yourChurch": "كنيستك",
@@ -555,7 +555,7 @@
       "dash": "لوحة التحكم"
     },
     "memberWelcome": {
-      "downloadAppDesc": "احصل على تطبيق B1.church على هاتفك لتبقى متصلاً أينما ذهبت.",
+      "downloadAppDesc": "احصل على تطبيق Huro على هاتفك لتبقى متصلاً أينما ذهبت.",
       "downloadAppTitle": "تنزيل تطبيق الهاتف المحمول",
       "fallbackChurchName": "كنيستك",
       "findPeopleDesc": "ابحث في دليل الكنيسة للعثور على والتواصل مع الآخرين في الجماعة.",
@@ -1197,7 +1197,7 @@
         "templates": "Templates",
         "welcome_volunteers": {
           "heading": "Welcome Volunteers",
-          "message": "Welcome Thank you for volunteering.\n\nPlease download the B1.Church app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welcome Thank you for volunteering.\n\nPlease download the Huro app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "غير معروف"

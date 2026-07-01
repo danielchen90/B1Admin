@@ -415,7 +415,7 @@
       "ariaSend": "Send message",
       "errorAnswer": "I'm sorry, I couldn't find an answer.",
       "errorGeneric": "Something went wrong. Please try again.",
-      "intro": "Hi, I'm Bez! I can help you navigate B1 Admin. Try asking me:",
+      "intro": "Hi, I'm Bez! I can help you navigate Church Admin. Try asking me:",
       "placeholderInput": "Ask Bez a question...",
       "sampleCsv": "\"How do I import members from a CSV?\"",
       "sampleGiving": "\"How do I set up online giving?\"",
@@ -429,7 +429,7 @@
       "composing": "Composing answer...",
       "errorAnswer": "I'm sorry, I couldn't find an answer.",
       "errorGeneric": "Something went wrong. Please try again.",
-      "intro": "Ask any question about B1 Admin. For example:",
+      "intro": "Ask any question about Church Admin. For example:",
       "placeholderInput": "Ask a question...",
       "sampleCsv": "\"How do I import members from a CSV?\"",
       "sampleGiving": "\"How do I set up online giving?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Send message",
       "errorAnswer": "Even a superhero hits a wall sometimes. Try again!",
       "errorGeneric": "Something went wrong. But don't worry — I'll be back stronger!",
-      "intro": "Hey there, champ! I'm SuperBee — your B1 Admin powerhouse. Hit me with your toughest questions!",
+      "intro": "Hey there, champ! I'm SuperBee — your Church Admin powerhouse. Hit me with your toughest questions!",
       "placeholderInput": "Ask SuperBee anything...",
       "sampleCsv": "\"How do I import members from a CSV?\"",
       "sampleGiving": "\"How do I set up online giving?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Upload a profile photo so your team can recognize you.",
       "setAvatarTitle": "Set Your Avatar",
       "subtitle": "Let's get your church set up. Here are some things you'll likely want to do first.",
-      "title": "Welcome to B1.church!",
+      "title": "Welcome to Huro!",
       "uploadSermonDesc": "Share your sermons online so people can watch anytime.",
       "uploadSermonTitle": "Upload a Sermon",
       "yourChurch": "Your Church",
@@ -555,7 +555,7 @@
       "dash": "Dashboard"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Get the B1.church app on your phone to stay connected wherever you go.",
+      "downloadAppDesc": "Get the Huro app on your phone to stay connected wherever you go.",
       "downloadAppTitle": "Download the Mobile App",
       "fallbackChurchName": "your church",
       "findPeopleDesc": "Search the church directory to find and connect with others in the congregation.",
@@ -1198,7 +1198,7 @@
         "templates": "Templates",
         "welcome_volunteers": {
           "heading": "Welcome Volunteers",
-          "message": "Welcome Thank you for volunteering.\n\nPlease download the B1.Church app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welcome Thank you for volunteering.\n\nPlease download the Huro app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Unknown"

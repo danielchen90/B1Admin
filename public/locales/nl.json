@@ -415,7 +415,7 @@
       "ariaSend": "Bericht verzenden",
       "errorAnswer": "Sorry, ik kon geen antwoord vinden.",
       "errorGeneric": "Er is iets misgegaan. Probeer het opnieuw.",
-      "intro": "Hoi, ik ben Bez! Ik kan je helpen B1 Admin te navigeren. Probeer me te vragen:",
+      "intro": "Hoi, ik ben Bez! Ik kan je helpen Church Admin te navigeren. Probeer me te vragen:",
       "placeholderInput": "Stel Bez een vraag...",
       "sampleCsv": "\"Hoe importeer ik leden uit een CSV?\"",
       "sampleGiving": "\"Hoe stel ik online geven in?\"",
@@ -429,7 +429,7 @@
       "composing": "Antwoord opstellen...",
       "errorAnswer": "Sorry, ik kon geen antwoord vinden.",
       "errorGeneric": "Er is iets misgegaan. Probeer het opnieuw.",
-      "intro": "Stel een vraag over B1 Admin. Bijvoorbeeld:",
+      "intro": "Stel een vraag over Church Admin. Bijvoorbeeld:",
       "placeholderInput": "Stel een vraag...",
       "sampleCsv": "\"Hoe importeer ik leden uit een CSV?\"",
       "sampleGiving": "\"Hoe stel ik online geven in?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Bericht verzenden",
       "errorAnswer": "Zelfs een superheld loopt soms tegen een muur op. Probeer het opnieuw!",
       "errorGeneric": "Er is iets misgegaan. Maar geen zorgen, ik kom sterker terug!",
-      "intro": "Hé kampioen! Ik ben SuperBee — jouw B1 Admin krachtpatser. Stel me je moeilijkste vragen!",
+      "intro": "Hé kampioen! Ik ben SuperBee — jouw Church Admin krachtpatser. Stel me je moeilijkste vragen!",
       "placeholderInput": "Vraag SuperBee van alles...",
       "sampleCsv": "\"Hoe importeer ik leden uit een CSV?\"",
       "sampleGiving": "\"Hoe stel ik online geven in?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Upload een profielfoto zodat je team je kan herkennen.",
       "setAvatarTitle": "Stel je avatar in",
       "subtitle": "Laten we je kerk opzetten. Hier zijn enkele dingen die je waarschijnlijk eerst wilt doen.",
-      "title": "Welkom bij B1.church!",
+      "title": "Welkom bij Huro!",
       "uploadSermonDesc": "Deel je preken online zodat mensen ze altijd kunnen bekijken.",
       "uploadSermonTitle": "Upload een preek",
       "yourChurch": "Jouw kerk",
@@ -555,7 +555,7 @@
       "dash": "Dashboard"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Krijg de B1.church-app op je telefoon om verbonden te blijven waar je ook bent.",
+      "downloadAppDesc": "Krijg de Huro-app op je telefoon om verbonden te blijven waar je ook bent.",
       "downloadAppTitle": "Download de mobiele app",
       "fallbackChurchName": "je kerk",
       "findPeopleDesc": "Zoek in het kerkadresboek om anderen in de gemeente te vinden en mee te verbinden.",
@@ -1197,7 +1197,7 @@
         "templates": "Sjablonen",
         "welcome_volunteers": {
           "heading": "Welkom vrijwilligers",
-          "message": "Welkom en bedankt voor uw vrijwilligerswerk.\n\nDownload de B1.Church-app en log in om uw rooster te beheren. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welkom en bedankt voor uw vrijwilligerswerk.\n\nDownload de Huro-app en log in om uw rooster te beheren. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Onbekend"

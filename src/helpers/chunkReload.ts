@@ -12,7 +12,7 @@
 // failing after the reload) cannot loop — we only reload if we have not just reloaded, and
 // otherwise let the error surface to the existing error boundary.
 
-const GUARD_KEY = "b1admin:chunk-reload-at";
+const GUARD_KEY = "huro:chunk-reload-at";
 const RELOAD_COOLDOWN_MS = 10_000;
 
 const looksLikeChunkError = (message?: string | null): boolean =>

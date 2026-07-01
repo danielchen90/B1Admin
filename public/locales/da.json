@@ -415,7 +415,7 @@
       "ariaSend": "Send besked",
       "errorAnswer": "Beklager, jeg kunne ikke finde et svar.",
       "errorGeneric": "Noget gik galt. Prøv venligst igen.",
-      "intro": "Hej, jeg er Bez! Jeg kan hjælpe dig med at navigere i B1 Admin. Prøv at spørge mig:",
+      "intro": "Hej, jeg er Bez! Jeg kan hjælpe dig med at navigere i Church Admin. Prøv at spørge mig:",
       "placeholderInput": "Stil Bez et spørgsmål...",
       "sampleCsv": "\"Hvordan importerer jeg medlemmer fra en CSV?\"",
       "sampleGiving": "\"Hvordan opsætter jeg online giving?\"",
@@ -429,7 +429,7 @@
       "composing": "Sammensætter svar...",
       "errorAnswer": "Beklager, jeg kunne ikke finde et svar.",
       "errorGeneric": "Noget gik galt. Prøv venligst igen.",
-      "intro": "Stil ethvert spørgsmål om B1 Admin. For eksempel:",
+      "intro": "Stil ethvert spørgsmål om Church Admin. For eksempel:",
       "placeholderInput": "Stil et spørgsmål...",
       "sampleCsv": "\"Hvordan importerer jeg medlemmer fra en CSV?\"",
       "sampleGiving": "\"Hvordan opsætter jeg online giving?\"",
@@ -488,7 +488,7 @@
       "ariaSend": "Send besked",
       "errorAnswer": "Selv en superhelt rammer en mur en gang imellem. Prøv igen!",
       "errorGeneric": "Noget gik galt. Men bare rolig — jeg kommer stærkere tilbage!",
-      "intro": "Hejsa, mester! Jeg er SuperBee — din B1 Admin-kraftstation. Kast dine sværeste spørgsmål mod mig!",
+      "intro": "Hejsa, mester! Jeg er SuperBee — din Church Admin-kraftstation. Kast dine sværeste spørgsmål mod mig!",
       "placeholderInput": "Spørg SuperBee om hvad som helst...",
       "sampleCsv": "\"Hvordan importerer jeg medlemmer fra en CSV?\"",
       "sampleGiving": "\"Hvordan opsætter jeg online giving?\"",
@@ -545,7 +545,7 @@
       "setAvatarDesc": "Upload et profilbillede, så dit team kan genkende dig.",
       "setAvatarTitle": "Indstil din avatar",
       "subtitle": "Lad os få din kirke sat op. Her er nogle ting, du sikkert vil gøre først.",
-      "title": "Velkommen til B1.church!",
+      "title": "Velkommen til Huro!",
       "uploadSermonDesc": "Del dine prædikener online, så folk kan se dem når som helst.",
       "uploadSermonTitle": "Upload en prædiken",
       "yourChurch": "Din kirke",
@@ -555,7 +555,7 @@
       "dash": "Dashboard"
     },
     "memberWelcome": {
-      "downloadAppDesc": "Hent B1.church-appen på din telefon for at holde dig forbundet, uanset hvor du går.",
+      "downloadAppDesc": "Hent Huro-appen på din telefon for at holde dig forbundet, uanset hvor du går.",
       "downloadAppTitle": "Download mobilappen",
       "fallbackChurchName": "din kirke",
       "findPeopleDesc": "Søg i kirkens adressekartotek for at finde og oprette forbindelse til andre i menigheden.",
@@ -1197,7 +1197,7 @@
         "templates": "Skabeloner",
         "welcome_volunteers": {
           "heading": "Velkommen frivillige",
-          "message": "Velkommen og tak fordi du melder dig frivilligt.\n\nDownload venligst B1.Church-appen og log ind for at administrere din tidsplan. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Velkommen og tak fordi du melder dig frivilligt.\n\nDownload venligst Huro-appen og log ind for at administrere din tidsplan. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
         }
       },
       "unknown": "Ukendt"

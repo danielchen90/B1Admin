@@ -7,7 +7,7 @@ interface ThemeContextType {
   toggleTheme: () => void;
 }
 
-const THEME_STORAGE_KEY = "b1admin-theme-mode";
+const THEME_STORAGE_KEY = "huro-theme-mode";
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 

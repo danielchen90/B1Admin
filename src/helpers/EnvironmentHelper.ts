@@ -50,19 +50,19 @@ export class EnvironmentHelper {
   //NOTE: None of these values are secret.
   static initDemo = () => {
     EnvironmentHelper.initStaging();
-    EnvironmentHelper.B1Url = "https://{subdomain}.demosite.b1.church";
+    EnvironmentHelper.B1Url = "https://{subdomain}.demosite.huro.church";
   };
 
   //NOTE: None of these values are secret.
   static initStaging = () => {
     EnvironmentHelper.LessonsApi = "https://api.staging.lessons.church";
-    EnvironmentHelper.B1Url = "https://{subdomain}.staging.b1.church";
+    EnvironmentHelper.B1Url = "https://{subdomain}.staging.huro.church";
   };
 
   //NOTE: None of these values are secret.
   static initProd = () => {
     EnvironmentHelper.Common.GoogleAnalyticsTag = "G-47N4XQJQJ5";
     EnvironmentHelper.LessonsApi = "https://api.lessons.church";
-    EnvironmentHelper.B1Url = "https://{subdomain}.b1.church";
+    EnvironmentHelper.B1Url = "https://{subdomain}.huro.church";
   };
 }
