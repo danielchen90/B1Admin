@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { type PersonInterface } from "@churchapps/helpers";
 import { Loading, PageHeader } from "@churchapps/apphelper";
-import { Box, Grid, Stack, Button, Tooltip } from "@mui/material";
+import { Box, Grid, Stack, Button, CircularProgress, Snackbar, Alert } from "@mui/material";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { ExportButton } from "../../components/ui";
 import { useCampuses } from "../../hooks/useCampuses";
@@ -13,6 +13,7 @@ import { type ReportFilterSpec } from "./reportTypes";
 import { ReportFilterPanel } from "./ReportFilterPanel";
 import { ReportTable } from "./ReportTable";
 import { CSV_HEADERS, toCsvRows } from "./reportCsv";
+import { downloadReportPdf } from "./reportPdfApi";
 
 // The leadership-report route target (/ordinations/reports). 100% client-side — it fetches the
 // same campus-scoped GETs the 7.1 print station uses (ALL statuses, no active-only filter),
@@ -67,6 +68,23 @@ export const LeadershipReportPage: React.FC = () => {
 
   const loading = ordQuery.isLoading || (personIds.length > 0 && peopleQuery.isLoading);
 
+  // Download PDF — POST the CURRENT spec to the 08-01 server endpoint (RPT-06 scope is re-resolved
+  // server-side; spec.campusIds is only a display filter). Busy state disables the button; any
+  // error surfaces via the snackbar.
+  const [downloading, setDownloading] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
+  const handleDownloadPdf = async () => {
+    setDownloading(true);
+    setPdfError(null);
+    try {
+      await downloadReportPdf(spec);
+    } catch (e: any) {
+      setPdfError(e?.message ? String(e.message) : "Failed to download the report PDF.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <>
       <PageHeader title="Leadership Report" subtitle="All credential holders across your campuses — filter, group, and export." />
@@ -74,14 +92,17 @@ export const LeadershipReportPage: React.FC = () => {
       <Box sx={{ p: 3 }}>
         <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ mb: 2 }}>
           <ExportButton data={csvData} filename="leadership-report.csv" text="Export CSV" customHeaders={CSV_HEADERS} />
-          {/* PLACEHOLDER for Plan 08-03: wires this to the server PDF endpoint from 08-01. */}
-          <Tooltip title="Coming soon (Plan 08-03)">
-            <span>
-              <Button variant="outlined" size="small" startIcon={<PictureAsPdfIcon />} disabled>
-                Download PDF
-              </Button>
-            </span>
-          </Tooltip>
+          {/* Posts the CURRENT ReportFilterSpec to POST /reports/leadership/pdf (08-01) and
+              downloads the returned PDF bytes. Disabled while awaiting the render. */}
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={downloading ? <CircularProgress size={16} /> : <PictureAsPdfIcon />}
+            disabled={downloading}
+            onClick={handleDownloadPdf}
+          >
+            {downloading ? "Preparing…" : "Download PDF"}
+          </Button>
         </Stack>
 
         {loading ? (
@@ -97,6 +118,17 @@ export const LeadershipReportPage: React.FC = () => {
           </Grid>
         )}
       </Box>
+
+      <Snackbar
+        open={pdfError !== null}
+        autoHideDuration={8000}
+        onClose={() => setPdfError(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={() => setPdfError(null)} variant="filled">
+          {pdfError}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
