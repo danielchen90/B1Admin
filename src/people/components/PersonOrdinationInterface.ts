@@ -13,5 +13,7 @@ export interface PersonOrdinationInterface {
   grantedDate?: string | null;
   expirationDate?: string | null;
   notes?: string;
+  paid?: boolean;
+  exempt?: boolean;
   version?: number;
 }

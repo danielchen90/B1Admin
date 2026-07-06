@@ -13,6 +13,8 @@ export interface CsvRow {
   credentialNumber: string;
   grantedDate: string;
   expirationDate: string;
+  paid: string;
+  exempt: string;
 }
 
 // customHeaders in RPT-04 order — label is the CSV column header, key maps to CsvRow.
@@ -23,7 +25,9 @@ export const CSV_HEADERS: { label: string; key: string }[] = [
   { label: "Status", key: "status" },
   { label: "Credential #", key: "credentialNumber" },
   { label: "Granted", key: "grantedDate" },
-  { label: "Expires", key: "expirationDate" }
+  { label: "Expires", key: "expirationDate" },
+  { label: "Paid", key: "paid" },
+  { label: "Exempt", key: "exempt" }
 ];
 
 // Format a date-only "YYYY-MM-DD" as a LOCAL calendar day (Pitfall 4) then pretty-print.
@@ -42,7 +46,9 @@ function rowToCsv(row: ReportRow): CsvRow {
     status: row.status,
     credentialNumber: row.credentialNumber ?? "",
     grantedDate: formatDate(row.grantedDate),
-    expirationDate: formatDate(row.expirationDate)
+    expirationDate: formatDate(row.expirationDate),
+    paid: row.paid ? "Yes" : "No",
+    exempt: row.exempt ? "Yes" : "No"
   };
 }
 

@@ -12,6 +12,7 @@ import { type PersonInterface } from "@churchapps/helpers";
 export type ReportGroupBy = "none" | "location" | "type" | "status";
 export type SortBy = "lastName" | "firstName";
 export type SortDir = "asc" | "desc";
+export type PaymentFilter = "all" | "paid" | "unpaid" | "exempt";
 
 // The atomic per-credential row. The first block of fields are the SHARED GROUPING
 // CONTRACT fields (verbatim names dedupeKey/compareRows operate on); the rest are display
@@ -25,6 +26,10 @@ export interface ReportRow {
   lastName: string;
   displayName: string;
   // Display extras (not referenced inside the SHARED GROUPING CONTRACT block).
+  id: string; // personOrdination id (payment toggle + grant target)
+  version: number; // ORD-07 optimistic-concurrency version
+  paid: boolean; // payment column checkbox
+  exempt: boolean; // exemption column checkbox
   person: PersonInterface; // full person for PersonAvatar + name link (GET /people/ids)
   campusName: string;
   callingName: string;
@@ -59,4 +64,5 @@ export interface ReportFilterSpec {
   groupBy2: ReportGroupBy; // secondary (nested); "none" = single level
   sortBy: SortBy;
   sortDir: SortDir;
+  paymentStatus: PaymentFilter; // all | paid | unpaid | exempt (default "all")
 }

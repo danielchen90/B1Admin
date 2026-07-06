@@ -97,6 +97,10 @@ export function composeReport(
       firstName: first,
       lastName: last,
       displayName,
+      id: o.id ?? "",
+      version: o.version ?? 0,
+      paid: !!o.paid,
+      exempt: !!o.exempt,
       person,
       campusName: campusById.get(campusId)?.name ?? "Unassigned",
       callingName: type?.name ?? "Unknown",
@@ -178,6 +182,10 @@ export function filterReport(rows: ReportRow[], spec: ReportFilterSpec): ReportR
       const hay = `${row.firstName} ${row.lastName} ${row.credentialNumber ?? ""}`.toLowerCase();
       if (!hay.includes(search)) return false;
     }
+    const pay = spec.paymentStatus ?? "all";
+    if (pay === "paid" && !row.paid) return false;
+    if (pay === "unpaid" && (row.paid || row.exempt)) return false;
+    if (pay === "exempt" && !row.exempt) return false;
     return true;
   });
 }
