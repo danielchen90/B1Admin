@@ -66,6 +66,7 @@ const Mobile = React.lazy(() => import("./mobile").then((module) => ({ default: 
 const EmailTemplatesPage = React.lazy(() => import("./settings/EmailTemplatesPage").then((module) => ({ default: module.EmailTemplatesPage })));
 const OrdinationsHubPage = React.lazy(() => import("./ordinations/OrdinationsHubPage").then((m) => ({ default: m.OrdinationsHubPage })));
 const TemplateEditor = React.lazy(() => import("./licenseTemplates/editor/TemplateEditor").then((m) => ({ default: m.TemplateEditor })));
+const PrintStationPage = React.lazy(() => import("./ordinations/printStation/PrintStationPage").then((m) => ({ default: m.PrintStationPage })));
 
 // Suspense fallback shown while a route's lazy chunk loads.
 const LoadingFallback: React.FC = () => <PageSkeleton />;
@@ -117,6 +118,8 @@ export const Authenticated: React.FC = () => {
           <Route path="/people/:id" element={<PersonPage />} />
           <Route path="/people" element={<PeoplePage />} />
           <Route path="/ordinations" element={<OrdinationsHubPage />} />
+          <Route path="/ordinations/print-station/:batchId" element={<PrintStationPage />} />
+          <Route path="/ordinations/print-station" element={<PrintStationPage />} />
           <Route path="/license-templates/:id" element={<TemplateEditor />} />
           <Route path="/groups/pending" element={<PendingRequestsPage />} />
           <Route path="/groups/health" element={<GroupsHealthPage />} />

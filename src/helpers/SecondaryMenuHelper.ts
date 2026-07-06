@@ -68,6 +68,7 @@ export class SecondaryMenuHelper {
     const menuItems: MenuItem[] = [];
     const label: string = "Ordinations";
     menuItems.push({ url: "/ordinations", label: "Ordinations", icon: "workspace_premium" });
+    if (canWriteOrdinations()) menuItems.push({ url: "/ordinations/print-station", label: "Print Station", icon: "print" });
     if (canManageOrdinationTypes()) menuItems.push({ url: "/settings/ordination-types", label: "Ordination Types", icon: "workspace_premium" });
     return { menuItems, label };
   };
