@@ -4,7 +4,7 @@ import {
   ToggleButton, ToggleButtonGroup, TextField, Select, MenuItem, FormControl, InputLabel, InputAdornment, IconButton
 } from "@mui/material";
 import { Search as SearchIcon, Clear as ClearIcon } from "@mui/icons-material";
-import { type ReportFilterSpec, type ReportGroupBy, type SortBy, type SortDir } from "./reportTypes";
+import { type ReportFilterSpec, type ReportGroupBy, type SortBy, type SortDir, type PaymentFilter } from "./reportTypes";
 import { STATUS_ORDER } from "./reportHelpers";
 import { type CampusInterface } from "../../settings/components/CampusInterface";
 import { type OrdinationTypeInterface } from "../../settings/components/OrdinationTypeInterface";
@@ -26,6 +26,13 @@ const GROUP_BY_OPTIONS: { value: ReportGroupBy; label: string }[] = [
   { value: "location", label: "Location" },
   { value: "type", label: "Ordination Type" },
   { value: "status", label: "Status" }
+];
+
+const PAYMENT_OPTIONS: { value: PaymentFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "paid", label: "Paid" },
+  { value: "unpaid", label: "Unpaid" },
+  { value: "exempt", label: "Exempt" }
 ];
 
 const titleCase = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -72,6 +79,8 @@ export const ReportFilterPanel: React.FC<ReportFilterPanelProps> = ({ accessible
     const n = parseInt(trimmed, 10);
     onChange({ ...spec, expiringWithinDays: isNaN(n) || n < 0 ? null : n });
   };
+
+  const setPaymentStatus = (value: PaymentFilter) => onChange({ ...spec, paymentStatus: value });
 
   const setGroupBy1 = (value: ReportGroupBy) => onChange({ ...spec, groupBy1: value });
   const setGroupBy2 = (value: ReportGroupBy) => onChange({ ...spec, groupBy2: value });
@@ -182,6 +191,27 @@ export const ReportFilterPanel: React.FC<ReportFilterPanelProps> = ({ accessible
               />
             ))}
           </FormGroup>
+        </Box>
+
+        <Divider sx={{ borderColor: "var(--border-light)" }} />
+
+        {/* PAYMENT — single-choice filter (all/paid/unpaid/exempt), default All. */}
+        <Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            Payment
+          </Typography>
+          <FormControl size="small" fullWidth disabled={disabled}>
+            <InputLabel id="report-payment-label">Payment</InputLabel>
+            <Select
+              labelId="report-payment-label"
+              label="Payment"
+              value={spec.paymentStatus}
+              onChange={(e) => setPaymentStatus(e.target.value as PaymentFilter)}>
+              {PAYMENT_OPTIONS.map((o) => (
+                <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
 
         <Divider sx={{ borderColor: "var(--border-light)" }} />
