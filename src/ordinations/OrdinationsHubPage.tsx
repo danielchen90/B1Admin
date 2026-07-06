@@ -4,6 +4,7 @@ import { PageHeader, PersonHelper } from "@churchapps/apphelper";
 import type { PersonInterface } from "@churchapps/helpers";
 import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import { PersonAdd } from "../components/PersonAdd";
 import { OrdinationIssueDialog } from "../people/components/OrdinationIssueDialog";
 import { canManageOrdinationTypes, canWriteOrdinations } from "../helpers/OrdinationHelper";
@@ -38,6 +39,24 @@ export const OrdinationsHubPage: React.FC = () => {
       <PageHeader title="Ordination & Leadership" subtitle="Issue and manage ministerial credentials across your campuses." />
       <Box sx={{ p: 3 }}>
         <Stack spacing={3}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Leadership Reports</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                View, group, filter, and export a roster of every credential holder across your campuses.
+              </Typography>
+              <Button
+                variant="outlined"
+                component={RouterLink}
+                to="/ordinations/reports"
+                startIcon={<AssessmentIcon />}
+                data-testid="leadership-reports-link"
+              >
+                Open leadership reports
+              </Button>
+            </CardContent>
+          </Card>
+
           {canManageTypes && (
             <Card>
               <CardContent>
