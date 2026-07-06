@@ -1,6 +1,6 @@
 import React from "react";
-import { Card, Box, Stack, Typography, FormGroup, FormControlLabel, Checkbox, Divider, Button } from "@mui/material";
-import { type RosterFilterSpec } from "./rosterTypes";
+import { Card, Box, Stack, Typography, FormGroup, FormControlLabel, Checkbox, Divider, Button, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { type RosterFilterSpec, type GroupBy, type SortBy } from "./rosterTypes";
 import { type CampusInterface } from "../../settings/components/CampusInterface";
 import { type OrdinationTypeInterface } from "../../settings/components/OrdinationTypeInterface";
 
@@ -52,6 +52,16 @@ export const RosterFilterPanel: React.FC<RosterFilterPanelProps> = ({ accessible
   // NOTE: an EMPTY ordinationTypeIds means "all callings, no filter" per Plan 01 filterRoster
   // semantics — so Clear intentionally shows the full population, not an empty roster.
   const clearCallings = () => onChange({ ...spec, ordinationTypeIds: [] });
+
+  // Group-by and calling/location filters are fully INDEPENDENT — any combination is valid
+  // (e.g. filter to Deacons + Elders while grouping by location). Guard against the null a
+  // ToggleButtonGroup emits on deselect so the control always reflects a real spec value.
+  const setGroupBy = (value: GroupBy | null) => {
+    if (value) onChange({ ...spec, groupBy: value });
+  };
+  const setSortBy = (value: SortBy | null) => {
+    if (value) onChange({ ...spec, sortBy: value });
+  };
 
   return (
     <Card sx={{ p: 2 }}>
@@ -106,6 +116,43 @@ export const RosterFilterPanel: React.FC<RosterFilterPanelProps> = ({ accessible
               </FormGroup>
             </>
           )}
+        </Box>
+
+        <Divider sx={{ borderColor: "var(--border-light)" }} />
+
+        {/* GROUP BY — reflects/reports spec.groupBy only; Plan 04 sets the auto default. */}
+        <Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+            Group by
+          </Typography>
+          <ToggleButtonGroup exclusive size="small" value={spec.groupBy} onChange={(_e, v) => setGroupBy(v as GroupBy | null)} disabled={disabled}>
+            <ToggleButton value="none" sx={{ textTransform: "none" }}>
+              None
+            </ToggleButton>
+            <ToggleButton value="location" sx={{ textTransform: "none" }}>
+              Location
+            </ToggleButton>
+            <ToggleButton value="calling" sx={{ textTransform: "none" }}>
+              Calling
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+
+        <Divider sx={{ borderColor: "var(--border-light)" }} />
+
+        {/* SORT BY — sort within groups; direction stays A–Z ("asc"), so no dir control. */}
+        <Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+            Sort within groups
+          </Typography>
+          <ToggleButtonGroup exclusive size="small" value={spec.sortBy} onChange={(_e, v) => setSortBy(v as SortBy | null)} disabled={disabled}>
+            <ToggleButton value="lastName" sx={{ textTransform: "none" }}>
+              Last name
+            </ToggleButton>
+            <ToggleButton value="firstName" sx={{ textTransform: "none" }}>
+              First name
+            </ToggleButton>
+          </ToggleButtonGroup>
         </Box>
       </Stack>
     </Card>
