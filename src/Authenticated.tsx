@@ -118,7 +118,8 @@ export const Authenticated: React.FC = () => {
           <Route path="/people/demographics" element={<DemographicsPage />} />
           <Route path="/people/:id" element={<PersonPage />} />
           <Route path="/people" element={<PeoplePage />} />
-          <Route path="/ordinations" element={<OrdinationsHubPage />} />
+          <Route path="/ordinations" element={<LeadershipReportPage />} />
+          <Route path="/ordinations/hub" element={<OrdinationsHubPage />} />
           <Route path="/ordinations/reports" element={<LeadershipReportPage />} />
           <Route path="/ordinations/print-station/:batchId" element={<PrintStationPage />} />
           <Route path="/ordinations/print-station" element={<PrintStationPage />} />

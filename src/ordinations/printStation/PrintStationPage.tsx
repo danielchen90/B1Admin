@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import { PageHeader } from "@churchapps/apphelper";
 import {
   Alert, Box, Button, Card, Chip, CircularProgress, Dialog, DialogActions,
@@ -18,7 +18,6 @@ import * as pdfjs from "pdfjs-dist";
 import PdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import * as printBatchApi from "./printBatchApi";
 import { type BatchCard, type SkippedPerson } from "./printBatchApi";
-import { BatchSelectionPanel } from "./BatchSelectionPanel";
 import { canWriteOrdinations, parseApiError } from "../../helpers/OrdinationHelper";
 
 // The pdfjs worker must be pointed at a real URL before getDocument() runs, else it falls
@@ -31,9 +30,9 @@ pdfjs.GlobalWorkerOptions.workerSrc = PdfWorkerUrl;
 // THUMBNAILS GRID pre-print preview (one rasterized card per BatchCard, each with a status
 // chip + person/credential/campus label), a "N skipped: reason" panel, a Download/Print
 // that opens the OS print dialog and bulk-marks the batch printed with a confirm-to-void
-// prompt, and per-card reprint/void. With no :batchId it shows the recent-batches picker +
-// the BatchSelectionPanel "build a batch" entry — both paths resolve to the SAME persisted
-// batch.
+// prompt, and per-card reprint/void. With no :batchId it shows the recent-batches picker to
+// reopen a prior batch — new batches are started from the Ordinations report's Print Licenses
+// action (selection lives on the report, not a duplicate roster here).
 
 // The preset void reasons (attributable + audited). "Other" reveals a free-text field.
 const VOID_REASONS = ["Printer jam", "Misprint/alignment", "Wrong data", "Damaged", "Other"] as const;
@@ -292,14 +291,20 @@ export const PrintStationPage: React.FC = () => {
     </FormControl>
   );
 
-  // --- No batch selected: the "build or load a batch" entry -----------------------------
+  // --- No batch selected: reopen a recent batch, or start one from the Ordinations report.
+  // Selection now lives on the report (Print Licenses), so there's no roster picker here.
   if (!batchId) {
     return (
       <>
-        <Box sx={{ px: 3, pt: 3 }}>
-          <Stack direction="row" justifyContent="flex-end">{recentPicker}</Stack>
+        <PageHeader title="Print Station" subtitle="Reopen a recent batch, or start a new one from the Ordinations report." />
+        <Box sx={{ p: 3 }}>
+          <Stack spacing={2}>
+            <Stack direction="row" justifyContent="flex-end">{recentPicker}</Stack>
+            <Alert severity="info" icon={<PrintIcon />}>
+              To print licenses, open the <RouterLink to="/ordinations">Ordinations report</RouterLink>, filter to the people you want, then click <strong>Print Licenses</strong>. Reopen any recent batch above.
+            </Alert>
+          </Stack>
         </Box>
-        <BatchSelectionPanel />
       </>
     );
   }

@@ -67,7 +67,8 @@ export class SecondaryMenuHelper {
   static getOrdinationsMenu = (path: string) => {
     const menuItems: MenuItem[] = [];
     const label: string = "Ordinations";
-    menuItems.push({ url: "/ordinations", label: "Ordinations", icon: "workspace_premium" });
+    // The report is the primary Ordinations landing; type management + print station are sub-items.
+    menuItems.push({ url: "/ordinations", label: "Report", icon: "assessment" });
     if (canWriteOrdinations()) menuItems.push({ url: "/ordinations/print-station", label: "Print Station", icon: "print" });
     if (canManageOrdinationTypes()) menuItems.push({ url: "/settings/ordination-types", label: "Ordination Types", icon: "workspace_premium" });
     return { menuItems, label };

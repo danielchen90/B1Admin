@@ -17,6 +17,11 @@ import { CSV_HEADERS, toCsvRows } from "./reportCsv";
 import { downloadReportPdf } from "./reportPdfApi";
 import { GrantLicensesDialog } from "./GrantLicensesDialog";
 import { grantLicenses, updatePayment } from "./reportPaymentApi";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import PrintIcon from "@mui/icons-material/Print";
+import SettingsIcon from "@mui/icons-material/Settings";
+import { canManageOrdinationTypes, canWriteOrdinations } from "../../helpers/OrdinationHelper";
+import { createBatch } from "../printStation/printBatchApi";
 
 // Grant-license default dates, computed in LOCAL time to avoid a UTC off-by-one (Pitfall 4):
 // granted = the Friday of NEXT week; expiration = one year later minus a day.
@@ -78,6 +83,14 @@ export const LeadershipReportPage: React.FC = () => {
 
   // Distinct credential ids passing ALL filters — the bulk-grant target set.
   const visibleIds = useMemo(() => Array.from(new Set(filtered.map((r) => r.id).filter(Boolean))), [filtered]);
+  // Distinct personIds passing ALL filters — the print-batch target (the server expands each
+  // person into one card per active credential). Print Licenses jumps to the batch view.
+  const visiblePersonIds = useMemo(() => Array.from(new Set(filtered.map((r) => r.personId).filter(Boolean))), [filtered]);
+
+  const navigate = useNavigate();
+  const canWrite = canWriteOrdinations();
+  const canManageTypes = canManageOrdinationTypes();
+  const [printing, setPrinting] = useState(false);
 
   const loading = ordQuery.isLoading || (personIds.length > 0 && peopleQuery.isLoading);
 
@@ -126,23 +139,59 @@ export const LeadershipReportPage: React.FC = () => {
     setGrantOpen(false);
   };
 
+  // Print Licenses — build a print batch from the currently-visible people and jump to the
+  // batch view (progress → download/print → reprint/void). Whatever is filtered on screen is
+  // exactly what's sent; the server skips people with no active credential / template / photo.
+  const handlePrintLicenses = async () => {
+    if (visiblePersonIds.length === 0 || printing) return;
+    setPrinting(true);
+    setPdfError(null);
+    try {
+      const result = await createBatch({ personIds: visiblePersonIds, filterJson: JSON.stringify(spec) });
+      navigate("/ordinations/print-station/" + result.batchId);
+    } catch (e: any) {
+      setPdfError(e?.message ? String(e.message) : "Failed to start the print batch.");
+      setPrinting(false);
+    }
+  };
+
   return (
     <>
       <PageHeader title="Leadership Report" subtitle="All credential holders across your campuses — filter, group, and export." />
 
       <Box sx={{ p: 3 }}>
-        <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ mb: 2 }}>
+        <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ mb: 2 }} flexWrap="wrap" rowGap={1}>
+          {/* Demoted ordination-type management — a header entry (also a left-nav sub-item). */}
+          {canManageTypes && (
+            <Button variant="text" size="small" startIcon={<SettingsIcon />} component={RouterLink} to="/settings/ordination-types">
+              Manage Types
+            </Button>
+          )}
+          {/* Batch-print the currently-visible people → jump to the print-station batch view. */}
+          {canWrite && (
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={printing ? <CircularProgress size={16} /> : <PrintIcon />}
+              disabled={printing || visiblePersonIds.length === 0}
+              onClick={handlePrintLicenses}
+            >
+              {printing ? "Preparing…" : "Print Licenses"}
+            </Button>
+          )}
           <ExportButton data={csvData} filename="leadership-report.csv" text="Export CSV" customHeaders={CSV_HEADERS} />
           {/* Bulk-grants an active license to every currently-visible credential. */}
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<WorkspacePremiumIcon />}
-            disabled={visibleIds.length === 0}
-            onClick={() => setGrantOpen(true)}
-          >
-            Grant Licenses
-          </Button>
+          {canWrite && (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<WorkspacePremiumIcon />}
+              disabled={visibleIds.length === 0}
+              onClick={() => setGrantOpen(true)}
+            >
+              Grant Licenses
+            </Button>
+          )}
           {/* Posts the CURRENT ReportFilterSpec to POST /reports/leadership/pdf (08-01) and
               downloads the returned PDF bytes. Disabled while awaiting the render. */}
           <Button
