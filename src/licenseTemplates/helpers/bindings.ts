@@ -27,6 +27,7 @@ export const BINDING_CATALOG: BindingDef[] = [
   { key: "ordinationType.code", label: "Ordination Type — Code" }, // extension
   // --- campus ---
   { key: "campus.name", label: "Campus — Name" }, // required
+  { key: "campus.address", label: "Campus — Full Address" }, // composite (single field, wraps gracefully)
   { key: "campus.city", label: "Campus — City" }, // extension
   { key: "campus.state", label: "Campus — State" }, // extension
   // --- credential / ordination ---
@@ -49,6 +50,8 @@ export const BINDING_REAL_PATHS: Record<string, string> = {
   "ordinationType.name": "ordinationType.name",
   "ordinationType.code": "ordinationType.code",
   "campus.name": "campus.name",
+  // campus.address is COMPUTED via formatCampusAddress(campus), not a flat path — Phase 6
+  // builds it from the campus record's address1/address2/city/state/zip, same as the editor.
   "campus.city": "campus.city",
   "campus.state": "campus.state",
   "credentialNumber": "ordination.credentialNumber",
@@ -56,6 +59,25 @@ export const BINDING_REAL_PATHS: Record<string, string> = {
   "ordination.expirationDate": "ordination.expirationDate",
   "ordination.status": "ordination.status",
   "church.name": "church.name",
+};
+
+// Format a campus's address parts into ONE gracefully-wrapping field: street line(s)
+// then "City, State ZIP" on the next line. Empty parts are dropped so short and long
+// addresses both render cleanly in a single text element (which wraps on \n / width).
+// Single source of truth — the editor's real-person preview AND Phase 6's renderer
+// build the `campus.address` binding value through this helper.
+export interface CampusAddressParts {
+  address1?: string;
+  address2?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+}
+export const formatCampusAddress = (c?: CampusAddressParts): string => {
+  if (!c) return "";
+  const street = [c.address1, c.address2].filter(Boolean).join(", ");
+  const cityLine = [[c.city, c.state].filter(Boolean).join(", "), c.zip].filter(Boolean).join(" ");
+  return [street, cityLine].filter(Boolean).join("\n");
 };
 
 // Sample values for the default live preview (flat keys matching BINDING_CATALOG).
@@ -68,6 +90,7 @@ export const SAMPLE_BINDINGS: Record<string, string> = {
   "ordinationType.name": "Pastor",
   "ordinationType.code": "PAS",
   "campus.name": "Main Campus",
+  "campus.address": formatCampusAddress({ address1: "123 Main St", city: "Springfield", state: "IL", zip: "62704" }),
   "campus.city": "Springfield",
   "campus.state": "IL",
   "credentialNumber": "ORD-0001",

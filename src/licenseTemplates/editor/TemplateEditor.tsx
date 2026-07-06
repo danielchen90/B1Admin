@@ -34,10 +34,11 @@ import { ApiHelper, PageHeader, PersonHelper, UniqueIdHelper, UserHelper } from 
 import type { PersonInterface } from "@churchapps/helpers";
 import type { LayoutElement, LicenseTemplateInterface, LicenseTemplateLayout } from "../LicenseTemplateInterface";
 import { newLayout } from "../helpers/coords";
-import { BINDING_CATALOG, SAMPLE_BINDINGS } from "../helpers/bindings";
+import { BINDING_CATALOG, SAMPLE_BINDINGS, formatCampusAddress } from "../helpers/bindings";
 import { loadEditorFonts } from "../helpers/fonts";
 import { useOrdinationTypes } from "../../hooks/useOrdinationTypes";
 import { useCampuses } from "../../hooks/useCampuses";
+import type { CampusInterface } from "../../settings/components/CampusInterface";
 import { parseApiError } from "../../helpers/OrdinationHelper";
 import { PersonAdd } from "../../components/PersonAdd";
 import type { PersonOrdinationInterface } from "../../people/components/PersonOrdinationInterface";
@@ -62,7 +63,7 @@ const buildRealPreview = (
   ord: PersonOrdinationInterface,
   typeName?: string,
   typeCode?: string,
-  campusName?: string
+  campus?: CampusInterface
 ): Record<string, string> => ({
   "person.fullName": [person.name?.first, person.name?.last].filter(Boolean).join(" "),
   "person.lastName": person.name?.last || "",
@@ -73,7 +74,10 @@ const buildRealPreview = (
   "person.photoUrl": PersonHelper.getPhotoUrl(person) || "",
   "ordinationType.name": typeName || "",
   "ordinationType.code": typeCode || "",
-  "campus.name": campusName || "",
+  "campus.name": campus?.name || "",
+  "campus.address": formatCampusAddress(campus),
+  "campus.city": campus?.city || "",
+  "campus.state": campus?.state || "",
   credentialNumber: ord.credentialNumber || "",
   "ordination.grantedDate": ord.grantedDate || "",
   "ordination.expirationDate": ord.expirationDate || "",
@@ -264,7 +268,7 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
       }
       const type = ord.ordinationTypeId ? ordinationTypeMap[ord.ordinationTypeId] : undefined;
       const campus = ord.campusId ? campusMap[ord.campusId] : undefined;
-      setPreviewData(buildRealPreview(person, ord, type?.name, type?.code, campus?.name));
+      setPreviewData(buildRealPreview(person, ord, type?.name, type?.code, campus));
     } catch (e: any) {
       setPreviewData(SAMPLE_BINDINGS);
       setError(e?.message || "Could not load that person's data — showing sample data.");
