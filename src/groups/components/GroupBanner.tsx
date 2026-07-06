@@ -18,6 +18,7 @@ import { SendTextDialog } from "./SendTextDialog";
 import { SendEmailDialog } from "./SendEmailDialog";
 import { SendNotificationDialog } from "./SendNotificationDialog";
 import { AppIconButton } from "../../components/ui/AppIconButton";
+import { useCampuses } from "../../hooks/useCampuses";
 
 interface Props {
   group: GroupInterface;
@@ -54,6 +55,10 @@ export const GroupBanner = memo((props: Props) => {
   }, [group?.id]);
 
   const isStandard = useMemo(() => group?.tags?.indexOf("standard") > -1, [group?.tags]);
+
+  // Resolve the group's campus (the "location") to its name for the header subtitle.
+  const campuses = useCampuses();
+  const campusName = useMemo(() => campuses.find((c) => c.id === group?.campusId)?.name || "", [campuses, group?.campusId]);
 
   const groupType = useMemo(() => {
     if (!group?.tags) return null;
@@ -241,6 +246,21 @@ export const GroupBanner = memo((props: Props) => {
                 )}
               </Stack>
             </Stack>
+
+            {/* Subtitle: Campus / location name */}
+            {campusName && (
+              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: -0.5 }}>
+                <LocationIcon sx={{ color: "rgba(255,255,255,0.85)", fontSize: 18 }} />
+                <Typography
+                  sx={{
+                    color: "rgba(255,255,255,0.85)",
+                    fontSize: { xs: "0.95rem", md: "1.05rem" },
+                    fontWeight: 500
+                  }}>
+                  {campusName}
+                </Typography>
+              </Stack>
+            )}
 
             {/* Row 2: Three Columns */}
             <Stack direction={{ xs: "column", md: "row" }} spacing={{ xs: 1.5, md: 2 }} sx={{ width: "100%" }}>
