@@ -35,9 +35,7 @@ export const OrdinationStatusDialog: React.FC<Props> = (props) => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState("");
 
-  const { register, handleSubmit, reset, formState } = useForm<StatusForm>({
-    defaultValues: { status: "", credentialNumber: "", grantedDate: "", expirationDate: "", notes: "" }
-  });
+  const { register, handleSubmit, reset, formState } = useForm<StatusForm>({ defaultValues: { status: "", credentialNumber: "", grantedDate: "", expirationDate: "", notes: "" } });
   const e = formState.errors as any;
 
   React.useEffect(() => {

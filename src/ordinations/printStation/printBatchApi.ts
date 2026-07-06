@@ -118,9 +118,7 @@ export const listRecentBatches = (): Promise<PrintBatch[]> => ApiHelper.get("/pr
 // for the thumbnails grid.
 export const downloadBatchPdf = async (batchId: string): Promise<PdfResult> => {
   const cfg = membershipConfig();
-  const res = await fetch(cfg.url + "/printBatches/" + batchId + "/pdf", {
-    headers: { Authorization: "Bearer " + cfg.jwt }
-  });
+  const res = await fetch(cfg.url + "/printBatches/" + batchId + "/pdf", { headers: { Authorization: "Bearer " + cfg.jwt } });
   if (!res.ok) return throwForResponse(res);
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);

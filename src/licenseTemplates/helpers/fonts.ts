@@ -11,7 +11,7 @@
 // is a Phase 6 packaging concern documented here.
 
 // webfontloader has no bundled @types; the JS module is already installed.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+
 import WebFont from "webfontloader";
 
 export interface FontDef {
@@ -24,7 +24,7 @@ export const FONT_WHITELIST: FontDef[] = [
   { key: "sans", label: "Sans (Noto Sans)", cssFamily: "'Noto Sans', sans-serif" },
   { key: "serif", label: "Serif (Noto Serif)", cssFamily: "'Noto Serif', serif" },
   { key: "condensed", label: "Condensed (Archivo Narrow)", cssFamily: "'Archivo Narrow', sans-serif" },
-  { key: "mono", label: "Mono (Noto Sans Mono)", cssFamily: "'Noto Sans Mono', monospace" },
+  { key: "mono", label: "Mono (Noto Sans Mono)", cssFamily: "'Noto Sans Mono', monospace" }
 ];
 
 // Map a whitelist key to its CSS family (fallback to sans for an unknown key).
@@ -39,8 +39,8 @@ export const loadEditorFonts = (): void => {
         "Noto Sans:400,700",
         "Noto Serif:400,700",
         "Archivo Narrow:400,700",
-        "Noto Sans Mono:400,700",
-      ],
-    },
+        "Noto Sans Mono:400,700"
+      ]
+    }
   });
 };

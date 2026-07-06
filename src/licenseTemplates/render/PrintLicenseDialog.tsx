@@ -3,7 +3,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { UserHelper, type PersonInterface } from "@churchapps/apphelper";
 import {
   Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent,
-  DialogTitle, Divider, FormControl, InputLabel, Link, MenuItem, Select, Stack, Typography
+  DialogTitle, FormControl, InputLabel, Link, MenuItem, Select, Stack, Typography
 } from "@mui/material";
 import { Download as DownloadIcon, Print as PrintIcon, Warning as WarningIcon } from "@mui/icons-material";
 import { parseApiError } from "../../helpers/OrdinationHelper";
@@ -98,7 +98,7 @@ export const PrintLicenseDialog: React.FC<Props> = (props) => {
         const code = parseApiError(e);
         setRenderError(code === "unauthorized" ? "You do not have permission to print this credential."
           : code === "not_found" ? "The credential or template could not be found."
-          : (e?.message || "Failed to render the license."));
+            : (e?.message || "Failed to render the license."));
       })
       .finally(() => { if (active) setRendering(false); });
     return () => { active = false; };

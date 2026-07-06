@@ -36,7 +36,7 @@ export const BINDING_CATALOG: BindingDef[] = [
   { key: "ordination.expirationDate", label: "Expiration Date", isDate: true }, // required
   { key: "ordination.status", label: "Status" }, // required
   // --- church ---
-  { key: "church.name", label: "Church — Name" }, // extension (issuing org line)
+  { key: "church.name", label: "Church — Name" } // extension (issuing org line)
 ];
 
 // Friendly binding key -> the real nested path on a fetched record (05-06 / Phase 6
@@ -58,7 +58,7 @@ export const BINDING_REAL_PATHS: Record<string, string> = {
   "ordination.grantedDate": "ordination.grantedDate",
   "ordination.expirationDate": "ordination.expirationDate",
   "ordination.status": "ordination.status",
-  "church.name": "church.name",
+  "church.name": "church.name"
 };
 
 // Format a campus's address parts into ONE gracefully-wrapping field: street line(s)
@@ -97,7 +97,7 @@ export const SAMPLE_BINDINGS: Record<string, string> = {
   "ordination.grantedDate": "2024-01-15",
   "ordination.expirationDate": "2027-01-15",
   "ordination.status": "active",
-  "church.name": "Grace Church",
+  "church.name": "Grace Church"
 };
 
 const isDateKey = (key: string): boolean =>

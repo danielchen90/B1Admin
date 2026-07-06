@@ -25,7 +25,7 @@ export const DEFAULT_SAFE_MM = 3;
 // Full canvas size (trim + bleed on every edge), origin = bleed-box top-left.
 export const canvasSize = (bleedMm: number) => ({
   widthMm: CR80.trimWidthMm + 2 * bleedMm,
-  heightMm: CR80.trimHeightMm + 2 * bleedMm,
+  heightMm: CR80.trimHeightMm + 2 * bleedMm
 });
 
 // Factory: a brand-new template opens with valid geometry (schemaVersion 1,
@@ -40,8 +40,8 @@ export const newLayout = (): LicenseTemplateLayout => {
       bleedMm: DEFAULT_BLEED_MM,
       safeMm: DEFAULT_SAFE_MM,
       widthMm,
-      heightMm,
+      heightMm
     },
-    elements: [],
+    elements: []
   };
 };

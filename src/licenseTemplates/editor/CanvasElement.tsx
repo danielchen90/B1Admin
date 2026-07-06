@@ -36,7 +36,7 @@ const textCss = (font: TextStyle): React.CSSProperties => ({
   width: "100%",
   height: "100%",
   overflow: "hidden",
-  whiteSpace: "pre-wrap",
+  whiteSpace: "pre-wrap"
 });
 
 const placeholderCss = (color: string): React.CSSProperties => ({
@@ -48,7 +48,7 @@ const placeholderCss = (color: string): React.CSSProperties => ({
   border: `1px dashed ${color}`,
   color,
   fontSize: 11,
-  boxSizing: "border-box",
+  boxSizing: "border-box"
 });
 
 const renderByType = (el: LayoutElement, previewData: Record<string, string>): React.ReactNode => {
@@ -108,7 +108,7 @@ export const CanvasElement: React.FC<Props> = ({ el, zoom, selected, previewData
           wMm: pxToMm(ref.offsetWidth),
           hMm: pxToMm(ref.offsetHeight),
           xMm: pxToMm(pos.x),
-          yMm: pxToMm(pos.y),
+          yMm: pxToMm(pos.y)
         })
       }
     >

@@ -27,7 +27,7 @@ const croppedAvatarStyle = (photoUrl: string | undefined, crop: PhotoCropTransfo
     backgroundImage: `url(${photoUrl})`,
     backgroundRepeat: "no-repeat",
     backgroundSize: `${(1 / cw) * 100}% ${(1 / ch) * 100}%`,
-    backgroundPosition: `${posX}% ${posY}%`,
+    backgroundPosition: `${posX}% ${posY}%`
   };
 };
 

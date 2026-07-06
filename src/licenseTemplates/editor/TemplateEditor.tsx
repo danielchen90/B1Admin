@@ -82,7 +82,7 @@ const buildRealPreview = (
   "ordination.grantedDate": ord.grantedDate || "",
   "ordination.expirationDate": ord.expirationDate || "",
   "ordination.status": ord.status || "",
-  "church.name": (UserHelper.currentUserChurch as any)?.church?.name || "",
+  "church.name": (UserHelper.currentUserChurch as any)?.church?.name || ""
 });
 
 export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
@@ -143,7 +143,7 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
   useEffect(() => {
     if (!id || id === "new") return;
     loadRow(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [id]);
 
   // ----- save (TPL-03 + TPL-04) ------------------------------------------------------
@@ -160,7 +160,7 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
       active,
       currentVersion,
       version,
-      layoutJson: JSON.stringify(layout),
+      layoutJson: JSON.stringify(layout)
     };
     try {
       const result = await ApiHelper.post("/licenseTemplates", payload, "MembershipApi");
@@ -199,7 +199,7 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
   const updateElement = (elId: string, patch: Record<string, any>) =>
     setLayout((prev) => ({
       ...prev,
-      elements: prev.elements.map((e) => (e.id === elId ? ({ ...e, ...patch } as LayoutElement) : e)),
+      elements: prev.elements.map((e) => (e.id === elId ? ({ ...e, ...patch } as LayoutElement) : e))
     }));
 
   const removeElement = (elId: string) => {
@@ -245,7 +245,7 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
       wMm: 30,
       hMm: 8,
       font: { ...DEFAULT_TEXT_STYLE },
-      ...(def?.isDate ? { dateFormat: "MMM D, YYYY" } : {}),
+      ...(def?.isDate ? { dateFormat: "MMM D, YYYY" } : {})
     });
   };
 

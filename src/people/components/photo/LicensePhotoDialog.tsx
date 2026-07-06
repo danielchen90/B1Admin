@@ -59,12 +59,12 @@ export const LicensePhotoDialog: React.FC<Props> = ({ person, open, onClose, onS
     () =>
       savedCrop
         ? {
-            cropX: savedCrop.cropX,
-            cropY: savedCrop.cropY,
-            cropWidth: savedCrop.cropWidth,
-            cropHeight: savedCrop.cropHeight,
-            rotation: savedCrop.rotation
-          }
+          cropX: savedCrop.cropX,
+          cropY: savedCrop.cropY,
+          cropWidth: savedCrop.cropWidth,
+          cropHeight: savedCrop.cropHeight,
+          rotation: savedCrop.rotation
+        }
         : undefined,
     [savedCrop]
   );

@@ -49,7 +49,7 @@ export const Canvas: React.FC<Props> = ({ layout, zoom, onSelect, children }) =>
     height: `${heightMm}mm`,
     position: "relative",
     background: "#fff",
-    boxShadow: "0 1px 6px rgba(0,0,0,0.3)",
+    boxShadow: "0 1px 6px rgba(0,0,0,0.3)"
   };
 
   // Guide insets expressed in the wrapper's own mm space.
@@ -79,7 +79,7 @@ export const Canvas: React.FC<Props> = ({ layout, zoom, onSelect, children }) =>
                 width: `${widthMm}mm`,
                 height: `${heightMm}mm`,
                 objectFit: bg.fit,
-                pointerEvents: "none",
+                pointerEvents: "none"
               }}
             />
           )}
@@ -97,7 +97,7 @@ export const Canvas: React.FC<Props> = ({ layout, zoom, onSelect, children }) =>
                 top: trimInset,
                 right: trimInset,
                 bottom: trimInset,
-                border: "1px solid rgba(0,0,0,0.45)",
+                border: "1px solid rgba(0,0,0,0.45)"
               }}
             />
             {/* Safe-area: dashed rectangle inset by bleed + safe. */}
@@ -108,7 +108,7 @@ export const Canvas: React.FC<Props> = ({ layout, zoom, onSelect, children }) =>
                 top: safeInset,
                 right: safeInset,
                 bottom: safeInset,
-                border: "1px dashed rgba(25,118,210,0.7)",
+                border: "1px dashed rgba(25,118,210,0.7)"
               }}
             />
             {/* Center crosshair: a vertical + horizontal hairline through the center. */}
