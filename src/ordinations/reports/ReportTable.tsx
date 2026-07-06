@@ -4,7 +4,7 @@
 // nested group headers (primary, then nested sub-group) each with a CountChip of DISTINCT
 // people, and an EmptyState when there are no rows. Fully presentational — no data shaping.
 import React from "react";
-import { Box, Stack, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Link } from "@mui/material";
+import { Box, Stack, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Link, Checkbox } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import GroupsIcon from "@mui/icons-material/Groups";
 import { PersonAvatar } from "@churchapps/apphelper";
@@ -14,9 +14,11 @@ import { type ReportGroup, type ReportRow } from "./reportTypes";
 
 interface ReportTableProps {
   groups: ReportGroup[];
+  onTogglePaid?: (row: ReportRow, next: boolean) => void;
+  onToggleExempt?: (row: ReportRow, next: boolean) => void;
 }
 
-const COLUMNS = ["Name", "Campus", "Ordination(s)", "Status", "Credential #", "Granted", "Expires"];
+const COLUMNS = ["Name", "Campus", "Ordination(s)", "Status", "Credential #", "Granted", "Expires", "Paid", "Exempt"];
 const COL_COUNT = COLUMNS.length;
 
 // Format a date-only "YYYY-MM-DD" as a LOCAL calendar day (Pitfall 4) then pretty-print.
@@ -27,7 +29,7 @@ const formatDate = (value: string | null): string => {
   return isNaN(d.getTime()) ? "" : DateHelper.prettyDate(d);
 };
 
-export const ReportTable: React.FC<ReportTableProps> = ({ groups }) => {
+export const ReportTable: React.FC<ReportTableProps> = ({ groups, onTogglePaid, onToggleExempt }) => {
   const hasRows = groups.some((g) => g.rows.length > 0 || (g.subGroups ?? []).some((s) => s.rows.length > 0));
 
   if (groups.length === 0 || !hasRows) {
@@ -80,6 +82,12 @@ export const ReportTable: React.FC<ReportTableProps> = ({ groups }) => {
       <TableCell>{row.credentialNumber ?? ""}</TableCell>
       <TableCell sx={{ whiteSpace: "nowrap" }}>{formatDate(row.grantedDate)}</TableCell>
       <TableCell sx={{ whiteSpace: "nowrap" }}>{formatDate(row.expirationDate)}</TableCell>
+      <TableCell padding="checkbox">
+        <Checkbox size="small" checked={row.paid} onChange={(e) => onTogglePaid?.(row, e.target.checked)} />
+      </TableCell>
+      <TableCell padding="checkbox">
+        <Checkbox size="small" checked={row.exempt} onChange={(e) => onToggleExempt?.(row, e.target.checked)} />
+      </TableCell>
     </TableRow>
   );
 
