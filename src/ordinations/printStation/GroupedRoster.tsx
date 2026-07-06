@@ -9,8 +9,9 @@
 import React from "react";
 import { Box, Stack, Typography, Checkbox, Link, Divider, Button } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
+import GroupsIcon from "@mui/icons-material/Groups";
 import { PersonAvatar } from "@churchapps/apphelper";
-import { CountChip } from "../../components/ui";
+import { CountChip, EmptyState } from "../../components/ui";
 import { type RosterGroup, type RosterRow } from "./rosterTypes";
 
 interface GroupedRosterProps {
@@ -19,10 +20,26 @@ interface GroupedRosterProps {
   canSelect: boolean; // canWriteOrdinations gate — hides every selection control when false
   onTogglePerson: (personId: string) => void;
   onToggleGroup: (groupPersonIds: string[]) => void; // per-group select-all / clear
+  onToggleAll: (allIds: string[]) => void; // global select-all / clear across the whole filtered roster
 }
 
-export const GroupedRoster: React.FC<GroupedRosterProps> = ({ groups, selectedPersonIds, canSelect, onTogglePerson, onToggleGroup }) => {
+export const GroupedRoster: React.FC<GroupedRosterProps> = ({ groups, selectedPersonIds, canSelect, onTogglePerson, onToggleGroup, onToggleAll }) => {
   const selected = new Set(selectedPersonIds);
+  // Distinct union of every group's personIds — drives the roster-level "select all matching".
+  const allIds = Array.from(new Set(groups.flatMap((g) => g.personIds)));
+  const allSelected = allIds.length > 0 && allIds.every((id) => selected.has(id));
+  const hasRows = groups.some((g) => g.rows.length > 0);
+
+  if (groups.length === 0 || !hasRows) {
+    return (
+      <EmptyState
+        variant="card"
+        icon={<GroupsIcon />}
+        title="No ministers match these filters"
+        description="Adjust the location or calling selection to see printable ministers."
+      />
+    );
+  }
 
   const renderGroupHeader = (group: RosterGroup) => {
     const allGroupSelected = group.personIds.length > 0 && group.personIds.every((id) => selected.has(id));
@@ -73,6 +90,20 @@ export const GroupedRoster: React.FC<GroupedRosterProps> = ({ groups, selectedPe
 
   return (
     <Box>
+      {canSelect && (
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={1}
+          sx={{ px: 2, py: 1, mb: 1, borderBottom: "1px solid var(--border-light)" }}>
+          <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1 }}>
+            {allSelected ? "All matching ministers selected" : `${selectedPersonIds.length} of ${allIds.length} selected`}
+          </Typography>
+          <Button size="small" variant="outlined" onClick={() => onToggleAll(allIds)}>
+            {allSelected ? "Clear all" : "Select all matching"}
+          </Button>
+        </Stack>
+      )}
       {groups.map((group, idx) => (
         <Box key={group.key}>
           {renderGroupHeader(group)}
