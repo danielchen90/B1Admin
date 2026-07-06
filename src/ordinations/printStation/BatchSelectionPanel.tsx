@@ -2,14 +2,18 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { type PersonInterface } from "@churchapps/helpers";
 import { Locale, PageHeader } from "@churchapps/apphelper";
-import { Box } from "@mui/material";
+import { Grid, Box, Typography, Card, Stack, Button, Snackbar, Alert, Chip } from "@mui/material";
+import { Print as PrintIcon, Warning as WarningIcon } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import { canWriteOrdinations } from "../../helpers/OrdinationHelper";
+import { CountChip } from "../../components/ui";
 import { useCampuses } from "../../hooks/useCampuses";
 import { useOrdinationTypes } from "../../hooks/useOrdinationTypes";
 import { type PersonOrdinationInterface } from "../../people/components/PersonOrdinationInterface";
-import { composeRoster, getAccessibleCampuses } from "./rosterHelpers";
+import { composeRoster, filterRoster, getAccessibleCampuses, groupRoster } from "./rosterHelpers";
 import { type RosterFilterSpec } from "./rosterTypes";
+import { RosterFilterPanel } from "./RosterFilterPanel";
+import { GroupedRoster } from "./GroupedRoster";
 import * as printBatchApi from "./printBatchApi";
 
 // Past this many selected people the batch still proceeds, but we warn the operator that
@@ -20,9 +24,10 @@ const SOFT_CAP = 150;
 // The "build a batch" half of the print station (PRT-02), rebuilt as a PURPOSE-BUILT roster:
 // the selectable set is the campus-scoped ACTIVE-credential holders (from /personOrdinations,
 // NOT the church-wide people-list search), joined client-side to people names / callings /
-// campuses, filtered by the
-// operator's campus + calling checkboxes, grouped (location/calling) and sorted, then sent as
-// UNIQUE personIds + a structured RosterFilterSpec filterJson to the UNCHANGED POST /printBatches.
+// campuses, filtered by the operator's campus + calling checkboxes, grouped (location/calling)
+// and sorted, then sent as UNIQUE personIds + a structured RosterFilterSpec filterJson to the
+// UNCHANGED POST /printBatches (the server resolveCards expands each into one card per active
+// credential — provenance PRT-02, downstream audit PRT-04).
 export const BatchSelectionPanel = React.memo(() => {
   const navigate = useNavigate();
   const [selectedPersonIds, setSelectedPersonIds] = useState<string[]>([]);
@@ -30,6 +35,7 @@ export const BatchSelectionPanel = React.memo(() => {
   const [toast, setToast] = useState<{ open: boolean; message: string; severity: "success" | "error" | "warning" }>({ open: false, message: "", severity: "success" });
 
   const canWrite = canWriteOrdinations();
+  const overCap = selectedPersonIds.length > SOFT_CAP;
 
   // --- Data layer: compose the scoped active-credential roster client-side --------------
   // RESEARCH Pattern 1: source from the campus-scoped /personOrdinations (server applies the
@@ -83,7 +89,9 @@ export const BatchSelectionPanel = React.memo(() => {
     const auto: RosterFilterSpec["groupBy"] = spec.campusIds.length >= 2 ? "location" : "none";
     lastAutoGroupBy.current = auto;
     if (spec.groupBy !== auto) setSpec((s) => ({ ...s, groupBy: auto }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Intentionally keyed on the campus COUNT only: this effect must NOT re-run when the operator
+    // changes groupBy (that path is the override, handled by the separate effect below), otherwise
+    // it would revert the operator's pick before the override flag flips.
   }, [spec.campusIds.length]);
 
   // Override-detection: when RosterFilterPanel's onChange moves groupBy to a value the auto-rule
@@ -94,11 +102,57 @@ export const BatchSelectionPanel = React.memo(() => {
     if (!groupByUserOverridden.current && spec.groupBy !== lastAutoGroupBy.current) groupByUserOverridden.current = true;
   }, [spec.groupBy]);
 
+  // --- Derive the display groups (pure, from Plan 01 helpers) ---------------------------
+  const filteredRows = useMemo(() => filterRoster(allRows, spec), [allRows, spec]);
+  const groups = useMemo(() => groupRoster(filteredRows, spec), [filteredRows, spec]);
+  // Distinct people currently matching the filter (drives the header count chip).
+  const distinctFilteredCount = useMemo(() => new Set(filteredRows.map((r) => r.personId)).size, [filteredRows]);
+
+  // --- Selection (de-duplicated Set<personId>, RESEARCH Pattern 3) ----------------------
+  const togglePersonSelection = useCallback((personId: string) => {
+    setSelectedPersonIds((current) => (current.includes(personId) ? current.filter((id) => id !== personId) : [...current, personId]));
+  }, []);
+
+  // Per-group select-all / clear: if EVERY id in the group is already selected, remove them all;
+  // otherwise union them in. Because selection is keyed on personId, this toggles the same person
+  // wherever they appear across groups.
+  const onToggleGroup = useCallback((groupIds: string[]) => {
+    if (groupIds.length === 0) return;
+    setSelectedPersonIds((current) => {
+      const allSelected = groupIds.every((id) => current.includes(id));
+      if (allSelected) return current.filter((id) => !groupIds.includes(id));
+      return Array.from(new Set([...current, ...groupIds]));
+    });
+  }, []);
+
+  // Global select-all / clear over the union of every group's personIds.
+  const onToggleAll = useCallback((allIds: string[]) => {
+    if (allIds.length === 0) return;
+    setSelectedPersonIds((current) => {
+      const allSelected = allIds.every((id) => current.includes(id));
+      if (allSelected) return current.filter((id) => !allIds.includes(id));
+      return Array.from(new Set([...current, ...allIds]));
+    });
+  }, []);
+
+  // Prune selection to only personIds still present in the filtered roster, so a person hidden
+  // by a filter change can never be silently sent in the batch.
+  useEffect(() => {
+    const visible = new Set(filteredRows.map((r) => r.personId));
+    setSelectedPersonIds((current) => {
+      const next = current.filter((id) => visible.has(id));
+      return next.length === current.length ? current : next;
+    });
+  }, [filteredRows]);
+
+  // --- Send flow (UNCHANGED contract — PRT-02 provenance) -------------------------------
   const handleSendToPrintStation = useCallback(async () => {
     if (selectedPersonIds.length === 0 || isSending) return;
     setIsSending(true);
     try {
       const result = await printBatchApi.createBatch({
+        // UNIQUE personIds — do NOT collapse credentials; the server expands each into one card
+        // per active credential. filterJson = the structured spec for reproducible provenance.
         personIds: Array.from(new Set(selectedPersonIds)),
         filterJson: JSON.stringify(spec)
       });
@@ -116,8 +170,57 @@ export const BatchSelectionPanel = React.memo(() => {
   return (
     <>
       <PageHeader title={Locale.label("ordinations.printStation.title") || "Print Station"} subtitle="Filter the roster, select the ministers to print, and send them to a new batch." />
-      {/* Rendering wired in Task 2. */}
-      <Box sx={{ p: 3 }} data-roster-rows={allRows.length} data-accessible-campuses={accessibleCampuses.length} data-callings={callingTypes.length} data-can-write={canWrite} data-sending={isSending} data-selected={selectedPersonIds.length} data-over-cap={selectedPersonIds.length > SOFT_CAP} data-send={typeof handleSendToPrintStation} data-clear={typeof setSelectedPersonIds} data-toast={toast.open ? 1 : 0} />
+
+      <Box sx={{ p: 3 }}>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 3 }}>
+            <RosterFilterPanel accessibleCampuses={accessibleCampuses} callingTypes={callingTypes} spec={spec} onChange={setSpec} disabled={isSending} />
+          </Grid>
+          <Grid size={{ xs: 12, md: 9 }}>
+            <Card>
+              <Box sx={{ p: 2, borderBottom: 1, borderColor: "var(--border-light)" }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={1}>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <PrintIcon sx={{ color: "primary.main", fontSize: 20 }} />
+                    <Typography variant="h6">Ministers</Typography>
+                    {distinctFilteredCount > 0 && <CountChip count={distinctFilteredCount} />}
+                    {selectedPersonIds.length > 0 && <Chip size="small" color="primary" label={`${selectedPersonIds.length} selected`} />}
+                  </Stack>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    {selectedPersonIds.length > 0 && <Button size="small" onClick={() => setSelectedPersonIds([])}>Clear selection</Button>}
+                    {canWrite && (
+                      <Button variant="contained" startIcon={<PrintIcon />} disabled={selectedPersonIds.length === 0 || isSending} onClick={handleSendToPrintStation}>
+                        {isSending ? "Sending…" : "Send to Print Station"}
+                      </Button>
+                    )}
+                  </Stack>
+                </Stack>
+                {overCap && (
+                  <Alert severity="warning" icon={<WarningIcon />} sx={{ mt: 2 }}>
+                    Large batch ({selectedPersonIds.length} selected) — rendering may take a while. You can still proceed.
+                  </Alert>
+                )}
+              </Box>
+              <Box>
+                <GroupedRoster
+                  groups={groups}
+                  selectedPersonIds={selectedPersonIds}
+                  canSelect={canWrite}
+                  onTogglePerson={togglePersonSelection}
+                  onToggleGroup={onToggleGroup}
+                  onToggleAll={onToggleAll}
+                />
+              </Box>
+            </Card>
+          </Grid>
+        </Grid>
+      </Box>
+
+      <Snackbar open={toast.open} autoHideDuration={6000} onClose={() => setToast((c) => ({ ...c, open: false }))} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
+        <Alert severity={toast.severity} onClose={() => setToast((c) => ({ ...c, open: false }))} sx={{ width: "100%" }}>
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 });
