@@ -10,6 +10,7 @@ import {
 } from "@mui/icons-material";
 import { DEFAULT_CALIBRATION, getCalibration, setCalibration, type Calibration } from "../calibrationStorage";
 import { renderTestCard, type TestCardResult } from "../licenseRenderApi";
+import { PageBreadcrumbs } from "../../../components/ui";
 
 // PrintCalibrationPage — the per-WORKSTATION print-calibration screen (PRT-05).
 //
@@ -145,6 +146,7 @@ export const PrintCalibrationPage: React.FC = () => {
 
   return (
     <>
+      <PageBreadcrumbs items={[{ label: "Settings", path: "/settings" }, { label: "License Templates", path: "/settings/license-templates" }, { label: "Print Calibration" }]} />
       <PageHeader title="Print Calibration" subtitle="Align this workstation's CR80 card printer." />
       <Box sx={{ p: 3 }}>
         <Stack spacing={3} direction={{ xs: "column", md: "row" }} alignItems="flex-start">

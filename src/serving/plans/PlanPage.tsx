@@ -7,7 +7,7 @@ import { Assignment } from "../components/Assignment";
 import { PlanNavigation } from "../components/PlanNavigation";
 import { Box, Container, Typography } from "@mui/material";
 import { ServiceOrder } from "../components/ServiceOrder";
-import { Breadcrumbs } from "../../components/ui";
+import { PageBreadcrumbs } from "../../components/ui";
 
 export const PlanPage = () => {
   const params = useParams();
@@ -63,22 +63,8 @@ export const PlanPage = () => {
 
   return (
     <>
-      <Box sx={{ position: "relative", "& #page-header > div": { paddingTop: "5.5rem" } }}>
-        <PageHeader title={plan.name || Locale.label("plans.planPage.servicePlan")} subtitle={Locale.label("plans.planPage.subtitle")} />
-        <Box sx={{
-          position: "absolute",
-          top: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "100vw",
-          zIndex: 2,
-          paddingTop: 1.5
-        }}>
-          <Container maxWidth="xl">
-            <Breadcrumbs items={breadcrumbItems} showHome={true} />
-          </Container>
-        </Box>
-      </Box>
+      <PageBreadcrumbs items={breadcrumbItems} />
+      <PageHeader title={plan.name || Locale.label("plans.planPage.servicePlan")} subtitle={Locale.label("plans.planPage.subtitle")} />
       <PlanNavigation selectedTab={selectedTab} onTabChange={setSelectedTab} plan={plan} />
 
       {/* Tab Content */}

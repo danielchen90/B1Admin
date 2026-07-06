@@ -5,7 +5,7 @@ import { Loading, PageHeader } from "@churchapps/apphelper";
 import { Box, Grid, Stack, Button, CircularProgress, Snackbar, Alert } from "@mui/material";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
-import { ExportButton } from "../../components/ui";
+import { ExportButton, PageBreadcrumbs } from "../../components/ui";
 import { useCampuses } from "../../hooks/useCampuses";
 import { useOrdinationTypes } from "../../hooks/useOrdinationTypes";
 import { type PersonOrdinationInterface } from "../../people/components/PersonOrdinationInterface";
@@ -157,6 +157,7 @@ export const LeadershipReportPage: React.FC = () => {
 
   return (
     <>
+      <PageBreadcrumbs items={[{ label: "Ordinations", path: "/ordinations/hub" }, { label: "Leadership Report" }]} />
       <PageHeader title="Leadership Report" subtitle="All credential holders across your campuses — filter, group, and export." />
 
       <Box sx={{ p: 3 }}>

@@ -4,6 +4,7 @@ import { type FormInterface, type MemberPermissionInterface } from "@churchapps/
 import { UserHelper, Permissions, Locale, Loading, PageHeader } from "@churchapps/apphelper";
 import { useParams } from "react-router-dom";
 import { Box } from "@mui/material";
+import { PageBreadcrumbs } from "../components/ui";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -58,6 +59,7 @@ export const FormPage = () => {
 
   return form.data?.id ? (
     <>
+      <PageBreadcrumbs items={[{ label: "Forms", path: "/forms" }, { label: form.data.name || "Form" }]} />
       <PageHeader title={form.data.name} subtitle={Locale.label("forms.formPage.subtitleConfig")} />
       <FormNavigation selectedTab={selectedTab} onTabChange={setSelectedTab} form={form.data} memberPermission={memberPermission.data} />
 

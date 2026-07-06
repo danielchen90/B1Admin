@@ -21,7 +21,7 @@ import { CuratedCalendar } from "./components/CuratedCalendar";
 import { NewEventModal } from "./components/NewEventModal";
 import { ImportIcsModal } from "./components/ImportIcsModal";
 import { AppIconButton } from "../components/ui/AppIconButton";
-import { CountChip } from "../components/ui";
+import { CountChip, PageBreadcrumbs } from "../components/ui";
 
 const printStyles = `@media print {
   body * { visibility: hidden; }
@@ -83,6 +83,7 @@ export const CalendarPage = () => {
   return (
     <>
       <style>{printStyles}</style>
+      <PageBreadcrumbs items={[{ label: "Calendars", path: "/calendars" }, { label: currentCalendar?.name || "Calendar" }]} />
       <PageHeader
         title={currentCalendar?.name || Locale.label("calendars.calendarPage.calendar")}
         subtitle={Locale.label("calendars.calendarPage.subtitle")}

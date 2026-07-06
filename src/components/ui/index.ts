@@ -8,6 +8,7 @@ export { NavigationTabs } from "./NavigationTabs";
 export type { NavigationTab, NavigationDropdown } from "./NavigationTabs";
 export { Breadcrumbs } from "./Breadcrumbs";
 export type { BreadcrumbItem } from "./Breadcrumbs";
+export { PageBreadcrumbs } from "./PageBreadcrumbs";
 export { FormCard } from "./FormCard";
 export { SortableTableHead } from "./SortableTableHead";
 export type { SortableColumn, SortDirection } from "./SortableTableHead";

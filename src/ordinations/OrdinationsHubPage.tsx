@@ -5,6 +5,7 @@ import type { PersonInterface } from "@churchapps/helpers";
 import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import AssessmentIcon from "@mui/icons-material/Assessment";
+import { PageBreadcrumbs } from "../components/ui";
 import { PersonAdd } from "../components/PersonAdd";
 import { OrdinationIssueDialog } from "../people/components/OrdinationIssueDialog";
 import { canManageOrdinationTypes, canWriteOrdinations } from "../helpers/OrdinationHelper";
@@ -36,6 +37,7 @@ export const OrdinationsHubPage: React.FC = () => {
 
   return (
     <>
+      <PageBreadcrumbs items={[{ label: "Ordination & Leadership" }]} />
       <PageHeader title="Ordination & Leadership" subtitle="Issue and manage ministerial credentials across your campuses." />
       <Box sx={{ p: 3 }}>
         <Stack spacing={3}>

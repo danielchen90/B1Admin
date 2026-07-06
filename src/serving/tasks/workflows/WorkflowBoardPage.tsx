@@ -14,6 +14,7 @@ import { WorkflowTriggersManager } from "./components/WorkflowTriggersManager";
 import { ContentPicker } from "../components/ContentPicker";
 import { type WorkflowBoardInterface, type WorkflowStepInterface, type TaskInterface, type WorkflowInterface, type WorkflowCategoryInterface } from "@churchapps/helpers";
 import { canViewWorkflows, canEditCards, canManageWorkflows } from "./permissions";
+import { PageBreadcrumbs } from "../../../components/ui";
 
 export const WorkflowBoardPage = () => {
   const params = useParams();
@@ -100,6 +101,7 @@ export const WorkflowBoardPage = () => {
 
   return (
     <>
+      <PageBreadcrumbs items={[{ label: "Tasks", path: "/serving/tasks" }, { label: board.data?.workflow?.name || "Workflow" }]} />
       <PageHeader title={board.data?.workflow?.name || Locale.label("tasks.workflowsPage.title")} subtitle={Locale.label("tasks.workflowBoard.subtitle")}>
         <Stack direction="row" spacing={1}>
           <Button variant="outlined" startIcon={<BackIcon />} onClick={() => navigate("/serving/tasks/workflows")} sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)" }}>{Locale.label("tasks.workflowsPage.title")}</Button>

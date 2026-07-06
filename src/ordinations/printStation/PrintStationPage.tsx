@@ -19,6 +19,7 @@ import PdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import * as printBatchApi from "./printBatchApi";
 import { type BatchCard, type SkippedPerson } from "./printBatchApi";
 import { canWriteOrdinations, parseApiError } from "../../helpers/OrdinationHelper";
+import { PageBreadcrumbs } from "../../components/ui";
 
 // The pdfjs worker must be pointed at a real URL before getDocument() runs, else it falls
 // back to a fake in-thread worker (slow / warns). Set once at module load.
@@ -296,6 +297,7 @@ export const PrintStationPage: React.FC = () => {
   if (!batchId) {
     return (
       <>
+        <PageBreadcrumbs items={[{ label: "Ordinations", path: "/ordinations/hub" }, { label: "Print Station" }]} />
         <PageHeader title="Print Station" subtitle="Reopen a recent batch, or start a new one from the Ordinations report." />
         <Box sx={{ p: 3 }}>
           <Stack spacing={2}>
@@ -314,6 +316,13 @@ export const PrintStationPage: React.FC = () => {
 
   return (
     <>
+      <PageBreadcrumbs
+        items={[
+          { label: "Ordinations", path: "/ordinations/hub" },
+          { label: "Print Station", path: "/ordinations/print-station" },
+          { label: batch?.name || "Batch" }
+        ]}
+      />
       <PageHeader title={batch?.name || "Print Station"} subtitle="Review the cards, print the batch, and correct any jams." />
 
       <Box sx={{ p: 3 }}>

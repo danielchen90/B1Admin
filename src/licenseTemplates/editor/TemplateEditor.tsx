@@ -34,6 +34,7 @@ import { ApiHelper, PageHeader, PersonHelper, UniqueIdHelper, UserHelper } from 
 import type { PersonInterface } from "@churchapps/helpers";
 import type { LayoutElement, LicenseTemplateInterface, LicenseTemplateLayout } from "../LicenseTemplateInterface";
 import { newLayout } from "../helpers/coords";
+import { PageBreadcrumbs } from "../../components/ui";
 import { BINDING_CATALOG, SAMPLE_BINDINGS, formatCampusAddress } from "../helpers/bindings";
 import { loadEditorFonts } from "../helpers/fonts";
 import { useOrdinationTypes } from "../../hooks/useOrdinationTypes";
@@ -280,6 +281,13 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
 
   return (
     <>
+      <PageBreadcrumbs
+        items={[
+          { label: "Settings", path: "/settings" },
+          { label: "License Templates", path: "/settings/license-templates" },
+          { label: name || "Template" }
+        ]}
+      />
       <PageHeader title="License Template Editor" subtitle="Design a CR80 ministerial-license card: bound fields, logo, background, photo, and fonts." />
 
       <Collapse in={!!error}>

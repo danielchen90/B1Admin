@@ -10,7 +10,7 @@ import {
   Person as PersonIcon,
   Receipt as ReceiptIcon
 } from "@mui/icons-material";
-import { CountChip, ExportButton } from "../components/ui";
+import { CountChip, ExportButton, PageBreadcrumbs } from "../components/ui";
 
 export const FundPage = () => {
   const params = useParams();
@@ -218,6 +218,7 @@ export const FundPage = () => {
 
   return (
     <>
+      <PageBreadcrumbs items={[{ label: "Donations", path: "/donations" }, { label: fund.name || "Fund" }]} />
       <PageHeader
         title={`${fund.name} ${Locale.label("donations.fundsPage.don")}`}
         subtitle={Locale.label("donations.fundPage.subtitle")}

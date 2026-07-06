@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Card, Stack, Button, Typography } from "@mui/material";
 import { Receipt as ReceiptIcon, Edit as EditIcon } from "@mui/icons-material";
+import { PageBreadcrumbs } from "../components/ui";
 
 export const DonationBatchPage = () => {
   const params = useParams();
@@ -75,6 +76,7 @@ export const DonationBatchPage = () => {
 
   return (
     <>
+      <PageBreadcrumbs items={[{ label: "Donations", path: "/donations" }, { label: batch.data?.name || "Batch " + params.id }]} />
       <PageHeader
         title={batch.data?.name || Locale.label("donations.donationBatchPage.title")}
         subtitle={batch.data?.batchDate ? `${Locale.label("donations.donationBatchPage.batchDate")} ${DateHelper.prettyDate(new Date(batch.data.batchDate.split("T")[0] + "T00:00:00"))}` : Locale.label("donations.donationBatchPage.subtitle")}

@@ -26,6 +26,7 @@ import { type EventInterface, type RegistrationInterface } from "@churchapps/hel
 import { PermissionDenied } from "../components";
 import { RegistrationSettingsEdit } from "./components/RegistrationSettingsEdit";
 import { AppIconButton } from "../components/ui/AppIconButton";
+import { PageBreadcrumbs } from "../components/ui";
 
 export const RegistrationDetailsPage = () => {
   const params = useParams();
@@ -125,6 +126,7 @@ export const RegistrationDetailsPage = () => {
 
   return (
     <>
+      <PageBreadcrumbs items={[{ label: "Registrations", path: "/registrations" }, { label: event.title || "Registration" }]} />
       <PageHeader title={event.title || Locale.label("registrations.registrationDetailsPage.eventRegistrations")} subtitle={Locale.label("registrations.registrationDetailsPage.subtitle")} />
       <Box sx={{ p: 3 }}>
         <Grid container spacing={3}>

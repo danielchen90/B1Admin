@@ -8,7 +8,7 @@ import { LibraryMusic as MusicIcon, Add as AddIcon, QueueMusic as ArrangementIco
 import { AppIconButton } from "../../components/ui/AppIconButton";
 import { Arrangement } from "./components/Arrangement";
 import { EmptyState } from "../../components/ui/EmptyState";
-import { CountChip } from "../../components/ui";
+import { CountChip, PageBreadcrumbs } from "../../components/ui";
 import { SongDetailsEdit } from "./components/SongDetailsEdit";
 import { SongDetailLinks } from "./components/SongDetailLinks";
 import { SongDetailLinksEdit } from "./components/SongDetailLinksEdit";
@@ -199,6 +199,7 @@ export const SongPage = memo(() => {
 
   return (
     <>
+      <PageBreadcrumbs items={[{ label: "Serving", path: "/serving" }, { label: songDetail.data?.title || song.data?.name || "Song" }]} />
       <PageHeader title={songDetail.data?.title || song.data?.name || Locale.label("songs.songPage.loading")} subtitle={Locale.label("songs.songPage.subtitle")}>
         {canEdit && (
           <AppIconButton label={Locale.label("common.edit")} icon={<EditIcon />} tone="header" onClick={() => setEditSongDetails(true)} />

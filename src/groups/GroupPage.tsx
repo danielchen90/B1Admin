@@ -8,6 +8,7 @@ import { GroupCalendarTab } from "./components/GroupCalendarTab";
 import { GroupHealthTab } from "./components/GroupHealthTab";
 import { Grid } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
+import { PageBreadcrumbs } from "../components/ui";
 
 export const GroupPage = () => {
   const params = useParams();
@@ -46,6 +47,7 @@ export const GroupPage = () => {
 
   return (
     <>
+      <PageBreadcrumbs items={[{ label: "Groups", path: "/groups" }, { label: group.data?.name || "Group" }]} />
       <GroupBanner group={group.data} onEdit={handleEdit} editMode={editMode} />
       {!editMode && <GroupNavigation selectedTab={selectedTab} onTabChange={setSelectedTab} group={group.data} />}
       <Grid container spacing={2}>

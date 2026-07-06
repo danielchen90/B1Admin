@@ -9,6 +9,7 @@ import { PersonDetails } from "./components/PersonDetails";
 import { PersonOrdinations } from "./components/PersonOrdinations";
 import UserContext from "../UserContext";
 import { useQuery } from "@tanstack/react-query";
+import { PageBreadcrumbs } from "../components/ui";
 
 export const PersonPage = () => {
   const [selectedTab, setSelectedTab] = React.useState("");
@@ -163,6 +164,7 @@ export const PersonPage = () => {
 
   return (
     <>
+      <PageBreadcrumbs items={[{ label: "People", path: "/people" }, { label: person?.name?.display || "Person" }]} />
       <PersonBanner
         person={person}
         togglePhotoEditor={setInPhotoEditMode}

@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { type CampaignProgressInterface, type PledgeInterface, type PledgeProgressRowInterface, type PledgeStatus } from "../helpers";
 import { CampaignEdit, PledgeEdit } from "./components";
 import { AppIconButton } from "../components/ui/AppIconButton";
-import { CountChip, EmptyState, ExportButton, SortableTableHead, type SortDirection } from "../components/ui";
+import { CountChip, EmptyState, ExportButton, PageBreadcrumbs, SortableTableHead, type SortDirection } from "../components/ui";
 
 const statusColors: Record<PledgeStatus, "default" | "info" | "success" | "warning"> = {
   notStarted: "default",
@@ -164,6 +164,7 @@ export const CampaignPage = () => {
 
   return (
     <>
+      <PageBreadcrumbs items={[{ label: "Donations", path: "/donations" }, { label: campaign?.name || "Campaign" }]} />
       <PageHeader title={campaign?.name || ""} subtitle={Locale.label("donations.campaignPage.subtitle")}>
         {progress.data && (
           <Stack

@@ -4,7 +4,7 @@ import { ApiHelper, PageHeader } from "@churchapps/apphelper";
 import { useQueryClient } from "@tanstack/react-query";
 import { Alert, Box, Button, Card, Chip, Collapse, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import { Badge as BadgeIcon, Add as AddIcon, Star as StarIcon } from "@mui/icons-material";
-import { CountChip, StatusChip } from "../components/ui";
+import { CountChip, StatusChip, PageBreadcrumbs } from "../components/ui";
 import { canManageOrdinationTypes, parseApiError } from "../helpers/OrdinationHelper";
 import { useLicenseTemplates } from "../hooks/useLicenseTemplates";
 import { useOrdinationTypes } from "../hooks/useOrdinationTypes";
@@ -113,6 +113,7 @@ export const LicenseTemplatesPage: React.FC = () => {
 
   return (
     <>
+      <PageBreadcrumbs items={[{ label: "Settings", path: "/settings" }, { label: "License Templates" }]} />
       <PageHeader title="License Templates" subtitle="Design and manage CR80 ministerial-license card templates." />
       <Box sx={{ p: 3 }}>
         <Collapse in={!!error}>
