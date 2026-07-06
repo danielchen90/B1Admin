@@ -3,7 +3,7 @@
 // with the ORD-07 optimistic-concurrency version; grantLicenses bulk-grants active licenses to
 // the currently-visible credential ids and reports how many were granted vs skipped.
 import { ApiHelper } from "@churchapps/apphelper";
-import { PersonOrdinationInterface } from "../../people/components/PersonOrdinationInterface";
+import { type PersonOrdinationInterface } from "../../people/components/PersonOrdinationInterface";
 
 export const updatePayment = (id: string, version: number, changes: { paid?: boolean; exempt?: boolean }): Promise<PersonOrdinationInterface> =>
   ApiHelper.post("/personOrdinations/" + id + "/payment", { ...changes, version }, "MembershipApi");

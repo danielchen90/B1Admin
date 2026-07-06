@@ -4,16 +4,25 @@ import { type PersonInterface } from "@churchapps/helpers";
 import { Loading, PageHeader } from "@churchapps/apphelper";
 import { Box, Grid, Stack, Button, CircularProgress, Snackbar, Alert } from "@mui/material";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import { ExportButton } from "../../components/ui";
 import { useCampuses } from "../../hooks/useCampuses";
 import { useOrdinationTypes } from "../../hooks/useOrdinationTypes";
 import { type PersonOrdinationInterface } from "../../people/components/PersonOrdinationInterface";
 import { composeReport, filterReport, getAccessibleCampuses, groupReport, STATUS_ORDER } from "./reportHelpers";
-import { type ReportFilterSpec } from "./reportTypes";
+import { type ReportFilterSpec, type ReportRow } from "./reportTypes";
 import { ReportFilterPanel } from "./ReportFilterPanel";
 import { ReportTable } from "./ReportTable";
 import { CSV_HEADERS, toCsvRows } from "./reportCsv";
 import { downloadReportPdf } from "./reportPdfApi";
+import { GrantLicensesDialog } from "./GrantLicensesDialog";
+import { grantLicenses, updatePayment } from "./reportPaymentApi";
+
+// Grant-license default dates, computed in LOCAL time to avoid a UTC off-by-one (Pitfall 4):
+// granted = the Friday of NEXT week; expiration = one year later minus a day.
+const fmtLocal = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const nextWeekFriday = () => { const t = new Date(); const daysToFri = (5 - t.getDay() + 7) % 7; const thisFri = new Date(t.getFullYear(), t.getMonth(), t.getDate() + daysToFri); return new Date(thisFri.getFullYear(), thisFri.getMonth(), thisFri.getDate() + 7); };
+const plusYearMinusDay = (d: Date) => new Date(d.getFullYear() + 1, d.getMonth(), d.getDate() - 1);
 
 // The leadership-report route target (/ordinations/reports). 100% client-side — it fetches the
 // same campus-scoped GETs the 7.1 print station uses (ALL statuses, no active-only filter),
@@ -29,7 +38,8 @@ const DEFAULT_SPEC: ReportFilterSpec = {
   groupBy1: "location",
   groupBy2: "none",
   sortBy: "lastName",
-  sortDir: "asc"
+  sortDir: "asc",
+  paymentStatus: "all"
 };
 
 export const LeadershipReportPage: React.FC = () => {
@@ -66,6 +76,9 @@ export const LeadershipReportPage: React.FC = () => {
   const groups = useMemo(() => groupReport(filtered, spec), [filtered, spec]);
   const csvData = useMemo(() => toCsvRows(groups, spec), [groups, spec]);
 
+  // Distinct credential ids passing ALL filters — the bulk-grant target set.
+  const visibleIds = useMemo(() => Array.from(new Set(filtered.map((r) => r.id).filter(Boolean))), [filtered]);
+
   const loading = ordQuery.isLoading || (personIds.length > 0 && peopleQuery.isLoading);
 
   // Download PDF — POST the CURRENT spec to the 08-01 server endpoint (RPT-06 scope is re-resolved
@@ -85,6 +98,34 @@ export const LeadershipReportPage: React.FC = () => {
     }
   };
 
+  // Success/error snackbars for the payment toggles + bulk grant (errors reuse pdfError).
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Toggle Paid/Exempt — persist with the row's version, then refetch to pull the bumped
+  // version + new flags. A version_conflict (or any failure) surfaces via pdfError + refetch.
+  const handleToggle = async (row: ReportRow, changes: { paid?: boolean; exempt?: boolean }) => {
+    try {
+      await updatePayment(row.id, row.version, changes);
+      await ordQuery.refetch();
+    } catch (e: any) {
+      setPdfError(e?.message ? String(e.message) : "Failed to update payment.");
+      await ordQuery.refetch();
+    }
+  };
+
+  // Bulk grant — POST every visible id, refetch, and summarize granted/skipped.
+  const [grantOpen, setGrantOpen] = useState(false);
+  const grantDefaults = useMemo(() => {
+    const fri = nextWeekFriday();
+    return { granted: fmtLocal(fri), expiration: fmtLocal(plusYearMinusDay(fri)) };
+  }, [grantOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+  const handleGrant = async (granted: string, expiration: string) => {
+    const result = await grantLicenses(visibleIds, granted, expiration);
+    await ordQuery.refetch();
+    setSuccessMsg(`Granted ${result.granted} license(s); ${result.skipped.length} skipped.`);
+    setGrantOpen(false);
+  };
+
   return (
     <>
       <PageHeader title="Leadership Report" subtitle="All credential holders across your campuses — filter, group, and export." />
@@ -92,6 +133,16 @@ export const LeadershipReportPage: React.FC = () => {
       <Box sx={{ p: 3 }}>
         <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ mb: 2 }}>
           <ExportButton data={csvData} filename="leadership-report.csv" text="Export CSV" customHeaders={CSV_HEADERS} />
+          {/* Bulk-grants an active license to every currently-visible credential. */}
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<WorkspacePremiumIcon />}
+            disabled={visibleIds.length === 0}
+            onClick={() => setGrantOpen(true)}
+          >
+            Grant Licenses
+          </Button>
           {/* Posts the CURRENT ReportFilterSpec to POST /reports/leadership/pdf (08-01) and
               downloads the returned PDF bytes. Disabled while awaiting the render. */}
           <Button
@@ -113,11 +164,24 @@ export const LeadershipReportPage: React.FC = () => {
               <ReportFilterPanel spec={spec} onChange={setSpec} accessibleCampuses={accessibleCampuses} ordinationTypes={types} />
             </Grid>
             <Grid size={{ xs: 12, md: 9 }}>
-              <ReportTable groups={groups} />
+              <ReportTable
+                groups={groups}
+                onTogglePaid={(row, next) => handleToggle(row, { paid: next })}
+                onToggleExempt={(row, next) => handleToggle(row, { exempt: next })}
+              />
             </Grid>
           </Grid>
         )}
       </Box>
+
+      <GrantLicensesDialog
+        open={grantOpen}
+        count={visibleIds.length}
+        defaultGranted={grantDefaults.granted}
+        defaultExpiration={grantDefaults.expiration}
+        onClose={() => setGrantOpen(false)}
+        onConfirm={handleGrant}
+      />
 
       <Snackbar
         open={pdfError !== null}
@@ -127,6 +191,17 @@ export const LeadershipReportPage: React.FC = () => {
       >
         <Alert severity="error" onClose={() => setPdfError(null)} variant="filled">
           {pdfError}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={successMsg !== null}
+        autoHideDuration={6000}
+        onClose={() => setSuccessMsg(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="success" onClose={() => setSuccessMsg(null)} variant="filled">
+          {successMsg}
         </Alert>
       </Snackbar>
     </>
