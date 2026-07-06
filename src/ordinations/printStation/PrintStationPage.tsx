@@ -143,7 +143,10 @@ export const PrintStationPage: React.FC = () => {
         pdfUrlRef.current = url;
         setPdfUrl(url);
         // Rasterize each page (one page == one card, in listBatchCards order) to a thumbnail.
-        const doc = await pdfjs.getDocument({ data: await blob.arrayBuffer() }).promise;
+        // NOTE: destroy() lives on the loading TASK, not the resolved PDFDocumentProxy
+        // (pdfjs v6) — keep the task ref so we can release the worker after rasterizing.
+        const loadingTask = pdfjs.getDocument({ data: await blob.arrayBuffer() });
+        const doc = await loadingTask.promise;
         const imgs: string[] = [];
         for (let i = 1; i <= doc.numPages; i++) {
           if (!active) break;
@@ -157,7 +160,7 @@ export const PrintStationPage: React.FC = () => {
           await page.render({ canvas, canvasContext: ctx, viewport }).promise;
           imgs.push(canvas.toDataURL("image/png"));
         }
-        await doc.destroy();
+        await loadingTask.destroy();
         if (active) setThumbnails(imgs);
       } catch (e) {
         if (active) setThumbError(e instanceof Error ? e.message : "Unable to render the card previews.");
