@@ -31,19 +31,31 @@ const createMdTheme = (mode: PaletteMode) =>
   createTheme({
     palette: {
       mode,
+      // HURO Deep Navy — the structural foundation (app bar, headings, primary buttons).
       primary: {
-        main: "#1565C0",
-        light: "#568BDA",
-        dark: "#0E3D86",
+        main: "#0B1D3A",
+        light: "#1E4675",
+        dark: "#071228",
         contrastText: "#FFFFFF"
       },
-      InputBox: { headerText: mode === "light" ? "#333333" : "#e0e0e0" },
-      background: {
-        default: mode === "light" ? "#e5e8ee" : "#121212",
-        paper: mode === "light" ? "#ffffff" : "#1e1e1e",
-        subtle: mode === "light" ? "#fafafa" : "#333333"
+      // Warm Gold — the honored accent, used sparingly for calls-to-action and emphasis.
+      secondary: {
+        main: "#D4A23A",
+        light: "#E4BD6A",
+        dark: "#B4842A",
+        contrastText: "#0B1D3A"
       },
-      divider: mode === "light" ? "#dddddd" : "#333333"
+      text: {
+        primary: mode === "light" ? "#1F2A3D" : "#E6EBF2",
+        secondary: mode === "light" ? "#6B7280" : "#9DB0CC"
+      },
+      InputBox: { headerText: mode === "light" ? "#0B1D3A" : "#E6EBF2" },
+      background: {
+        default: mode === "light" ? "#F5F6F7" : "#0A1526",
+        paper: mode === "light" ? "#ffffff" : "#10203B",
+        subtle: mode === "light" ? "#FAFBFC" : "#14294A"
+      },
+      divider: mode === "light" ? "#E2E5EA" : "#1E3355"
     },
     components: {
       MuiCssBaseline: {
@@ -62,12 +74,29 @@ const createMdTheme = (mode: PaletteMode) =>
       // always-shrunk labels: react-hook-form reset() fills inputs without events, so MUI's filled-state detection misses them
       MuiInputLabel: { defaultProps: { shrink: true } },
       MuiOutlinedInput: { defaultProps: { notched: true } },
-      MuiButton: { styleOverrides: { root: { textTransform: "none" } } },
+      MuiButton: {
+        defaultProps: { disableElevation: true },
+        styleOverrides: {
+          root: { textTransform: "none", fontWeight: 600, borderRadius: 8, letterSpacing: "0.01em" },
+          // Gold CTA: a filled secondary button reads as the "important action" the brand calls for.
+          containedSecondary: {
+            color: "#0B1D3A",
+            "&:hover": { backgroundColor: "#C6942F" }
+          },
+          outlinedPrimary: { borderColor: "rgba(11,29,58,0.28)" }
+        }
+      },
+      MuiChip: {
+        styleOverrides: {
+          root: { fontWeight: 600, letterSpacing: "0.01em" }
+        }
+      },
       MuiCard: {
         styleOverrides: {
           root: {
-            borderRadius: 8,
-            boxShadow: mode === "light" ? "0 2px 8px rgba(0,0,0,0.1)" : "0 2px 8px rgba(0,0,0,0.4)"
+            borderRadius: 10,
+            border: mode === "light" ? "1px solid #E2E5EA" : "1px solid #1E3355",
+            boxShadow: mode === "light" ? "0 1px 2px rgba(11,29,58,0.04), 0 6px 20px rgba(11,29,58,0.06)" : "0 2px 8px rgba(0,0,0,0.4)"
           }
         }
       },
@@ -81,19 +110,21 @@ const createMdTheme = (mode: PaletteMode) =>
       }
     },
     typography: {
-      fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-      h1: { fontSize: "2.5rem", fontWeight: 500, lineHeight: 1.2 },
-      h2: { fontSize: "2.25rem", fontWeight: 500, lineHeight: 1.25 },
-      h3: { fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: 500, lineHeight: 1.3 },
-      h4: { fontSize: "1.75rem", fontWeight: 500, lineHeight: 1.35 },
-      h5: { fontSize: "1.5rem", fontWeight: 500, lineHeight: 1.4 },
-      h6: { fontSize: "1.25rem", fontWeight: 500, lineHeight: 1.45 },
-      subtitle1: { fontSize: "1rem", fontWeight: 500, lineHeight: 1.5 },
+      // Inter carries the interface; Sora (via the HuroLogo + brand moments) carries the identity.
+      fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+      h1: { fontSize: "2.5rem", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em" },
+      h2: { fontSize: "2.25rem", fontWeight: 700, lineHeight: 1.25, letterSpacing: "-0.02em" },
+      h3: { fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.015em" },
+      h4: { fontSize: "1.75rem", fontWeight: 600, lineHeight: 1.35, letterSpacing: "-0.01em" },
+      h5: { fontSize: "1.5rem", fontWeight: 600, lineHeight: 1.4, letterSpacing: "-0.01em" },
+      h6: { fontSize: "1.25rem", fontWeight: 600, lineHeight: 1.45 },
+      subtitle1: { fontSize: "1rem", fontWeight: 600, lineHeight: 1.5 },
       subtitle2: { fontSize: "0.875rem", fontWeight: 600, lineHeight: 1.5 },
-      body1: { fontSize: "1rem", fontWeight: 400, lineHeight: 1.5 },
-      body2: { fontSize: "0.875rem", fontWeight: 400, lineHeight: 1.5 },
+      body1: { fontSize: "1rem", fontWeight: 400, lineHeight: 1.55 },
+      body2: { fontSize: "0.875rem", fontWeight: 400, lineHeight: 1.55 },
+      button: { fontWeight: 600, letterSpacing: "0.01em" },
       caption: { fontSize: "0.75rem", fontWeight: 400, lineHeight: 1.4 },
-      overline: { fontSize: "0.75rem", fontWeight: 600, lineHeight: 1.4, letterSpacing: "0.5px", textTransform: "uppercase" }
+      overline: { fontSize: "0.72rem", fontWeight: 600, lineHeight: 1.4, letterSpacing: "0.12em", textTransform: "uppercase" }
     },
     shape: { borderRadius: 8 }
   });

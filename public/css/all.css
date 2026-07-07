@@ -1,50 +1,66 @@
-﻿:root {
-  --c1: #1565C0;
-  --c1l1: #3578CC;
-  --c1l2: #568BDA;
-  --c1l3: #77A0E5;
-  --c1l4: #99B5F0;
-  --c1l5: #BBCBF8;
-  --c1l6: #DDE1FC;
-  --c1l7: #F0F4FF;
-  --c1d1: #1358AD;
-  --c1d2: #114A99;
-  --c1d3: #0E3D86;
-  --c1d4: #0C3172;
-  --c1d5: #09245F;
-  --c1d6: #07184B;
-  --c1d7: #050C37;
+﻿/* HURO brand system — Deep Navy #0B1D3A is the structural foundation,
+   Warm Gold #D4A23A the honored accent, Soft Ivory #F5F6F7 the calm canvas.
+   --c1 (navy) drives the app bar and links; the gold ramp is used sparingly
+   for selected states, credentials, and brand ornaments. */
+:root {
+  /* Navy ramp (--c1 = brand navy; lighter steps for hovers/tints) */
+  --c1: #0B1D3A;
+  --c1l1: #13315A;
+  --c1l2: #1E4675;
+  --c1l3: #305F91;
+  --c1l4: #5C82AC;
+  --c1l5: #90A9C8;
+  --c1l6: #C3D1E1;
+  --c1l7: #E9EEF4;
+  --c1d1: #091730;
+  --c1d2: #071228;
+  --c1d3: #050D1E;
+  --c1d4: #040A18;
+  --c1d5: #030711;
+  --c1d6: #02050C;
+  --c1d7: #010307;
+  /* Warm gold accent ramp */
+  --gold: #D4A23A;
+  --gold-dark: #B4842A;
+  --gold-light: #E4BD6A;
+  --gold-tint: #F6ECD6;
+  --navy-tint: rgba(11, 29, 58, 0.05);
+  --navy-tint-strong: rgba(11, 29, 58, 0.1);
   /* Theme variables */
-  --bg-main: #e5e8ee;
+  --bg-main: #F5F6F7;
   --bg-card: #ffffff;
   --bg-header: #ffffff;
-  --bg-sub: #fafafa;
-  --text-main: #333333;
-  --text-muted: #666666;
-  --border-main: #dddddd;
-  --border-light: #f0f0f0;
-  --bg-plan-header: #e0e0e0;
+  --bg-sub: #FAFBFC;
+  --text-main: #1F2A3D;
+  --text-muted: #6B7280;
+  --border-main: #E2E5EA;
+  --border-light: #EEF0F3;
+  --bg-plan-header: #EEF1F5;
   --link: var(--c1);
   --focus: var(--c1);
 }
 
 body.dark-theme {
-  --bg-main: #121212;
-  --bg-card: #1e1e1e;
-  --bg-header: #1e1e1e;
-  --bg-sub: #333333;
-  --text-main: #e0e0e0;
-  --text-muted: #aaaaaa;
-  --border-main: #333333;
-  --border-light: #444444;
-  --bg-plan-header: #151515;
-  --link: var(--c1l3);
+  --bg-main: #0A1526;
+  --bg-card: #10203B;
+  --bg-header: #0B1D3A;
+  --bg-sub: #14294A;
+  --text-main: #E6EBF2;
+  --text-muted: #9DB0CC;
+  --border-main: #1E3355;
+  --border-light: #17294699;
+  --bg-plan-header: #0E1E38;
+  --link: var(--gold-light);
+  --navy-tint: rgba(212, 162, 58, 0.08);
+  --navy-tint-strong: rgba(212, 162, 58, 0.14);
 }
 
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: "Inter", "Helvetica", "Arial", sans-serif;
   color: var(--text-main);
   background-color: var(--bg-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .table {
@@ -60,6 +76,29 @@ a:focus-visible,
 button:focus-visible,
 [tabindex]:focus-visible {
   outline: 2px solid var(--focus);
+}
+
+/* --- Login surface: apphelper bakes hsl(218,85%,50/55%) blue into its login form
+   via inline sx. Remap those accents to HURO navy/gold so the brand carries through. --- */
+.split-login-page .MuiButton-contained {
+  background-color: var(--c1) !important;
+  box-shadow: none !important;
+}
+.split-login-page .MuiButton-contained:hover {
+  background-color: var(--c1l1) !important;
+}
+.split-login-page .MuiButton-text,
+.split-login-page a:not(.MuiButton-root) {
+  color: var(--c1) !important;
+}
+.split-login-page .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--c1) !important;
+}
+.split-login-page .MuiInputLabel-root.Mui-focused {
+  color: var(--c1) !important;
+}
+.split-login-page .MuiCheckbox-root.Mui-checked {
+  color: var(--c1) !important;
 }
 
 /* apphelper PageHeader: full-width hero with 32px vertical padding (design standards §3).
@@ -505,7 +544,7 @@ label .description {
   transition: background-color 0.15s;
 }
 .clickableRow:hover {
-  background-color: rgba(21, 101, 192, 0.04);
+  background-color: rgba(11, 29, 58, 0.04);
 }
 
 /* Drag handle cursor and hover effects */
@@ -515,12 +554,12 @@ label .description {
   transition: background-color 0.15s, color 0.15s;
 }
 .dragHandle:hover {
-  background-color: rgba(21, 101, 192, 0.1);
+  background-color: rgba(11, 29, 58, 0.1);
   color: var(--c1) !important;
 }
 .dragHandle:active {
   cursor: grabbing;
-  background-color: rgba(21, 101, 192, 0.2);
+  background-color: rgba(11, 29, 58, 0.2);
 }
 
 /* Row controls (drag handle, edit/add buttons) hover */
@@ -531,7 +570,7 @@ label .description {
   transition: background-color 0.15s, opacity 0.15s;
 }
 .rowControl:hover, .actionButton:hover {
-  background-color: rgba(21, 101, 192, 0.15);
+  background-color: rgba(11, 29, 58, 0.15);
 }
 
 /* Time Rail */
