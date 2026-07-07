@@ -193,7 +193,7 @@ export const MergeModal: React.FC<Props> = (props) => {
   return (
     <Dialog open={props.show} aria-labelledby="contained-modal-title-vcenter" data-cy="merge-modal">
       <DialogTitle>
-        {Locale.label("people.mergeModal.mergeQuestion")} {person1?.name.display} {Locale.label("people.mergeModal.with")} {person2?.name.display}?
+        {Locale.label("people.mergeModal.mergeQuestion")} {person1?.name?.display} {Locale.label("people.mergeModal.with")} {person2?.name?.display}?
       </DialogTitle>
       <DialogContent>
         {conflicts.length > 0 && (

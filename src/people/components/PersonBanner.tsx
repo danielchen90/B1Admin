@@ -6,9 +6,11 @@ import {
   Email as EmailIcon,
   Home as HomeIcon,
   Sms as SmsIcon,
-  ViewKanban as WorkflowIcon
+  ViewKanban as WorkflowIcon,
+  DeleteOutline as DeleteIcon
 } from "@mui/icons-material";
 import { memo, useMemo, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppIconButton } from "../../components/ui/AppIconButton";
 import { StatusChip } from "../../components";
 import { SendTextDialog } from "../../groups/components/SendTextDialog";
@@ -21,8 +23,10 @@ interface Props {
 
 export const PersonBanner = memo((props: Props) => {
   const { person, togglePhotoEditor } = props;
+  const navigate = useNavigate();
 
   const [userEmail, setUserEmail] = useState<string>("");
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showTextDialog, setShowTextDialog] = useState(false);
   const [showWorkflowDialog, setShowWorkflowDialog] = useState(false);
   const [hasTextingProvider, setHasTextingProvider] = useState(false);
@@ -48,6 +52,20 @@ export const PersonBanner = memo((props: Props) => {
   }, [canText]);
 
   const canEdit = useMemo(() => UserHelper.checkAccess(Permissions.membershipApi.people.edit), []);
+
+  // Delete this person entirely (soft-delete on the server) and return to the list.
+  const handleDeletePerson = async () => {
+    if (!person?.id || isDeleting) return;
+    if (!window.confirm(`Delete ${person.name?.display || "this person"}? This removes the person record from People.`)) return;
+    setIsDeleting(true);
+    try {
+      await ApiHelper.delete("/people/" + person.id, "MembershipApi");
+      navigate("/people");
+    } catch (err: any) {
+      window.alert(err?.message ? "Could not delete: " + err.message : "Could not delete this person.");
+      setIsDeleting(false);
+    }
+  };
 
   const membershipStatus = useMemo(() => {
     if (!person?.membershipStatus) return null;
@@ -172,6 +190,9 @@ export const PersonBanner = memo((props: Props) => {
               </Typography>
               {canEdit && (
                 <AppIconButton label={Locale.label("people.personBanner.addToWorkflow")} icon={<WorkflowIcon />} tone="header" data-testid="add-to-workflow-button" onClick={() => setShowWorkflowDialog(true)} />
+              )}
+              {canEdit && (
+                <AppIconButton label="Delete Person" icon={<DeleteIcon />} tone="header" intent="remove" disabled={isDeleting} data-testid="delete-person-button" onClick={handleDeletePerson} />
               )}
             </Stack>
             <Stack direction="row" flexWrap="wrap" gap={1}>

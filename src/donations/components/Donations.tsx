@@ -145,7 +145,7 @@ export const Donations: React.FC<Props> = ({ currency = "usd", ...props }) => {
           </TableCell>
           <TableCell>
             <IconText icon={<PersonIcon />} iconSize={18} iconColor="text.secondary" variant="body2">
-              {d.person?.name.display || Locale.label("donations.donations.anon")}
+              {d.person?.name?.display || Locale.label("donations.donations.anon")}
             </IconText>
           </TableCell>
           <TableCell>

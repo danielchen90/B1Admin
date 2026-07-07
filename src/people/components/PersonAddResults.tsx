@@ -41,7 +41,7 @@ export const PersonAddResults: React.FC<Props> = (props: Props) => {
           <Avatar src={props.getPhotoUrl(sr)} sx={{ width: 48, height: 48 }} />
         </TableCell>
         <TableCell>
-          {sr.name.display}
+          {sr.name?.display}
           {props.includeEmail && (
             <>
               <br />

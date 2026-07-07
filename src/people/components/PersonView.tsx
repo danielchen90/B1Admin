@@ -250,7 +250,7 @@ export const PersonView = memo(({ person, editFunction, updatedFunction, showFor
           {avatar}
         </Grid>
         <Grid size={{ xs: 12, sm: 9 }}>
-          <h2 style={{ marginTop: 0 }}>{person?.name.display}</h2>
+          <h2 style={{ marginTop: 0 }}>{person?.name?.display}</h2>
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 6 }}>
               {leftAttributes}

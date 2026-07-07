@@ -111,12 +111,12 @@ export function HouseholdEdit(props: Props) {
       </TableCell>
       <TableCell>
         <FormControl fullWidth style={{ marginTop: 0 }}>
-          <InputLabel id="household-role">{m.name.display}</InputLabel>
+          <InputLabel id="household-role">{m.name?.display}</InputLabel>
           <Select
             aria-label="role"
             value={m.householdRole || ""}
             size="small"
-            label={m.name.display}
+            label={m.name?.display || ""}
             labelId="household-role"
             onChange={(e: SelectChangeEvent) => handleChangeRole(e, index)}
             data-testid="household-role-select">

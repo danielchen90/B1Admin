@@ -92,7 +92,7 @@ export const PersonAdd: React.FC<Props> = ({ addFunction, getPhotoUrl, searchCli
             type="button"
             onClick={() => handleAdd(sr)}
             style={{ background: "none", border: 0, padding: 0, color: "var(--link)", cursor: "pointer", textDecoration: "underline", textAlign: "left" }}>
-            {sr.name.display}
+            {sr.name?.display}
           </button>
           {includeEmail && (
             <>

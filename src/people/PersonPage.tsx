@@ -111,7 +111,7 @@ export const PersonPage = () => {
       allowAnonymousPosts: false,
       contentType: "person",
       contentId: person.id,
-      title: person.name.display + Locale.label("people.personPage.notesSuffix"),
+      title: (person.name?.display || "") + Locale.label("people.personPage.notesSuffix"),
       visibility: "hidden"
     };
     const result: ConversationInterface[] = await ApiHelper.post("/conversations", [conv], "MessagingApi");

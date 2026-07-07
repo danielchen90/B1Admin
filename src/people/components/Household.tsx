@@ -116,7 +116,7 @@ export const Household: React.FC<Props> = memo((props) => {
                 <Stack direction="row" spacing={3} alignItems="center" mb={2}>
                   <Link to={"/people/" + m.id} style={{ textDecoration: "none" }}>
                     <Typography variant="h5" sx={{ color: "primary.main", "&:hover": { textDecoration: "underline" } }}>
-                      {m.name.display}
+                      {m.name?.display}
                     </Typography>
                   </Link>
                   {m.householdRole && <Chip label={m.householdRole} size="medium" variant="outlined" sx={{ fontSize: "0.875rem" }} />}
