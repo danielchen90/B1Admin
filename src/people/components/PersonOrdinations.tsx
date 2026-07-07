@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from "react";
-import { UniqueIdHelper, Loading, type PersonInterface } from "@churchapps/apphelper";
+import { ApiHelper, UniqueIdHelper, Loading, type PersonInterface } from "@churchapps/apphelper";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Stack, Typography, List, ListItem, ListItemText, ListItemButton, Dialog, DialogTitle } from "@mui/material";
-import { WorkspacePremium as OrdinationIcon, Add as AddIcon, Print as PrintIcon } from "@mui/icons-material";
+import { WorkspacePremium as OrdinationIcon, Add as AddIcon, Print as PrintIcon, DeleteOutline as DeleteIcon } from "@mui/icons-material";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { CardWithHeader } from "../../components/ui/CardWithHeader";
 import { CountChip } from "../../components/ui/CountChip";
@@ -58,6 +58,7 @@ export const PersonOrdinations: React.FC<Props> = (props) => {
   // picker for a person-level print when they hold more than one credential.
   const [printRow, setPrintRow] = useState<PersonOrdinationInterface | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const typeNames = useMemo(() => {
     const map: Record<string, string> = {};
@@ -99,6 +100,23 @@ export const PersonOrdinations: React.FC<Props> = (props) => {
     if (fresh) setStatusRow(fresh);
   };
 
+  // Remove (soft-delete) a credential entirely — distinct from revoking (which keeps
+  // a revoked row on file). The server loads the current version, so no version is
+  // sent from here. Confirm first since it drops out of every list.
+  const handleRemove = async (o: PersonOrdinationInterface) => {
+    const label = (o.ordinationTypeId && typeNames[o.ordinationTypeId]) || "this credential";
+    if (!window.confirm(`Remove ${label}? This deletes the credential record and cannot be undone here.`)) return;
+    setRemovingId(o.id || null);
+    try {
+      await ApiHelper.delete("/personOrdinations/" + o.id, "MembershipApi");
+      handleChanged();
+    } catch (err: any) {
+      window.alert(err?.message ? "Could not remove: " + err.message : "Could not remove this credential.");
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
   const recordsContent = () => {
     if (ordinations.isLoading) return <Loading size="sm" />;
     if (count === 0) {
@@ -114,6 +132,7 @@ export const PersonOrdinations: React.FC<Props> = (props) => {
               <Stack direction="row" spacing={0.5} alignItems="center">
                 <Button variant="text" size="small" startIcon={<PrintIcon />} onClick={() => setPrintRow(o)} data-testid="ordination-print-button">Print License</Button>
                 <Button variant="text" size="small" onClick={() => setStatusRow(o)} data-testid="ordination-manage-button">Manage</Button>
+                <Button variant="text" size="small" color="error" startIcon={<DeleteIcon />} disabled={removingId === o.id} onClick={() => handleRemove(o)} data-testid="ordination-remove-button">Remove</Button>
               </Stack>
             ) : undefined}
             sx={{ px: 1, py: 1 }}>
@@ -174,6 +193,8 @@ export const PersonOrdinations: React.FC<Props> = (props) => {
         <OrdinationStatusDialog
           open={!!statusRow}
           ordination={statusRow}
+          typeName={statusRow.ordinationTypeId ? typeNames[statusRow.ordinationTypeId] : undefined}
+          campusName={statusRow.campusId ? campusNames[statusRow.campusId] : undefined}
           onClose={() => setStatusRow(null)}
           onChanged={handleChanged}
           onVersionConflict={handleVersionConflict}

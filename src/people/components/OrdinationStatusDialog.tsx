@@ -1,17 +1,32 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack, TextField } from "@mui/material";
+import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { ApiHelper } from "@churchapps/apphelper";
+import { StatusChip } from "../../components/ui/StatusChip";
 import { type PersonOrdinationInterface } from "./PersonOrdinationInterface";
 import { allowedNextStatuses, parseApiError } from "../../helpers/OrdinationHelper";
 
 interface Props {
   open: boolean;
   ordination: PersonOrdinationInterface;
+  typeName?: string;
+  campusName?: string;
   onClose: () => void;
   onChanged: (updated: PersonOrdinationInterface) => void;
   onVersionConflict: () => void;
 }
+
+const EM_DASH = "—";
+// `type="date"` inputs need a bare YYYY-MM-DD; the API returns full ISO datetimes
+// (e.g. 2026-07-17T00:00:00.000Z), which the input silently rejects — leaving the
+// field blank. Slice to the date part so existing dates actually pre-populate.
+const toDateInput = (v?: string | null): string => (v ? String(v).slice(0, 10) : "");
+const fmtDate = (v?: string | null): string => {
+  if (!v) return EM_DASH;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? String(v) : d.toLocaleDateString();
+};
+const titleCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 type StatusForm = {
   status: string;
@@ -20,8 +35,6 @@ type StatusForm = {
   expirationDate: string;
   notes: string;
 };
-
-const titleCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 // Edits ONE existing credential's lifecycle. The status options come ONLY from
 // allowedNextStatuses (Pitfall 4 — revoked is terminal, so a revoked row offers
@@ -43,8 +56,8 @@ export const OrdinationStatusDialog: React.FC<Props> = (props) => {
       reset({
         status: "",
         credentialNumber: ordination?.credentialNumber ?? "",
-        grantedDate: ordination?.grantedDate ?? "",
-        expirationDate: ordination?.expirationDate ?? "",
+        grantedDate: toDateInput(ordination?.grantedDate),
+        expirationDate: toDateInput(ordination?.expirationDate),
         notes: ordination?.notes ?? ""
       });
       setErrorMsg("");
@@ -90,6 +103,23 @@ export const OrdinationStatusDialog: React.FC<Props> = (props) => {
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           {errorMsg && <Alert severity="error" data-testid="ordination-status-error">{errorMsg}</Alert>}
+
+          {/* Current values — what the user is changing FROM. */}
+          <Stack spacing={1} sx={{ bgcolor: "action.hover", borderRadius: 1, p: 1.5 }} data-testid="ordination-status-current">
+            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+              <Typography sx={{ fontWeight: 600 }}>{props.typeName || "Credential"}</Typography>
+              <StatusChip status={ordination?.status || ""} />
+              {props.campusName && <Typography variant="body2" color="text.secondary">{props.campusName}</Typography>}
+            </Stack>
+            <Typography variant="body2" color="text.secondary" component="div">
+              {"Current status: "}<b>{titleCase(ordination?.status || EM_DASH)}</b>
+              {"  •  #"}{ordination?.credentialNumber || EM_DASH}
+              {"  •  Granted "}{fmtDate(ordination?.grantedDate)}
+              {"  •  Expires "}{fmtDate(ordination?.expirationDate)}
+            </Typography>
+          </Stack>
+          <Divider />
+
           <TextField
             fullWidth
             select
