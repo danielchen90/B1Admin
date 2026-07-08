@@ -10,6 +10,7 @@ import { useCampuses } from "../hooks/useCampuses";
 import { type AuxiliaryInterface } from "./AuxiliaryInterface";
 import { AuxiliaryEdit } from "./components/AuxiliaryEdit";
 import { AuxiliaryPresidents } from "./components/AuxiliaryPresidents";
+import { AuxiliaryMemberManager } from "./components/AuxiliaryMemberManager";
 
 interface Rollup { auxiliary: AuxiliaryInterface; instances: GroupInterface[]; members: GroupMemberInterface[] }
 
@@ -103,6 +104,18 @@ export const AuxiliaryPage: React.FC = () => {
 
       <Box sx={{ px: 3, pb: 3 }}>
         {canEdit && params.id && <AuxiliaryPresidents auxiliaryId={params.id} />}
+
+        {params.id && instances.length > 0 && (
+          <>
+            {!canEdit && <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>You preside over this auxiliary — manage its members below.</Typography>}
+            <AuxiliaryMemberManager
+              auxiliaryId={params.id}
+              instances={instances}
+              members={members}
+              onChanged={() => qc.invalidateQueries({ queryKey: [`/auxiliaries/${params.id}/rollup`, "MembershipApi"] })}
+            />
+          </>
+        )}
 
         {accessibleCampuses.length > 1 && (
           <Card variant="outlined" sx={{ mb: 2, p: 2 }}>
