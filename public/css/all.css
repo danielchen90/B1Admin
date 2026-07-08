@@ -78,6 +78,17 @@ button:focus-visible,
   outline: 2px solid var(--focus);
 }
 
+/* --- Top nav bar: apphelper's SiteHeader sets `--c1:#1565C0` (plus derived
+   shades) via an inline style on #site-header, which shadows our :root navy for
+   the whole header subtree. An !important author rule outranks a non-important
+   inline custom property, so re-assert the HURO navy ramp here. --- */
+#site-header {
+  --c1: #0B1D3A !important;
+  --c1d1: #091730 !important;
+  --c1d2: #071228 !important;
+  --c1l2: #1E4675 !important;
+}
+
 /* --- Login surface: apphelper bakes hsl(218,85%,50/55%) blue into its login form
    via inline sx. Remap those accents to HURO navy/gold so the brand carries through. --- */
 .split-login-page .MuiButton-contained {
