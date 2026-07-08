@@ -39,7 +39,13 @@ export const CampusesPage: React.FC = () => {
       if (!byCountry.has(key)) byCountry.set(key, []);
       byCountry.get(key)!.push(c);
     }
-    return [...byCountry.entries()].sort((a, b) => (a[0] === "Other" ? 1 : b[0] === "Other" ? -1 : a[0].localeCompare(b[0])));
+    // Order country groups by campus count (most first, least last); "Other"
+    // always sinks to the bottom, ties broken alphabetically.
+    return [...byCountry.entries()].sort((a, b) => {
+      if ((a[0] === "Other") !== (b[0] === "Other")) return a[0] === "Other" ? 1 : -1;
+      if (b[1].length !== a[1].length) return b[1].length - a[1].length;
+      return a[0].localeCompare(b[0]);
+    });
   }, [campuses, search, sortBy, countFor]);
 
   return (
