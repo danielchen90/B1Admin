@@ -42,6 +42,7 @@ export const Header: React.FC = () => {
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/ordinations", icon: "workspace_premium", label: "Ordinations" });
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/campuses", icon: "location_on", label: "Campuses" });
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view) || auxiliaries.length > 0) menuItems.push({ url: "/auxiliaries", icon: "workspaces", label: "Auxiliaries" });
+    if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/groups", icon: "groups", label: "Groups" });
     if (UserHelper.checkAccess(Permissions.givingApi.donations.viewSummary)) menuItems.push({ url: "/donations", label: Locale.label("components.wrapper.don"), icon: donationIcon });
 
     const canViewPlans = UserHelper.checkAccess(Permissions.membershipApi.plans.edit) || isMinistryMember;
@@ -76,7 +77,7 @@ export const Header: React.FC = () => {
     else if (path.startsWith("/auxiliaries")) result = "Auxiliaries";
     else if (path.startsWith("/ordinations")) result = "Ordinations";
     else if (path.startsWith("/attendance")) result = Locale.label("components.wrapper.ppl");
-    else if (path.startsWith("/groups")) result = Locale.label("components.wrapper.ppl");
+    else if (path.startsWith("/groups")) result = "Groups";
     else if (path.startsWith("/forms")) result = Locale.label("components.wrapper.ppl");
     else if (path.startsWith("/donations")) result = Locale.label("components.wrapper.don");
     else if (path.startsWith("/serving") || window.location.search.indexOf("tag=") > -1) result = Locale.label("components.wrapper.serving");
