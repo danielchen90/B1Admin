@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { GroupAdd } from "./components";
 import { ApiHelper, UserHelper, Loading, Locale, PageHeader } from "@churchapps/apphelper";
 import { Link, useNavigate } from "react-router-dom";
-import { Table, TableBody, TableCell, TableRow, Box, Card, Chip, Button, Stack, Typography } from "@mui/material";
+import { Table, TableBody, TableCell, TableRow, Box, Card, Chip, Button, Stack, Typography, Grid } from "@mui/material";
 import { Add as AddIcon, Folder as FolderIcon, Group as GroupIcon, Inbox as InboxIcon, LocationOn as CampusIcon, MonitorHeart as HealthIcon, People as PeopleIcon, Workspaces as AuxIcon } from "@mui/icons-material";
 import { type GroupInterface, type GroupJoinRequestInterface } from "@churchapps/helpers";
 import { useMountedState, Permissions } from "@churchapps/apphelper";
@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CountChip, ExportButton, SortableTableHead } from "../components/ui";
 import { useAuxiliaries } from "../hooks/useAuxiliaries";
 import { useCampuses } from "../hooks/useCampuses";
+import { GroupsFilterPanel, matchesGroupsFilter, activeGroupsFilterCount, EMPTY_GROUPS_FILTER, type GroupsFilterSpec } from "./GroupsFilterPanel";
 
 const formatHeader = (key: string): string => {
   const customMap: Record<string, string> = {
@@ -43,34 +44,16 @@ const GroupsPage = () => {
   const [groups, setGroups] = useState<GroupInterface[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [campusFilter, setCampusFilter] = useState<string>("");
-  const [auxFilter, setAuxFilter] = useState<string>("");
+  const [spec, setSpec] = useState<GroupsFilterSpec>(EMPTY_GROUPS_FILTER);
   const isMounted = useMountedState();
   const navigate = useNavigate();
 
-  // Church-wide auxiliary/campus lists power the rollup chips on each group and
-  // the campus/auxiliary filter bar (mirrors the Auxiliaries dashboard). Both
-  // share the same cached React Query fetch used elsewhere.
+  // Church-wide auxiliary/campus lists power the rollup chips on each group and the
+  // sidebar filter's Campus/Auxiliary checkbox lists. Both share the same cached fetch.
   const auxiliaries = useAuxiliaries();
   const campuses = useCampuses();
   const auxName = useMemo(() => new Map(auxiliaries.map((a) => [a.id, a.name])), [auxiliaries]);
   const campusName = useMemo(() => new Map(campuses.map((c) => [c.id, c.name])), [campuses]);
-
-  // Rollup stats across every standard group (not the filtered subset).
-  const totalMembers = useMemo(() => groups.reduce((s, g) => s + (g.memberCount || 0), 0), [groups]);
-  const campusesCovered = useMemo(() => new Set(groups.map((g) => (g as any).campusId).filter(Boolean)).size, [groups]);
-
-  // Only offer filter chips for campuses/auxiliaries that actually have groups.
-  const usedCampusIds = useMemo(() => Array.from(new Set(groups.map((g) => (g as any).campusId).filter(Boolean))), [groups]);
-  const usedAuxIds = useMemo(() => Array.from(new Set(groups.map((g) => (g as any).auxiliaryId).filter(Boolean))), [groups]);
-
-  const visibleGroups = useMemo(
-    () =>
-      groups.filter(
-        (g) => (!campusFilter || (g as any).campusId === campusFilter) && (!auxFilter || (g as any).auxiliaryId === auxFilter)
-      ),
-    [groups, campusFilter, auxFilter]
-  );
 
   const handleAddUpdated = () => {
     setShowAdd(false);
@@ -94,6 +77,23 @@ const GroupsPage = () => {
 
   React.useEffect(loadData, [isMounted]);
 
+  // Rollup stats across every standard group (not the filtered subset).
+  const totalMembers = useMemo(() => groups.reduce((s, g) => s + (g.memberCount || 0), 0), [groups]);
+  const campusesCovered = useMemo(() => new Set(groups.map((g) => (g as any).campusId).filter(Boolean)).size, [groups]);
+
+  // Only offer campuses/auxiliaries that actually have groups as checkbox options.
+  const campusOptions = useMemo(() => {
+    const used = new Set(groups.map((g) => (g as any).campusId).filter(Boolean));
+    return campuses.filter((c) => used.has(c.id)).map((c) => ({ id: c.id!, name: c.name! })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [groups, campuses]);
+  const auxiliaryOptions = useMemo(() => {
+    const used = new Set(groups.map((g) => (g as any).auxiliaryId).filter(Boolean));
+    return auxiliaries.filter((a) => used.has(a.id)).map((a) => ({ id: a.id!, name: a.name! })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [groups, auxiliaries]);
+
+  const visibleGroups = useMemo(() => groups.filter((g) => matchesGroupsFilter(g, spec)), [groups, spec]);
+  const activeFilters = activeGroupsFilterCount(spec);
+
   const canApproveRequests = UserHelper.checkAccess(Permissions.membershipApi.groupMembers.edit);
   const { data: pendingRequests = [] } = useQuery<GroupJoinRequestInterface[]>({
     queryKey: ["/groupjoinrequests/pending", "MembershipApi"],
@@ -110,7 +110,7 @@ const GroupsPage = () => {
   });
   const showServingTeams = canEditPlans || (myMinistries?.length || 0) > 0;
 
-  const exportData = groups.map((g) => {
+  const exportData = visibleGroups.map((g) => {
     const { labelArray, ...rest } = g;
 
     const rawExport: any = {
@@ -141,7 +141,7 @@ const GroupsPage = () => {
     if (visibleGroups.length === 0) {
       rows.push(
         <TableRow key="0">
-          <TableCell colSpan={5}>{groups.length === 0 ? Locale.label("groups.groupsPage.noGroupMsg") : "No groups match the selected filters."}</TableCell>
+          <TableCell colSpan={5}>{groups.length === 0 ? Locale.label("groups.groupsPage.noGroupMsg") : "No groups match the current filters."}</TableCell>
         </TableRow>
       );
       return rows;
@@ -153,7 +153,7 @@ const GroupsPage = () => {
       const cat =
         g.categoryName !== lastCat ? (
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            <FolderIcon sx={{ color: "text.secondary", fontSize: 18, marginRight: "5px" }} /> {g.categoryName}
+            <FolderIcon sx={{ color: "text.secondary", fontSize: 18, marginRight: "5px" }} /> {g.categoryName || "Uncategorized"}
           </Box>
         ) : (
           <></>
@@ -191,70 +191,41 @@ const GroupsPage = () => {
 
   const getTable = () => {
     if (isLoading) return <Loading />;
-    else {
-      return (
-        <Card>
-          <Box sx={{ p: 2, borderBottom: 1, borderColor: "var(--border-light)" }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Stack direction="row" spacing={1} alignItems="center">
-                <GroupIcon sx={{ color: "primary.main", fontSize: 20 }} />
-                <Typography variant="h6">{Locale.label("groups.groupsPage.groups")}</Typography>
-                {groups.length > 0 && <CountChip count={visibleGroups.length} />}
-              </Stack>
-              <Stack direction="row" spacing={1} alignItems="center">
-                {groups.length > 0 && UserHelper.checkAccess(Permissions.membershipApi.groups.edit) && (
-                  <ExportButton data={exportData} filename="groups.csv" text={Locale.label("groups.groupsPage.export")} />
-                )}
-              </Stack>
+    return (
+      <Card>
+        <Box sx={{ p: 2, borderBottom: 1, borderColor: "var(--border-light)" }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Stack direction="row" spacing={1} alignItems="center">
+              <GroupIcon sx={{ color: "primary.main", fontSize: 20 }} />
+              <Typography variant="h6">{Locale.label("groups.groupsPage.groups")}</Typography>
+              {groups.length > 0 && <CountChip count={visibleGroups.length} />}
+              {activeFilters > 0 && <Typography variant="caption" sx={{ color: "var(--text-muted)" }}>of {groups.length}</Typography>}
             </Stack>
-          </Box>
-          {(usedCampusIds.length > 0 || usedAuxIds.length > 0) && (
-            <Box sx={{ p: 2, borderBottom: 1, borderColor: "var(--border-light)", display: "flex", flexWrap: "wrap", gap: 1, alignItems: "center" }}>
-              {usedCampusIds.length > 0 && (
-                <>
-                  <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mr: 0.5 }}>
-                    <CampusIcon sx={{ color: "text.secondary", fontSize: 18 }} />
-                    <Typography variant="caption" color="text.secondary">Campus:</Typography>
-                  </Stack>
-                  <Chip size="small" label="All" variant={campusFilter ? "outlined" : "filled"} color={campusFilter ? "default" : "primary"} onClick={() => setCampusFilter("")} />
-                  {usedCampusIds.map((id) => (
-                    <Chip key={id} size="small" label={campusName.get(id) || "Unknown"} variant={campusFilter === id ? "filled" : "outlined"} color={campusFilter === id ? "primary" : "default"} onClick={() => setCampusFilter(campusFilter === id ? "" : id)} />
-                  ))}
-                </>
+            <Stack direction="row" spacing={1} alignItems="center">
+              {groups.length > 0 && UserHelper.checkAccess(Permissions.membershipApi.groups.edit) && (
+                <ExportButton data={exportData} filename="groups.csv" text={Locale.label("groups.groupsPage.export")} />
               )}
-              {usedAuxIds.length > 0 && (
-                <>
-                  <Stack direction="row" spacing={0.5} alignItems="center" sx={{ ml: usedCampusIds.length > 0 ? 2 : 0, mr: 0.5 }}>
-                    <AuxIcon sx={{ color: "text.secondary", fontSize: 18 }} />
-                    <Typography variant="caption" color="text.secondary">Auxiliary:</Typography>
-                  </Stack>
-                  <Chip size="small" label="All" variant={auxFilter ? "outlined" : "filled"} color={auxFilter ? "default" : "primary"} onClick={() => setAuxFilter("")} />
-                  {usedAuxIds.map((id) => (
-                    <Chip key={id} size="small" label={auxName.get(id) || "Unknown"} variant={auxFilter === id ? "filled" : "outlined"} color={auxFilter === id ? "primary" : "default"} onClick={() => setAuxFilter(auxFilter === id ? "" : id)} />
-                  ))}
-                </>
-              )}
-            </Box>
-          )}
-          <Box sx={{ overflowX: "auto" }}>
-            <Table>
-              {groups.length > 0 && (
-                <SortableTableHead
-                  columns={[
-                    { key: "categoryName", label: Locale.label("groups.groupsPage.cat") },
-                    { key: "name", label: Locale.label("common.name") },
-                    { key: "campusId", label: "Campus" },
-                    { key: "labels", label: Locale.label("groups.groupsPage.labels") },
-                    { key: "memberCount", label: Locale.label("groups.groupsPage.ppl") }
-                  ]}
-                />
-              )}
-              <TableBody>{getRows()}</TableBody>
-            </Table>
-          </Box>
-        </Card>
-      );
-    }
+            </Stack>
+          </Stack>
+        </Box>
+        <Box sx={{ overflowX: "auto" }}>
+          <Table>
+            {groups.length > 0 && (
+              <SortableTableHead
+                columns={[
+                  { key: "categoryName", label: Locale.label("groups.groupsPage.cat") },
+                  { key: "name", label: Locale.label("common.name") },
+                  { key: "campusId", label: "Campus" },
+                  { key: "labels", label: Locale.label("groups.groupsPage.labels") },
+                  { key: "memberCount", label: Locale.label("groups.groupsPage.ppl") }
+                ]}
+              />
+            )}
+            <TableBody>{getRows()}</TableBody>
+          </Table>
+        </Box>
+      </Card>
+    );
   };
 
   return (
@@ -322,14 +293,7 @@ const GroupsPage = () => {
                 to="/groups/pending"
                 startIcon={<InboxIcon />}
                 data-testid="pending-requests-link"
-                sx={{
-                  color: "#FFF",
-                  borderColor: "rgba(255,255,255,0.5)",
-                  "&:hover": {
-                    borderColor: "#FFF",
-                    backgroundColor: "rgba(255,255,255,0.1)"
-                  }
-                }}>
+                sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}>
                 {pendingCount} pending request{pendingCount === 1 ? "" : "s"}
               </Button>
             )}
@@ -340,14 +304,7 @@ const GroupsPage = () => {
                 to="/groups/health"
                 startIcon={<HealthIcon />}
                 data-testid="group-health-link"
-                sx={{
-                  color: "#FFF",
-                  borderColor: "rgba(255,255,255,0.5)",
-                  "&:hover": {
-                    borderColor: "#FFF",
-                    backgroundColor: "rgba(255,255,255,0.1)"
-                  }
-                }}>
+                sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}>
                 {Locale.label("groups.groupHealth.title")}
               </Button>
             )}
@@ -358,14 +315,7 @@ const GroupsPage = () => {
                 to="/serving"
                 startIcon={<PeopleIcon />}
                 data-testid="serving-teams-button"
-                sx={{
-                  color: "#FFF",
-                  borderColor: "rgba(255,255,255,0.5)",
-                  "&:hover": {
-                    borderColor: "#FFF",
-                    backgroundColor: "rgba(255,255,255,0.1)"
-                  }
-                }}>
+                sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}>
                 {Locale.label("components.wrapper.teams")}
               </Button>
             )}
@@ -374,14 +324,7 @@ const GroupsPage = () => {
                 variant="outlined"
                 startIcon={<AddIcon />}
                 onClick={() => setShowAdd(true)}
-                sx={{
-                  color: "#FFF",
-                  borderColor: "rgba(255,255,255,0.5)",
-                  "&:hover": {
-                    borderColor: "#FFF",
-                    backgroundColor: "rgba(255,255,255,0.1)"
-                  }
-                }}
+                sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}
                 data-testid="add-group-button">
                 {Locale.label("groups.groupsPage.addGroup")}
               </Button>
@@ -393,7 +336,14 @@ const GroupsPage = () => {
       {/* Main Content */}
       <Box sx={{ p: 3 }}>
         {addBox}
-        {getTable()}
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, md: 3 }}>
+            <GroupsFilterPanel spec={spec} onChange={setSpec} campuses={campusOptions} auxiliaries={auxiliaryOptions} />
+          </Grid>
+          <Grid size={{ xs: 12, md: 9 }}>
+            {getTable()}
+          </Grid>
+        </Grid>
       </Box>
     </>
   );
