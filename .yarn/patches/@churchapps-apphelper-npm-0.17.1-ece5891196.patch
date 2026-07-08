@@ -1,0 +1,13 @@
+diff --git a/dist/login/LoginPage.js b/dist/login/LoginPage.js
+index dd43f895c3510a87e7e31309659078a8737335bf..b25c1199f05e10f08e1b5362c91e34a780348b18 100644
+--- a/dist/login/LoginPage.js
++++ b/dist/login/LoginPage.js
+@@ -116,6 +116,8 @@ const LoginPageContent = ({ showLogo = true, loginContainerCssProps, ...props })
+             selectedChurchId = cookies.lastChurchId;
+             selectChurchById();
+         }
++        else if ((resp.userChurches || []).length === 1)
++            selectChurch(resp.userChurches[0].church.id);
+         else
+             setShowSelectModal(true);
+     };
