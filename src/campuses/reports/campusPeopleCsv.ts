@@ -1,11 +1,16 @@
 import { type PersonInterface } from "@churchapps/helpers";
 import { ageFromBirthDate } from "../helpers/campusDemographics";
+import { type OrdinationInfo, ordinationTitle } from "../helpers/campusOrdinations";
 
 // Flat per-person rows for the per-campus CSV export, fed to <ExportButton>
 // (ExportLink maps each header's `key` → `label`). Mirrors the flattening in
-// people/PeoplePage.getExportData but scoped to the campus roster columns.
+// people/PeoplePage.getExportData but scoped to the campus roster columns, with
+// the leadership section + ordination title surfaced so the export reflects the
+// same "leaders first, then members" grouping as the on-screen list.
 
 export const CAMPUS_PEOPLE_HEADERS: { label: string; key: string }[] = [
+  { label: "Section", key: "section" },
+  { label: "Ordination", key: "ordination" },
   { label: "Display Name", key: "displayName" },
   { label: "First Name", key: "firstName" },
   { label: "Last Name", key: "lastName" },
@@ -22,10 +27,14 @@ export const CAMPUS_PEOPLE_HEADERS: { label: string; key: string }[] = [
   { label: "Zip", key: "zip" }
 ];
 
-export function toCampusPeopleCsv(people: PersonInterface[]): Record<string, any>[] {
+// `people` is expected already ordered leaders-first by the caller.
+export function toCampusPeopleCsv(people: PersonInterface[], ordByPerson: Map<string, OrdinationInfo>): Record<string, any>[] {
   return people.map((p) => {
+    const ordination = ordinationTitle(p, ordByPerson);
     const age = ageFromBirthDate(p.birthDate as any);
     return {
+      section: ordination ? "Ordained Leader" : "Member",
+      ordination,
       displayName: p.name?.display || "",
       firstName: p.name?.first || "",
       lastName: p.name?.last || "",

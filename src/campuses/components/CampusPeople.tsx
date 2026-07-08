@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from "react";
-import { Box, Card, Stack, Typography, TextField, InputAdornment, Table, TableBody, TableCell, TableHead, TableRow, Avatar, Button, CircularProgress, Link } from "@mui/material";
-import { Search as SearchIcon, People as PeopleIcon, PictureAsPdf as PdfIcon } from "@mui/icons-material";
+import { Box, Card, Stack, Typography, TextField, InputAdornment, Table, TableBody, TableCell, TableHead, TableRow, Avatar, Button, CircularProgress, Link, Chip } from "@mui/material";
+import { Search as SearchIcon, People as PeopleIcon, PictureAsPdf as PdfIcon, WorkspacePremium as LeaderIcon } from "@mui/icons-material";
 import { ApiHelper } from "@churchapps/apphelper";
 import { type PersonInterface } from "@churchapps/helpers";
 import { useQuery } from "@tanstack/react-query";
@@ -8,14 +8,19 @@ import { useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { CountChip, ExportButton } from "../../components/ui";
 import { EnvironmentHelper } from "../../helpers";
+import { useOrdinationTypes } from "../../hooks/useOrdinationTypes";
+import { type PersonOrdinationInterface } from "../../people/components/PersonOrdinationInterface";
 import { type CampusInterface } from "../../settings/components/CampusInterface";
 import { ageFromBirthDate } from "../helpers/campusDemographics";
+import { buildOrdinationsByPerson, splitCampusPeople } from "../helpers/campusOrdinations";
 import { toCampusPeopleCsv, CAMPUS_PEOPLE_HEADERS } from "../reports/campusPeopleCsv";
 import { CampusDemographicsSummary } from "./CampusDemographicsSummary";
 import { CampusRoster } from "./CampusRoster";
 
 // People tab: everyone assigned to this campus, fetched via the existing
-// advancedSearch campusId filter. Report-style list with per-campus CSV + PDF export.
+// advancedSearch campusId filter. Ordained leaders are shown first as their own
+// section (with their credential title), then the rest of the membership.
+// Report-style list with per-campus CSV + PDF export that mirrors the grouping.
 export const CampusPeople: React.FC<{ campus?: CampusInterface }> = ({ campus }) => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
@@ -28,15 +33,50 @@ export const CampusPeople: React.FC<{ campus?: CampusInterface }> = ({ campus })
     enabled: !!campus?.id,
     placeholderData: []
   });
+  const ordinationsQuery = useQuery<PersonOrdinationInterface[]>({ queryKey: ["/personOrdinations", "MembershipApi"], placeholderData: [] });
+  const types = useOrdinationTypes();
+
   const people = peopleQuery.data || [];
+  const ordByPerson = useMemo(() => buildOrdinationsByPerson(ordinationsQuery.data || [], types), [ordinationsQuery.data, types]);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     return term ? people.filter((p) => (p.name?.display || "").toLowerCase().includes(term)) : people;
   }, [people, search]);
 
+  const { leaders, members } = useMemo(() => splitCampusPeople(filtered, ordByPerson), [filtered, ordByPerson]);
+  const orderedForExport = useMemo(() => [...leaders, ...members], [leaders, members]);
+
   const photoUrl = (p: PersonInterface) => (p.photo ? (p.photo.startsWith("http") ? p.photo : EnvironmentHelper.Common.ContentRoot + p.photo) : undefined);
   const fileBase = (campus?.name || "campus").replace(/\s+/g, "-").toLowerCase();
+
+  const personRow = (p: PersonInterface, isLeader: boolean) => (
+    <TableRow key={p.id} hover>
+      <TableCell>
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Avatar src={photoUrl(p)} sx={{ width: 32, height: 32 }}>{(p.name?.first || "?").charAt(0)}</Avatar>
+          <Link component="button" underline="hover" onClick={() => navigate(`/people/${p.id}`)}>{p.name?.display}</Link>
+        </Stack>
+      </TableCell>
+      <TableCell>{isLeader && p.id ? <Typography variant="body2" color="primary" sx={{ fontWeight: 600 }}>{ordByPerson.get(p.id)?.titles.join(", ")}</Typography> : <Typography variant="body2" color="text.disabled">—</Typography>}</TableCell>
+      <TableCell>{p.gender || "—"}</TableCell>
+      <TableCell>{ageFromBirthDate(p.birthDate as any) ?? "—"}</TableCell>
+      <TableCell>{p.membershipStatus || "—"}</TableCell>
+      <TableCell>{p.contactInfo?.email || p.contactInfo?.mobilePhone || "—"}</TableCell>
+    </TableRow>
+  );
+
+  const sectionHeader = (icon: React.ReactNode, label: string, count: number) => (
+    <TableRow>
+      <TableCell colSpan={6} sx={{ bgcolor: "action.hover", py: 1 }}>
+        <Stack direction="row" spacing={1} alignItems="center">
+          {icon}
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{label}</Typography>
+          <CountChip count={count} />
+        </Stack>
+      </TableCell>
+    </TableRow>
+  );
 
   return (
     <Box sx={{ p: 3 }}>
@@ -52,10 +92,11 @@ export const CampusPeople: React.FC<{ campus?: CampusInterface }> = ({ campus })
               <PeopleIcon color="primary" />
               <Typography variant="h6">People</Typography>
               <CountChip count={people.length} />
+              {leaders.length > 0 && <Chip size="small" color="primary" variant="outlined" icon={<LeaderIcon />} label={`${leaders.length} ordained`} />}
             </Stack>
             <Stack direction="row" spacing={1} alignItems="center">
               <TextField size="small" placeholder="Filter by name" value={search} onChange={(e) => setSearch(e.target.value)} InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment>) }} />
-              <ExportButton data={toCampusPeopleCsv(filtered)} customHeaders={CAMPUS_PEOPLE_HEADERS} filename={`${fileBase}-people.csv`} text="CSV" />
+              <ExportButton data={toCampusPeopleCsv(orderedForExport, ordByPerson)} customHeaders={CAMPUS_PEOPLE_HEADERS} filename={`${fileBase}-people.csv`} text="CSV" />
               <Button size="small" variant="outlined" startIcon={<PdfIcon />} onClick={() => handlePrint()} disabled={filtered.length === 0}>PDF</Button>
             </Stack>
           </Stack>
@@ -70,6 +111,7 @@ export const CampusPeople: React.FC<{ campus?: CampusInterface }> = ({ campus })
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>
+                <TableCell>Ordination</TableCell>
                 <TableCell>Gender</TableCell>
                 <TableCell>Age</TableCell>
                 <TableCell>Membership</TableCell>
@@ -77,20 +119,10 @@ export const CampusPeople: React.FC<{ campus?: CampusInterface }> = ({ campus })
               </TableRow>
             </TableHead>
             <TableBody>
-              {filtered.map((p) => (
-                <TableRow key={p.id} hover>
-                  <TableCell>
-                    <Stack direction="row" spacing={1.5} alignItems="center">
-                      <Avatar src={photoUrl(p)} sx={{ width: 32, height: 32 }}>{(p.name?.first || "?").charAt(0)}</Avatar>
-                      <Link component="button" underline="hover" onClick={() => navigate(`/people/${p.id}`)}>{p.name?.display}</Link>
-                    </Stack>
-                  </TableCell>
-                  <TableCell>{p.gender || "—"}</TableCell>
-                  <TableCell>{ageFromBirthDate(p.birthDate as any) ?? "—"}</TableCell>
-                  <TableCell>{p.membershipStatus || "—"}</TableCell>
-                  <TableCell>{p.contactInfo?.email || p.contactInfo?.mobilePhone || "—"}</TableCell>
-                </TableRow>
-              ))}
+              {leaders.length > 0 && sectionHeader(<LeaderIcon fontSize="small" color="primary" />, "Ordained Leaders", leaders.length)}
+              {leaders.map((p) => personRow(p, true))}
+              {members.length > 0 && sectionHeader(<PeopleIcon fontSize="small" color="action" />, "Members", members.length)}
+              {members.map((p) => personRow(p, false))}
             </TableBody>
           </Table>
         )}
@@ -98,7 +130,7 @@ export const CampusPeople: React.FC<{ campus?: CampusInterface }> = ({ campus })
 
       {/* Off-screen printable roster for the PDF export */}
       <Box sx={{ position: "absolute", left: -99999, top: 0 }} aria-hidden>
-        <CampusRoster ref={contentRef} campus={campus} people={filtered} />
+        <CampusRoster ref={contentRef} campus={campus} people={orderedForExport} ordByPerson={ordByPerson} />
       </Box>
     </Box>
   );
