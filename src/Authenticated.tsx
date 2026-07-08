@@ -5,6 +5,7 @@ import { NotificationService, UserHelper } from "@churchapps/apphelper";
 import { Box } from "@mui/material";
 import { PageSkeleton } from "./components/ui/PageSkeleton";
 import UserContext from "./UserContext";
+import { canWriteOrdinations } from "./helpers/OrdinationHelper";
 
 // Lazy load all page components for code splitting
 const PeoplePage = React.lazy(() => import("./people/PeoplePage").then((module) => ({ default: module.PeoplePage })));
@@ -72,6 +73,12 @@ const OrdinationsHubPage = React.lazy(() => import("./ordinations/OrdinationsHub
 const TemplateEditor = React.lazy(() => import("./licenseTemplates/editor/TemplateEditor").then((m) => ({ default: m.TemplateEditor })));
 const PrintStationPage = React.lazy(() => import("./ordinations/printStation/PrintStationPage").then((m) => ({ default: m.PrintStationPage })));
 const LeadershipReportPage = React.lazy(() => import("./ordinations/reports/LeadershipReportPage").then((m) => ({ default: m.LeadershipReportPage })));
+const AdminDashboardPage = React.lazy(() => import("./dashboard/admin/AdminDashboardPage").then((m) => ({ default: m.AdminDashboardPage })));
+
+// The `/` landing gate: admins (canWriteOrdinations) land on the domain-specific Admin
+// Dashboard; everyone else keeps the person DashboardPage. `/dashboard` always renders the
+// person view (the admin's "View my personal dashboard" target), so admins can still reach it.
+const DashboardLanding: React.FC = () => (canWriteOrdinations() ? <AdminDashboardPage /> : <DashboardPage />);
 
 // Suspense fallback shown while a route's lazy chunk loads.
 const LoadingFallback: React.FC = () => <PageSkeleton />;
@@ -179,7 +186,7 @@ export const Authenticated: React.FC = () => {
           <Route path="/site/*" element={<Site />} />
           <Route path="/mobile/*" element={<Mobile />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/" element={<DashboardPage />} />
+          <Route path="/" element={<DashboardLanding />} />
         </Route>
 
         <Route
