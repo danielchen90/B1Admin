@@ -6,6 +6,7 @@ import { type CampusInterface } from "../settings/components/CampusInterface";
 import { CampusBanner } from "./components/CampusBanner";
 import { CampusNavigation } from "./components/CampusNavigation";
 import { CampusPeople } from "./components/CampusPeople";
+import { CampusGroups } from "./components/CampusGroups";
 
 // Per-campus detail page: name in the header, a location map, and tabs of
 // campus-scoped data. People is the only tab today; more slot in as new cases.
@@ -17,6 +18,8 @@ export const CampusPage: React.FC = () => {
 
   const getCurrentTab = () => {
     switch (selectedTab) {
+      case "groups":
+        return <CampusGroups campus={campus} />;
       case "people":
       default:
         return <CampusPeople campus={campus} />;

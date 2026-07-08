@@ -1,4 +1,4 @@
-import { People as PeopleIcon } from "@mui/icons-material";
+import { People as PeopleIcon, Groups as GroupsIcon } from "@mui/icons-material";
 import { memo, useMemo } from "react";
 import { NavigationTabs, type NavigationTab } from "../../components/ui";
 
@@ -7,9 +7,12 @@ interface Props {
   onTabChange: (tab: string) => void;
 }
 
-// Campus detail tab strip. People-only for now; future campus-scoped tabs
-// (groups, services, giving, etc.) are added here + as a case in CampusPage.
+// Campus detail tab strip. People + Groups today; future campus-scoped tabs
+// (services, giving, etc.) are added here + as a case in CampusPage.
 export const CampusNavigation = memo((props: Props) => {
-  const tabs: NavigationTab[] = useMemo(() => [{ value: "people", label: "People", icon: <PeopleIcon /> }], []);
+  const tabs: NavigationTab[] = useMemo(() => [
+    { value: "people", label: "People", icon: <PeopleIcon /> },
+    { value: "groups", label: "Groups", icon: <GroupsIcon /> }
+  ], []);
   return <NavigationTabs selectedTab={props.selectedTab} onTabChange={props.onTabChange} tabs={tabs} />;
 });
