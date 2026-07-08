@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Box, Card, Stack, Typography, Table, TableBody, TableCell, TableRow, Link, Chip, CircularProgress, Button } from "@mui/material";
-import { Workspaces as AuxIcon, People as PeopleIcon, Edit as EditIcon, LocationOn as LocationIcon } from "@mui/icons-material";
+import { Box, Card, Stack, Typography, Table, TableBody, TableCell, TableRow, Link, Chip, CircularProgress, Button, FormGroup, FormControlLabel, Checkbox } from "@mui/material";
+import { Workspaces as AuxIcon, People as PeopleIcon, Edit as EditIcon, LocationOn as LocationIcon, FilterAlt as FilterIcon } from "@mui/icons-material";
 import { ApiHelper, UserHelper, Permissions } from "@churchapps/apphelper";
 import { type GroupInterface, type GroupMemberInterface } from "@churchapps/helpers";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -33,6 +33,7 @@ export const AuxiliaryPage: React.FC = () => {
   const [editMode, setEditMode] = useState(false);
   const campuses = useCampuses();
   const cName = useMemo(() => new Map(campuses.map((c) => [c.id, c.name])), [campuses]);
+  const [campusFilter, setCampusFilter] = useState<string[]>([]);
 
   const rollupQuery = useQuery<Rollup>({
     queryKey: [`/auxiliaries/${params.id}/rollup`, "MembershipApi"],
@@ -44,19 +45,29 @@ export const AuxiliaryPage: React.FC = () => {
   const gid = useMemo(() => new Map(instances.map((g) => [g.id, g])), [instances]);
 
   const campusOf = (gm: GroupMemberInterface) => (gid.get(gm.groupId as string) as any)?.campusId || "";
-  const byCampus = useMemo(() => {
+  const byCampusAll = useMemo(() => {
     const m = new Map<string, GroupMemberInterface[]>();
     for (const gm of members) { const cid = campusOf(gm); if (!m.has(cid)) m.set(cid, []); m.get(cid)!.push(gm); }
     return [...m.entries()].sort((a, b) => (cName.get(a[0]) || "Unassigned").localeCompare(cName.get(b[0]) || "Unassigned"));
   }, [members, gid, cName]);
 
-  const exportData = useMemo(() => members.map((gm) => ({
-    campus: cName.get(campusOf(gm)) || "Unassigned",
+  // Location filter options = campuses that actually have members in this auxiliary.
+  const accessibleCampuses = useMemo(() => byCampusAll.map(([cid]) => ({ id: cid, name: cName.get(cid) || "Unassigned" })), [byCampusAll, cName]);
+  // Empty selection = show all (matches the ordinations report semantics).
+  const displayedByCampus = useMemo(() => (campusFilter.length ? byCampusAll.filter(([cid]) => campusFilter.includes(cid)) : byCampusAll), [byCampusAll, campusFilter]);
+  const shownMembers = useMemo(() => displayedByCampus.reduce((n, [, gms]) => n + gms.length, 0), [displayedByCampus]);
+
+  const toggleCampus = (id: string) => setCampusFilter((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
+  const selectAllCampuses = () => setCampusFilter(accessibleCampuses.map((c) => c.id));
+  const clearCampuses = () => setCampusFilter([]);
+
+  const exportData = useMemo(() => displayedByCampus.flatMap(([cid, gms]) => gms.map((gm) => ({
+    campus: cName.get(cid) || "Unassigned",
     name: gm.person?.name?.display || "",
     leader: gm.leader ? "Yes" : "",
     group: (gid.get(gm.groupId as string) as any)?.name || "",
     email: gm.person?.contactInfo?.email || ""
-  })), [members, gid, cName]);
+  }))), [displayedByCampus, gid, cName]);
 
   const campusCount = useMemo(() => new Set(instances.map((g) => (g as any).campusId).filter(Boolean)).size, [instances]);
   const refresh = (deleted?: boolean) => {
@@ -79,7 +90,7 @@ export const AuxiliaryPage: React.FC = () => {
               {aux?.description && <Typography color="text.secondary" sx={{ mt: 0.5 }}>{aux.description}</Typography>}
               <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
                 <Chip icon={<LocationIcon />} variant="outlined" label={`${campusCount} ${campusCount === 1 ? "campus" : "campuses"}`} />
-                <Chip icon={<PeopleIcon />} color="primary" label={`${members.length} members`} />
+                <Chip icon={<PeopleIcon />} color="primary" label={campusFilter.length ? `${shownMembers} of ${members.length} members` : `${members.length} members`} />
               </Stack>
             </Box>
             <Stack direction="row" spacing={1} alignItems="center">
@@ -93,12 +104,31 @@ export const AuxiliaryPage: React.FC = () => {
       <Box sx={{ px: 3, pb: 3 }}>
         {canEdit && params.id && <AuxiliaryPresidents auxiliaryId={params.id} />}
 
+        {accessibleCampuses.length > 1 && (
+          <Card variant="outlined" sx={{ mb: 2, p: 2 }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Stack direction="row" spacing={1} alignItems="center"><FilterIcon fontSize="small" color="action" /><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Locations</Typography></Stack>
+              <Box>
+                <Button size="small" onClick={selectAllCampuses}>All</Button>
+                <Button size="small" onClick={clearCampuses} disabled={campusFilter.length === 0}>Clear</Button>
+              </Box>
+            </Stack>
+            <FormGroup row>
+              {accessibleCampuses.map((c) => (
+                <FormControlLabel key={c.id} control={<Checkbox size="small" checked={campusFilter.includes(c.id)} onChange={() => toggleCampus(c.id)} />} label={c.name} />
+              ))}
+            </FormGroup>
+          </Card>
+        )}
+
         {rollupQuery.isLoading ? (
           <Box sx={{ p: 4, textAlign: "center" }}><CircularProgress /></Box>
-        ) : byCampus.length === 0 ? (
+        ) : byCampusAll.length === 0 ? (
           <Typography color="text.secondary" sx={{ p: 2 }}>No members across this auxiliary's campus instances yet.</Typography>
+        ) : displayedByCampus.length === 0 ? (
+          <Typography color="text.secondary" sx={{ p: 2 }}>No members in the selected locations.</Typography>
         ) : (
-          byCampus.map(([cid, gms]) => (
+          displayedByCampus.map(([cid, gms]) => (
             <Card key={cid || "none"} sx={{ mb: 2 }}>
               <Box sx={{ p: 1.5, borderBottom: 1, borderColor: "divider", bgcolor: "action.hover" }}>
                 <Stack direction="row" spacing={1} alignItems="center">
