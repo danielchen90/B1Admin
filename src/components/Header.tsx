@@ -37,6 +37,7 @@ export const Header: React.FC = () => {
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/people", icon: "person", label: Locale.label("components.wrapper.ppl") });
     else if (formPermission || isFormMember) menuItems.push({ url: "/forms", icon: "person", label: Locale.label("components.wrapper.ppl") });
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/ordinations", icon: "workspace_premium", label: "Ordinations" });
+    if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/campuses", icon: "location_on", label: "Campuses" });
     if (UserHelper.checkAccess(Permissions.givingApi.donations.viewSummary)) menuItems.push({ url: "/donations", label: Locale.label("components.wrapper.don"), icon: donationIcon });
 
     const canViewPlans = UserHelper.checkAccess(Permissions.membershipApi.plans.edit) || isMinistryMember;
@@ -67,6 +68,7 @@ export const Header: React.FC = () => {
     const path = window.location.pathname;
     let result = Locale.label("dashboard.dashboardPage.dash");
     if (path.startsWith("/people")) result = Locale.label("components.wrapper.ppl");
+    else if (path.startsWith("/campuses")) result = "Campuses";
     else if (path.startsWith("/ordinations")) result = "Ordinations";
     else if (path.startsWith("/attendance")) result = Locale.label("components.wrapper.ppl");
     else if (path.startsWith("/groups")) result = Locale.label("components.wrapper.ppl");
@@ -96,6 +98,7 @@ export const Header: React.FC = () => {
         "/": "nav-item-quick-actions",
         "/dashboard": "nav-item-dashboard",
         "/people": "nav-item-people",
+        "/campuses": "nav-item-campuses",
         "/groups": "nav-item-groups",
         "/donations": "nav-item-donations",
         "/serving": "nav-item-serving",
