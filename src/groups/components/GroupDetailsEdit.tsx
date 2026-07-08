@@ -12,6 +12,7 @@ import { useMountedState } from "@churchapps/apphelper";
 import { MarkdownEditor } from "@churchapps/apphelper/markdown";
 import { GroupLabelsEdit } from "./GroupLabelsEdit";
 import { CampusSelect } from "../../components/CampusSelect";
+import { useAuxiliaries } from "../../hooks/useAuxiliaries";
 
 type AnyRecord = Record<string, any>;
 
@@ -29,6 +30,7 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
   const [photoUrl, setPhotoUrl] = React.useState("");
   const [labelArray, setLabelArray] = React.useState<string[]>([]);
   const isMounted = useMountedState();
+  const auxiliaries = useAuxiliaries();
 
   const { control, register, handleSubmit, reset } = useForm<AnyRecord>({
     defaultValues: {
@@ -42,6 +44,7 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
       printNametag: "false",
       slug: "",
       campusId: "",
+      auxiliaryId: "",
       joinPolicy: "open"
     }
   });
@@ -69,6 +72,7 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
         printNametag: props.group.printNametag?.toString() || "false",
         slug: props.group.slug || "",
         campusId: props.group.campusId || "",
+        auxiliaryId: (props.group as AnyRecord).auxiliaryId || "",
         joinPolicy: props.group.joinPolicy || "open"
       });
       setAbout(props.group.about || "");
@@ -97,6 +101,8 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
     };
     // "" = Unassigned; store null so it matches campusId IS NULL.
     group.campusId = values.campusId || null;
+    // Link the group to an auxiliary (the church-wide program umbrella), or null.
+    (group as AnyRecord).auxiliaryId = values.auxiliaryId || null;
     // Cast until the published GroupInterface includes attendanceReminders.
     (group as AnyRecord).attendanceReminders = values.attendanceReminders === "true";
     ApiHelper.post("/groups", [group], "MembershipApi").then(() => {
@@ -278,6 +284,17 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
                 <CampusSelect control={control} testId="group-campus-select" />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <FormControl fullWidth>
+                  <InputLabel>Auxiliary</InputLabel>
+                  <Controller name="auxiliaryId" control={control} render={({ field }) => (
+                    <Select {...field} value={field.value ?? ""} label="Auxiliary" data-testid="group-auxiliary-select">
+                      <MenuItem value="">Unassigned</MenuItem>
+                      {auxiliaries.map((a) => <MenuItem key={a.id} value={a.id}>{a.name}</MenuItem>)}
+                    </Select>
+                  )} />
+                </FormControl>
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
                 <FormControl fullWidth>

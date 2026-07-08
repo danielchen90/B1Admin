@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { Box, Card, Stack, Typography, TextField, InputAdornment, Table, TableBody, TableCell, TableHead, TableRow, CircularProgress, Link, Chip } from "@mui/material";
-import { Search as SearchIcon, Groups as GroupsIcon } from "@mui/icons-material";
+import { Search as SearchIcon, Groups as GroupsIcon, Workspaces as AuxIcon } from "@mui/icons-material";
 import { type GroupInterface } from "@churchapps/helpers";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { CountChip } from "../../components/ui";
+import { useAuxiliaries } from "../../hooks/useAuxiliaries";
 import { type CampusInterface } from "../../settings/components/CampusInterface";
 
 // Groups tab: the groups scoped to this campus (group.campusId === campus.id).
@@ -14,6 +15,8 @@ export const CampusGroups: React.FC<{ campus?: CampusInterface }> = ({ campus })
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const groupsQuery = useQuery<GroupInterface[]>({ queryKey: ["/groups", "MembershipApi"], placeholderData: [] });
+  const auxiliaries = useAuxiliaries();
+  const auxName = useMemo(() => new Map(auxiliaries.map((a) => [a.id, a.name])), [auxiliaries]);
 
   const campusGroups = useMemo(() => {
     const all = (groupsQuery.data || []).filter((g) => (g as any).campusId === campus?.id);
@@ -58,6 +61,9 @@ export const CampusGroups: React.FC<{ campus?: CampusInterface }> = ({ campus })
                   <TableCell>
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Link component="button" underline="hover" onClick={(e) => { e.stopPropagation(); navigate(`/groups/${g.id}`); }}>{g.name}</Link>
+                      {(g as any).auxiliaryId && auxName.get((g as any).auxiliaryId) && (
+                        <Chip size="small" color="primary" variant="outlined" icon={<AuxIcon />} label={auxName.get((g as any).auxiliaryId)} onClick={(e) => { e.stopPropagation(); navigate(`/auxiliaries/${(g as any).auxiliaryId}`); }} />
+                      )}
                       {g.categoryName && <Chip size="small" label={g.categoryName} variant="outlined" />}
                     </Stack>
                   </TableCell>
