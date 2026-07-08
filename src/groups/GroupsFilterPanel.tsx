@@ -4,43 +4,40 @@ import { Search as SearchIcon, Clear as ClearIcon } from "@mui/icons-material";
 
 // Sidebar filter for the Groups list, modeled on the ordination LeadershipReport's
 // ReportFilterPanel: a controlled Card with a search box and independent multi-select
-// checkbox groups (Scope / Campus / Auxiliary), each visually separated by a divider.
-// Campus and Auxiliary are kept as distinct groups so the two properties read separately;
-// the Scope group's "Org-wide" option is the explicit way to isolate groups that are
-// neither campus-scoped nor auxiliary-linked.
+// checkbox groups (Scope / Campus), each visually separated by a divider.
+// The Scope group's "Org-wide" option is the explicit way to isolate groups that have
+// no campus. (Auxiliaries are intentionally not surfaced here — manage/view them in the
+// dedicated Auxiliaries area.)
 
 export interface GroupsFilterSpec {
   search: string;
-  scopes: string[]; // "campus" | "orgwide" | "auxiliary"; empty = all
+  scopes: string[]; // "campus" | "orgwide"; empty = all
   campusIds: string[]; // empty = all
-  auxiliaryIds: string[]; // empty = all
 }
 
-export const EMPTY_GROUPS_FILTER: GroupsFilterSpec = { search: "", scopes: [], campusIds: [], auxiliaryIds: [] };
+export const EMPTY_GROUPS_FILTER: GroupsFilterSpec = { search: "", scopes: [], campusIds: [] };
 
 const SCOPE_OPTIONS: { id: string; label: string }[] = [
   { id: "campus", label: "Campus-scoped" },
-  { id: "orgwide", label: "Org-wide (no campus / auxiliary)" },
-  { id: "auxiliary", label: "Auxiliary-linked" }
+  { id: "orgwide", label: "Org-wide (no campus)" }
 ];
 
 // Match a single group against the spec. Within a checkbox group the selections are
-// OR'd (any match); across the three groups (and the search box) they are AND'd. An
+// OR'd (any match); across the two groups (and the search box) they are AND'd. An
 // empty group means "no constraint" so nothing is hidden until a box is ticked.
 export const matchesGroupsFilter = (g: any, spec: GroupsFilterSpec): boolean => {
   const term = spec.search.trim().toLowerCase();
   if (term && !(g.name || "").toLowerCase().includes(term) && !(g.categoryName || "").toLowerCase().includes(term)) return false;
   if (spec.scopes.length) {
-    const ok = spec.scopes.some((s) => (s === "campus" ? !!g.campusId : s === "auxiliary" ? !!g.auxiliaryId : !g.campusId && !g.auxiliaryId));
+    const ok = spec.scopes.some((s) => (s === "campus" ? !!g.campusId : !g.campusId));
     if (!ok) return false;
   }
   if (spec.campusIds.length && !spec.campusIds.includes(g.campusId)) return false;
-  if (spec.auxiliaryIds.length && !spec.auxiliaryIds.includes(g.auxiliaryId)) return false;
   return true;
 };
 
 export const activeGroupsFilterCount = (spec: GroupsFilterSpec): number =>
-  (spec.search.trim() ? 1 : 0) + spec.scopes.length + spec.campusIds.length + spec.auxiliaryIds.length;
+  (spec.search.trim() ? 1 : 0) + spec.scopes.length + spec.campusIds.length;
 
 const SelectAllClear: React.FC<{ onAll: () => void; onClear: () => void }> = ({ onAll, onClear }) => (
   <Stack direction="row" spacing={1} sx={{ mb: 0.5 }}>
@@ -83,19 +80,17 @@ interface GroupsFilterPanelProps {
   spec: GroupsFilterSpec;
   onChange: (next: GroupsFilterSpec) => void;
   campuses: { id: string; name: string }[];
-  auxiliaries: { id: string; name: string }[];
 }
 
-export const GroupsFilterPanel: React.FC<GroupsFilterPanelProps> = ({ spec, onChange, campuses, auxiliaries }) => {
-  const toggle = (key: "scopes" | "campusIds" | "auxiliaryIds", id: string) => {
+export const GroupsFilterPanel: React.FC<GroupsFilterPanelProps> = ({ spec, onChange, campuses }) => {
+  const toggle = (key: "scopes" | "campusIds", id: string) => {
     const arr = spec[key];
     onChange({ ...spec, [key]: arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id] });
   };
-  const setAll = (key: "scopes" | "campusIds" | "auxiliaryIds", ids: string[]) => onChange({ ...spec, [key]: ids });
-  const clear = (key: "scopes" | "campusIds" | "auxiliaryIds") => onChange({ ...spec, [key]: [] });
+  const setAll = (key: "scopes" | "campusIds", ids: string[]) => onChange({ ...spec, [key]: ids });
+  const clear = (key: "scopes" | "campusIds") => onChange({ ...spec, [key]: [] });
 
   const campusOptions = campuses.map((c) => ({ id: c.id, label: c.name }));
-  const auxOptions = auxiliaries.map((a) => ({ id: a.id, label: a.name }));
   const hasActive = activeGroupsFilterCount(spec) > 0;
 
   return (
@@ -129,9 +124,6 @@ export const GroupsFilterPanel: React.FC<GroupsFilterPanelProps> = ({ spec, onCh
 
         <Divider sx={{ borderColor: "var(--border-light)" }} />
         <CheckboxGroup title="Campus" options={campusOptions} selected={spec.campusIds} onToggle={(id) => toggle("campusIds", id)} onAll={() => setAll("campusIds", campusOptions.map((o) => o.id))} onClear={() => clear("campusIds")} />
-
-        <Divider sx={{ borderColor: "var(--border-light)" }} />
-        <CheckboxGroup title="Auxiliary" options={auxOptions} selected={spec.auxiliaryIds} onToggle={(id) => toggle("auxiliaryIds", id)} onAll={() => setAll("auxiliaryIds", auxOptions.map((o) => o.id))} onClear={() => clear("auxiliaryIds")} />
       </Stack>
     </Card>
   );

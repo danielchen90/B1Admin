@@ -1,14 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { GroupAdd } from "./components";
 import { ApiHelper, UserHelper, Loading, Locale, PageHeader } from "@churchapps/apphelper";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Table, TableBody, TableCell, TableRow, Box, Card, Chip, Button, Stack, Typography, Grid } from "@mui/material";
-import { Add as AddIcon, Folder as FolderIcon, Group as GroupIcon, Inbox as InboxIcon, LocationOn as CampusIcon, MonitorHeart as HealthIcon, People as PeopleIcon, Workspaces as AuxIcon } from "@mui/icons-material";
+import { Add as AddIcon, Folder as FolderIcon, Group as GroupIcon, Inbox as InboxIcon, LocationOn as CampusIcon, MonitorHeart as HealthIcon, People as PeopleIcon } from "@mui/icons-material";
 import { type GroupInterface, type GroupJoinRequestInterface } from "@churchapps/helpers";
 import { useMountedState, Permissions } from "@churchapps/apphelper";
 import { useQuery } from "@tanstack/react-query";
 import { CountChip, ExportButton, SortableTableHead } from "../components/ui";
-import { useAuxiliaries } from "../hooks/useAuxiliaries";
 import { useCampuses } from "../hooks/useCampuses";
 import { GroupsFilterPanel, matchesGroupsFilter, activeGroupsFilterCount, EMPTY_GROUPS_FILTER, type GroupsFilterSpec } from "./GroupsFilterPanel";
 
@@ -46,13 +45,10 @@ const GroupsPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [spec, setSpec] = useState<GroupsFilterSpec>(EMPTY_GROUPS_FILTER);
   const isMounted = useMountedState();
-  const navigate = useNavigate();
 
-  // Church-wide auxiliary/campus lists power the rollup chips on each group and the
-  // sidebar filter's Campus/Auxiliary checkbox lists. Both share the same cached fetch.
-  const auxiliaries = useAuxiliaries();
+  // Church-wide campus list powers the campus column and the sidebar filter's Campus
+  // checkbox list.
   const campuses = useCampuses();
-  const auxName = useMemo(() => new Map(auxiliaries.map((a) => [a.id, a.name])), [auxiliaries]);
   const campusName = useMemo(() => new Map(campuses.map((c) => [c.id, c.name])), [campuses]);
 
   const handleAddUpdated = () => {
@@ -81,15 +77,11 @@ const GroupsPage = () => {
   const totalMembers = useMemo(() => groups.reduce((s, g) => s + (g.memberCount || 0), 0), [groups]);
   const campusesCovered = useMemo(() => new Set(groups.map((g) => (g as any).campusId).filter(Boolean)).size, [groups]);
 
-  // Only offer campuses/auxiliaries that actually have groups as checkbox options.
+  // Only offer campuses that actually have groups as checkbox options.
   const campusOptions = useMemo(() => {
     const used = new Set(groups.map((g) => (g as any).campusId).filter(Boolean));
     return campuses.filter((c) => used.has(c.id)).map((c) => ({ id: c.id!, name: c.name! })).sort((a, b) => a.name.localeCompare(b.name));
   }, [groups, campuses]);
-  const auxiliaryOptions = useMemo(() => {
-    const used = new Set(groups.map((g) => (g as any).auxiliaryId).filter(Boolean));
-    return auxiliaries.filter((a) => used.has(a.id)).map((a) => ({ id: a.id!, name: a.name! })).sort((a, b) => a.name.localeCompare(b.name));
-  }, [groups, auxiliaries]);
 
   const visibleGroups = useMemo(() => groups.filter((g) => matchesGroupsFilter(g, spec)), [groups, spec]);
   const activeFilters = activeGroupsFilterCount(spec);
@@ -159,7 +151,6 @@ const GroupsPage = () => {
           <></>
         );
       const memberCount = g.memberCount === 1 ? Locale.label("groups.groupsPage.pers") : (g.memberCount || 0).toString() + Locale.label("groups.groupsPage.spPpl");
-      const auxId = (g as any).auxiliaryId as string | undefined;
       const campusId = (g as any).campusId as string | undefined;
       rows.push(
         <TableRow sx={{ whiteSpace: "nowrap" }} key={g.id}>
@@ -168,9 +159,6 @@ const GroupsPage = () => {
             <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
               <GroupIcon sx={{ color: "primary.main", fontSize: 20 }} />{" "}
               <Link to={"/groups/" + g.id.toString()} style={{ color: "var(--link)", fontWeight: 500, textDecoration: "none" }}>{g.name}</Link>
-              {auxId && auxName.get(auxId) && (
-                <Chip size="small" color="primary" variant="outlined" icon={<AuxIcon />} label={auxName.get(auxId)} onClick={() => navigate(`/auxiliaries/${auxId}`)} sx={{ cursor: "pointer" }} />
-              )}
             </Box>
           </TableCell>
           <TableCell>{campusId && campusName.get(campusId) ? campusName.get(campusId) : "—"}</TableCell>
@@ -338,7 +326,7 @@ const GroupsPage = () => {
         {addBox}
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 3 }}>
-            <GroupsFilterPanel spec={spec} onChange={setSpec} campuses={campusOptions} auxiliaries={auxiliaryOptions} />
+            <GroupsFilterPanel spec={spec} onChange={setSpec} campuses={campusOptions} />
           </Grid>
           <Grid size={{ xs: 12, md: 9 }}>
             {getTable()}
