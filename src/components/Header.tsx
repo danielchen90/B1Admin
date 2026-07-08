@@ -5,6 +5,7 @@ import { SecondaryMenuHelper } from "../helpers/SecondaryMenuHelper";
 import { SiteHeader } from "@churchapps/apphelper";
 import UserContext from "../UserContext";
 import { useNavigate } from "react-router-dom";
+import { useAuxiliaries } from "../hooks/useAuxiliaries";
 
 export const Header: React.FC = () => {
   const context = React.useContext(UserContext);
@@ -13,6 +14,8 @@ export const Header: React.FC = () => {
   const [donationError, setDonationError] = React.useState<boolean>(false);
   const [isFormMember, setIsFormMember] = React.useState<boolean>(false);
   const [isMinistryMember, setIsMinistryMember] = React.useState<boolean>(false);
+  // Presidents may lack people.view but still get a scoped auxiliaries list.
+  const auxiliaries = useAuxiliaries();
 
   useEffect(() => {
     if (UserHelper.checkAccess(Permissions.givingApi.donations.viewSummary)) {
@@ -38,7 +41,7 @@ export const Header: React.FC = () => {
     else if (formPermission || isFormMember) menuItems.push({ url: "/forms", icon: "person", label: Locale.label("components.wrapper.ppl") });
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/ordinations", icon: "workspace_premium", label: "Ordinations" });
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/campuses", icon: "location_on", label: "Campuses" });
-    if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/auxiliaries", icon: "workspaces", label: "Auxiliaries" });
+    if (UserHelper.checkAccess(Permissions.membershipApi.people.view) || auxiliaries.length > 0) menuItems.push({ url: "/auxiliaries", icon: "workspaces", label: "Auxiliaries" });
     if (UserHelper.checkAccess(Permissions.givingApi.donations.viewSummary)) menuItems.push({ url: "/donations", label: Locale.label("components.wrapper.don"), icon: donationIcon });
 
     const canViewPlans = UserHelper.checkAccess(Permissions.membershipApi.plans.edit) || isMinistryMember;
@@ -55,7 +58,7 @@ export const Header: React.FC = () => {
     else if (UserHelper.checkAccess(Permissions.membershipApi.roles.view)) menuItems.push({ url: "/settings/roles", label: Locale.label("components.wrapper.set"), icon: "settings" });
     // if (UserHelper.checkAccess(Permissions.membershipApi.server.admin)) tabs.push(<NavItem key="/admin" url="/admin" label={Locale.label("components.wrapper.servAdmin")} icon="admin_panel_settings" selected={selectedTab === "admin"} />);
     return menuItems;
-  }, [donationError, formPermission, isFormMember, isMinistryMember]);
+  }, [donationError, formPermission, isFormMember, isMinistryMember, auxiliaries.length]);
   /*
   const getSecondaryMenu = () => {
     const menuItems:{ url: string, label: string }[] = []

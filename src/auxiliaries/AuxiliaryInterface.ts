@@ -6,4 +6,8 @@ export interface AuxiliaryInterface {
   name?: string;
   description?: string;
   importKey?: string;
+  // Rollup counts attached by GET /auxiliaries (server-computed).
+  instanceCount?: number;
+  campusCount?: number;
+  memberCount?: number;
 }

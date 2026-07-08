@@ -9,6 +9,9 @@ import { PageBreadcrumbs, CountChip, ExportButton } from "../components/ui";
 import { useCampuses } from "../hooks/useCampuses";
 import { type AuxiliaryInterface } from "./AuxiliaryInterface";
 import { AuxiliaryEdit } from "./components/AuxiliaryEdit";
+import { AuxiliaryPresidents } from "./components/AuxiliaryPresidents";
+
+interface Rollup { auxiliary: AuxiliaryInterface; instances: GroupInterface[]; members: GroupMemberInterface[] }
 
 const CSV_HEADERS = [
   { label: "Campus", key: "campus" },
@@ -18,33 +21,27 @@ const CSV_HEADERS = [
   { label: "Email", key: "email" }
 ];
 
-// Auxiliary detail = the cross-campus rollup an international president needs:
-// members of every campus instance, grouped by campus, with per-campus counts
-// and a full CSV export. Admins (settings.edit) can edit/delete the auxiliary.
+// Auxiliary detail = the cross-campus rollup (fetched from the SCOPED server
+// endpoint, so an Auxiliary President only ever gets their own auxiliary's data):
+// members of every campus instance grouped by campus, with a full CSV export.
+// Admins (settings.edit) can edit/delete the auxiliary and manage its presidents.
 export const AuxiliaryPage: React.FC = () => {
   const params = useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const canEdit = UserHelper.checkAccess(Permissions.membershipApi.settings.edit);
   const [editMode, setEditMode] = useState(false);
-
-  const auxQuery = useQuery<AuxiliaryInterface>({ queryKey: [`/auxiliaries/${params.id}`, "MembershipApi"], placeholderData: {} as AuxiliaryInterface });
-  const aux = auxQuery.data;
   const campuses = useCampuses();
   const cName = useMemo(() => new Map(campuses.map((c) => [c.id, c.name])), [campuses]);
 
-  const groupsQuery = useQuery<GroupInterface[]>({ queryKey: ["/groups", "MembershipApi"], placeholderData: [] });
-  const instances = useMemo(() => (groupsQuery.data || []).filter((g) => (g as any).auxiliaryId === params.id), [groupsQuery.data, params.id]);
-  const groupIds = useMemo(() => instances.map((g) => g.id).filter(Boolean) as string[], [instances]);
-  const gid = useMemo(() => new Map(instances.map((g) => [g.id, g])), [instances]);
-
-  const membersQuery = useQuery<GroupMemberInterface[]>({
-    queryKey: ["auxMembers", params.id, groupIds.join(",")],
-    queryFn: () => ApiHelper.get("/groupmembers?groupIds=" + groupIds.join(","), "MembershipApi"),
-    enabled: groupIds.length > 0,
-    placeholderData: []
+  const rollupQuery = useQuery<Rollup>({
+    queryKey: [`/auxiliaries/${params.id}/rollup`, "MembershipApi"],
+    placeholderData: { auxiliary: {}, instances: [], members: [] }
   });
-  const members = membersQuery.data || [];
+  const aux = rollupQuery.data?.auxiliary;
+  const instances = rollupQuery.data?.instances || [];
+  const members = rollupQuery.data?.members || [];
+  const gid = useMemo(() => new Map(instances.map((g) => [g.id, g])), [instances]);
 
   const campusOf = (gm: GroupMemberInterface) => (gid.get(gm.groupId as string) as any)?.campusId || "";
   const byCampus = useMemo(() => {
@@ -66,7 +63,7 @@ export const AuxiliaryPage: React.FC = () => {
     setEditMode(false);
     qc.invalidateQueries({ queryKey: ["/auxiliaries", "MembershipApi"] });
     if (deleted) navigate("/auxiliaries");
-    else auxQuery.refetch();
+    else rollupQuery.refetch();
   };
 
   if (editMode && aux) return <Box sx={{ p: 3, maxWidth: 560 }}><AuxiliaryEdit auxiliary={aux} updatedFunction={refresh} /></Box>;
@@ -94,7 +91,9 @@ export const AuxiliaryPage: React.FC = () => {
       </Card>
 
       <Box sx={{ px: 3, pb: 3 }}>
-        {membersQuery.isLoading ? (
+        {canEdit && params.id && <AuxiliaryPresidents auxiliaryId={params.id} />}
+
+        {rollupQuery.isLoading ? (
           <Box sx={{ p: 4, textAlign: "center" }}><CircularProgress /></Box>
         ) : byCampus.length === 0 ? (
           <Typography color="text.secondary" sx={{ p: 2 }}>No members across this auxiliary's campus instances yet.</Typography>
