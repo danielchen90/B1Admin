@@ -11,6 +11,7 @@ export interface CampusInterface extends BaseCampusInterface {
   city?: string;
   state?: string;
   zip?: string;
+  country?: string;
   timezone?: string;
   website?: string;
   importKey?: string;

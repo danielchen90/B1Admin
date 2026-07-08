@@ -56,6 +56,7 @@ export const CampusEdit: React.FC<Props> = (props) => {
       city: props.campus?.city || "",
       state: props.campus?.state || "",
       zip: props.campus?.zip || "",
+      country: props.campus?.country || "",
       timezone: props.campus?.timezone || "",
       website: props.campus?.website || ""
     });
@@ -93,6 +94,11 @@ export const CampusEdit: React.FC<Props> = (props) => {
         </Grid>
         <Grid size={{ xs: 6, sm: 3 }}>
           <TextField fullWidth label={Locale.label("person.zip")} id="zip" type="text" {...register("zip")} />
+        </Grid>
+      </Grid>
+      <Grid container spacing={1} sx={{ mb: 1 }}>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <TextField fullWidth label={Locale.label("person.country")} id="country" type="text" {...register("country")} />
         </Grid>
       </Grid>
       <TextField fullWidth select label={Locale.label("settings.campusEdit.timezone")} id="timezone" defaultValue="" {...register("timezone")} sx={{ mb: 1 }}>
