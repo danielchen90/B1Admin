@@ -41,6 +41,11 @@ export const Header: React.FC = () => {
     else if (formPermission || isFormMember) menuItems.push({ url: "/forms", icon: "person", label: Locale.label("components.wrapper.ppl") });
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/ordinations", icon: "workspace_premium", label: "Ordinations" });
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/campuses", icon: "location_on", label: "Campuses" });
+    // Gate on people.view to MATCH the other hubs (belt-and-suspenders — the
+    // MessagingApi enforces Campaigns perms server-side; there is no B1Admin
+    // Campaigns constant). Distinct /email area for EMAIL campaigns — NOT the
+    // /donations/campaigns giving-campaign routes.
+    if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/email", icon: "mail", label: "Email" });
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view) || auxiliaries.length > 0) menuItems.push({ url: "/auxiliaries", icon: "workspaces", label: "Auxiliaries" });
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/groups", icon: "groups", label: "Groups" });
     if (UserHelper.checkAccess(Permissions.givingApi.donations.viewSummary)) menuItems.push({ url: "/donations", label: Locale.label("components.wrapper.don"), icon: donationIcon });
@@ -76,6 +81,7 @@ export const Header: React.FC = () => {
     else if (path.startsWith("/campuses")) result = "Campuses";
     else if (path.startsWith("/auxiliaries")) result = "Auxiliaries";
     else if (path.startsWith("/ordinations")) result = "Ordinations";
+    else if (path.startsWith("/email")) result = "Email";
     else if (path.startsWith("/attendance")) result = Locale.label("components.wrapper.ppl");
     else if (path.startsWith("/groups")) result = "Groups";
     else if (path.startsWith("/forms")) result = Locale.label("components.wrapper.ppl");
@@ -105,6 +111,7 @@ export const Header: React.FC = () => {
         "/dashboard": "nav-item-dashboard",
         "/people": "nav-item-people",
         "/campuses": "nav-item-campuses",
+        "/email": "nav-item-email",
         "/auxiliaries": "nav-item-auxiliaries",
         "/groups": "nav-item-groups",
         "/donations": "nav-item-donations",
