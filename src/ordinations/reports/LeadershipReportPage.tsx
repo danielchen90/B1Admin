@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { type PersonInterface } from "@churchapps/helpers";
+import { Permissions, UserHelper, type PersonInterface } from "@churchapps/helpers";
 import { Loading, PageHeader } from "@churchapps/apphelper";
 import { Box, Grid, Stack, Button, CircularProgress, Snackbar, Alert } from "@mui/material";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import EmailIcon from "@mui/icons-material/Email";
 import { ExportButton, PageBreadcrumbs } from "../../components/ui";
 import { useCampuses } from "../../hooks/useCampuses";
 import { useOrdinationTypes } from "../../hooks/useOrdinationTypes";
@@ -22,6 +23,7 @@ import PrintIcon from "@mui/icons-material/Print";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { canManageOrdinationTypes, canWriteOrdinations } from "../../helpers/OrdinationHelper";
 import { createBatch } from "../printStation/printBatchApi";
+import { emailThesePeople } from "../../campaigns/emailThesePeople";
 
 // Grant-license default dates, computed in LOCAL time to avoid a UTC off-by-one (Pitfall 4):
 // granted = the Friday of NEXT week; expiration = one year later minus a day.
@@ -90,7 +92,10 @@ export const LeadershipReportPage: React.FC = () => {
   const navigate = useNavigate();
   const canWrite = canWriteOrdinations();
   const canManageTypes = canManageOrdinationTypes();
+  // "Email these people" is gated on the same nav perm the Email area uses.
+  const canEmail = UserHelper.checkAccess(Permissions.membershipApi.people.view);
   const [printing, setPrinting] = useState(false);
+  const [emailing, setEmailing] = useState(false);
 
   const loading = ordQuery.isLoading || (personIds.length > 0 && peopleQuery.isLoading);
 
@@ -155,6 +160,25 @@ export const LeadershipReportPage: React.FC = () => {
     }
   };
 
+  // Email these people — carry the currently-visible people (the SAME explicit
+  // set Print Licenses uses) into a new draft campaign and open the editor on the
+  // Audience tab. The report has already resolved the filtered people, so an
+  // explicit { personIds } carry (12-02) is the honest descriptor; the single
+  // selected campus (when exactly one) sets the "Sending as" scope. Mirrors
+  // handlePrintLicenses (resolve → create downstream record → navigate).
+  const handleEmailThese = async () => {
+    if (visiblePersonIds.length === 0 || emailing) return;
+    setEmailing(true);
+    setPdfError(null);
+    try {
+      const campusId = spec.campusIds.length === 1 ? spec.campusIds[0] : undefined;
+      await emailThesePeople({ personIds: visiblePersonIds, campusId, name: "Leadership Email" }, navigate);
+    } catch (e: any) {
+      setPdfError(e?.message ? String(e.message) : "Failed to start a campaign for these people.");
+      setEmailing(false);
+    }
+  };
+
   return (
     <>
       <PageBreadcrumbs items={[{ label: "Ordinations", path: "/ordinations/hub" }, { label: "Leadership Report" }]} />
@@ -178,6 +202,18 @@ export const LeadershipReportPage: React.FC = () => {
               onClick={handlePrintLicenses}
             >
               {printing ? "Preparing…" : "Print Licenses"}
+            </Button>
+          )}
+          {/* Carry the currently-visible people into a new draft campaign + editor. */}
+          {canEmail && (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={emailing ? <CircularProgress size={16} /> : <EmailIcon />}
+              disabled={emailing || visiblePersonIds.length === 0}
+              onClick={handleEmailThese}
+            >
+              {emailing ? "Preparing…" : "Email these people"}
             </Button>
           )}
           <ExportButton data={csvData} filename="leadership-report.csv" text="Export CSV" customHeaders={CSV_HEADERS} />
