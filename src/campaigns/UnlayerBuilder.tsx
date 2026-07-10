@@ -17,7 +17,16 @@
 // this editor produces.
 
 import React from "react";
-import EmailEditor, { type EditorRef } from "react-email-editor";
+// IMPORTANT: use the NAMED import, not `import EmailEditor from ...`.
+// react-email-editor@1.8.0 ships a CJS build (dist/index.js) whose default is
+// re-exported via `module.exports = { default, EmailEditor }`. Under Vite/esbuild
+// production CJS→ESM interop, the DEFAULT import resolves to the whole module
+// NAMESPACE OBJECT (`{ default, EmailEditor }`), NOT the forwardRef component — so
+// `<EmailEditor>` renders a plain object and throws React #130 ("element type is
+// invalid: got object") in the MINIFIED production bundle only (dev uses the ESM
+// build and works). The NAMED export resolves to the real forwardRef in both
+// modes. See .planning/debug/react-130-template-picker.md.
+import { EmailEditor, type EditorRef } from "react-email-editor";
 import type { JSONTemplate } from "@unlayer/types";
 import { MERGE_TAGS } from "./mergeTags";
 import { uploadCampaignImage } from "./campaignApi";
