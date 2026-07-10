@@ -83,6 +83,7 @@ export async function uploadCampaignImage(id: string, file: File): Promise<{ url
 export function saveAsTemplate(body: {
   name: string;
   subject?: string;
+  category?: string;
   blockJson: string;
   renderedHtml?: string;
 }): Promise<{ id: string; name: string }> {
