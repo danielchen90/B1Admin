@@ -9,7 +9,7 @@ import { PeopleSearch } from "./components/PeopleSearch";
 import { SavedLists, type ListConditions, type ListInterface } from "./components/SavedLists";
 import { buildRulesFromCriteria } from "./components/listRules";
 import { type ActiveFilter } from "./components/AdvancedPeopleSearch";
-import { People as PeopleIcon, PersonAdd as PersonAddIcon, Print as PrintIcon, BookmarkAdd as SaveListIcon, BarChart as BarChartIcon } from "@mui/icons-material";
+import { People as PeopleIcon, PersonAdd as PersonAddIcon, Print as PrintIcon, BookmarkAdd as SaveListIcon, BarChart as BarChartIcon, Email as EmailIcon } from "@mui/icons-material";
 import { PageHeader } from "@churchapps/apphelper";
 import { AppIconButton } from "../components/ui/AppIconButton";
 import { CountChip, ExportButton } from "../components/ui";
@@ -17,6 +17,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AISearch } from "./components/AISearch";
 import { PeopleBulkActions } from "./components/bulk/PeopleBulkActions";
 import { type BulkResult } from "./components/bulk/BulkFieldDialog";
+import { emailThesePeople } from "../campaigns/emailThesePeople";
 
 interface BulkDeleteResponse {
   success: boolean;
@@ -101,6 +102,10 @@ export const PeoplePage = memo(() => {
     severity: "success"
   });
   const canEdit = UserHelper.checkAccess(Permissions.membershipApi.people.edit);
+  // "Email these people" is gated on the Email-area nav perm (people.view), so a
+  // viewer who cannot edit can still start a campaign from a selection.
+  const canViewPeople = UserHelper.checkAccess(Permissions.membershipApi.people.view);
+  const [emailing, setEmailing] = React.useState(false);
   const currentPersonId = UserHelper.currentUserChurch?.person?.id || "";
 
   const peopleQuery = useQuery<PersonInterface[]>({
@@ -294,6 +299,25 @@ export const PeoplePage = memo(() => {
     }
   }, [selectedPersonIds]);
 
+  // Email these people — carry the explicit checkbox selection (the page's
+  // existing selection model) into a new draft campaign as { personIds } (12-02)
+  // and open the editor on the Audience tab. The audience stays fully editable
+  // there. Errors surface via the existing toast.
+  const handleEmailThese = useCallback(async () => {
+    if (selectedPersonIds.length === 0 || emailing) return;
+    setEmailing(true);
+    try {
+      await emailThesePeople({ personIds: selectedPersonIds, name: "New Email" }, navigate);
+    } catch (error) {
+      setEmailing(false);
+      setToast({
+        open: true,
+        message: error instanceof Error ? error.message : "Unable to start a campaign for these people",
+        severity: "error"
+      });
+    }
+  }, [selectedPersonIds, emailing, navigate]);
+
   const handleBulkComplete = useCallback((result: BulkResult) => {
     setToast({ open: true, message: result.message, severity: result.severity });
     if (result.severity !== "success") return;
@@ -445,6 +469,18 @@ export const PeoplePage = memo(() => {
                         <Button size="small" onClick={() => setSelectedPersonIds([])}>{Locale.label("people.bulk.clearSelection")}</Button>
                         <PeopleBulkActions selectedPersonIds={selectedPersonIds} onComplete={handleBulkComplete} onDeleteClick={() => setShowBulkDeleteConfirm(true)} />
                       </>
+                    )}
+                    {/* Carry the explicit selection into a new draft campaign + editor. */}
+                    {canViewPeople && selectedPersonIds.length > 0 && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={emailing ? <CircularProgress size={16} /> : <EmailIcon />}
+                        disabled={emailing}
+                        onClick={handleEmailThese}
+                      >
+                        {emailing ? "Preparing…" : "Email these people"}
+                      </Button>
                     )}
                     {canEdit && saveableCriteria && isSearchPerformed && searchResults && searchResults.length > 0 && (
                       <Button size="small" variant="outlined" startIcon={<SaveListIcon />} onClick={() => setSaveListDialog({ ...emptySaveListDialog, open: true })} sx={{ mr: 1 }}>
