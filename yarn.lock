@@ -2534,6 +2534,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@unlayer/types@npm:latest":
+  version: 1.448.0
+  resolution: "@unlayer/types@npm:1.448.0"
+  checksum: 10c0/1c7dc9c6f83c222551b70950aaa1206c8646ce687085445fbda5a31d2264ca6989b72f425471a3174461c5c957698f874263cf47571a15911795dfa5825cd5fa
+  languageName: node
+  linkType: hard
+
 "@vitejs/plugin-react-swc@npm:^4.3.0":
   version: 4.3.1
   resolution: "@vitejs/plugin-react-swc@npm:4.3.1"
@@ -4023,6 +4030,7 @@ __metadata:
     react-dnd-html5-backend: "npm:^16.0.1"
     react-dom: "npm:^19.2.6"
     react-easy-crop: "npm:^6.0.2"
+    react-email-editor: "npm:^1.8.0"
     react-ga4: "npm:^3.0.1"
     react-google-charts: "npm:^5.2.1"
     react-google-recaptcha: "npm:^3.1.0"
@@ -5365,6 +5373,17 @@ __metadata:
     react: ">=16.4.0"
     react-dom: ">=16.4.0"
   checksum: 10c0/45d25be073409185a84089a3e2a58f8fb36c3bb3c8153a900c8423e9812da1dbb35fc295c3be2c4e6ca6a2a6386dff7be669b66307d4f0e0ee27ede9b29e79c3
+  languageName: node
+  linkType: hard
+
+"react-email-editor@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "react-email-editor@npm:1.8.0"
+  dependencies:
+    "@unlayer/types": "npm:latest"
+  peerDependencies:
+    react: ">=15"
+  checksum: 10c0/a7b327395b6af832f53e8ca3b553b405f1be94e3b4247cbca4ae49ba2f4eba536446d265bd697cabd1ecd238d4522863208b4e689a733d9e77532943e9c96567
   languageName: node
   linkType: hard
 
