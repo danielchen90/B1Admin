@@ -13,7 +13,13 @@
 // code. Nothing here hardcodes an absolute host; the app registration resolves it.
 
 import { ApiHelper } from "@churchapps/apphelper";
-import { type CampaignInterface, type PreviewResult, type TemplateInterface } from "./emailTypes";
+import {
+  type AudienceDescriptor,
+  type AudiencePreviewResult,
+  type CampaignInterface,
+  type PreviewResult,
+  type TemplateInterface,
+} from "./emailTypes";
 
 const APP = "MessagingApi";
 
@@ -46,6 +52,19 @@ export function updateDraft(
 // POST /campaigns/:id/preview — render the campaign for one frozen recipient.
 export function previewCampaign(id: string, recipientIndex: number): Promise<PreviewResult> {
   return ApiHelper.post(`/campaigns/${id}/preview`, { recipientIndex }, APP);
+}
+
+// POST /campaigns/:id/audience/preview — resolve the audience descriptor LIVE
+// (pre-freeze) and return the deliverable / skipped / suppressed counts. Drives
+// the same RecipientResolver freeze uses (CampaignAudienceController), so the
+// count shown on the Audience tab can never drift from the eventual send. The
+// descriptor is POSTed as the body (the endpoint reads req.body directly), not
+// the campaign's stored copy — so an unsaved edit previews immediately.
+export function previewAudience(
+  id: string,
+  descriptor: AudienceDescriptor
+): Promise<AudiencePreviewResult> {
+  return ApiHelper.post(`/campaigns/${id}/audience/preview`, descriptor, APP);
 }
 
 // POST /campaigns/:id/test-send — deliver a single test to `to`, rendered as the

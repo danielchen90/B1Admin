@@ -57,6 +57,17 @@ export interface PreviewResult {
   totalRecipients: number;
 }
 
+// The resolved audience-size preview (CampaignAudienceController /audience/preview,
+// 12-03 seam). `deliverableCount` is who actually gets the email; `skipped` are
+// people with no/invalid email; `suppressed` are on the unsubscribe/suppression
+// list. The three are computed by the SAME resolver freeze uses, so a preview can
+// never drift from the eventual frozen list.
+export interface AudiencePreviewResult {
+  deliverableCount: number;
+  skippedNoEmailCount: number;
+  suppressedCount: number;
+}
+
 // A reusable email template (BLD-02). `blockJson` is present ONLY on get-template
 // (list omits the heavy payload); legacy HTML-only templates have it NULL, so the
 // editor must guard on `hasBlockJson` before calling `editor.loadDesign`.
