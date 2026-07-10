@@ -68,11 +68,15 @@ export function previewAudience(
 }
 
 // POST /campaigns/:id/test-send — deliver a single test to `to`, rendered as the
-// recipient at `recipientIndex` so merge fields resolve realistically.
+// recipient at `recipientIndex` so merge fields resolve realistically. The 12-03
+// backend returns { sent, to, renderedFromRecipient } and writes ZERO recipient
+// rows / counters (stats-safe). It gates on VerifiedDomainGate first — an
+// unverified sending domain / missing settings throws a 422 the caller parses
+// (DOMAIN_UNVERIFIED / NO_EMAIL_SETTINGS) via apiError.
 export function testSendCampaign(
   id: string,
   args: { to: string; recipientIndex: number }
-): Promise<{ ok: true }> {
+): Promise<{ sent: true; to: string; renderedFromRecipient?: string }> {
   return ApiHelper.post(`/campaigns/${id}/test-send`, args, APP);
 }
 
