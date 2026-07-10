@@ -28,6 +28,8 @@ import { useCampaignDraft } from "./useCampaignDraft";
 import { UnlayerBuilder, type UnlayerBuilderHandle, type UnlayerDesignJson } from "./UnlayerBuilder";
 import { TemplatePickerDialog } from "./TemplatePickerDialog";
 import { SaveAsTemplateDialog } from "./SaveAsTemplateDialog";
+import { AudienceTab } from "./AudienceTab";
+import { PreviewTestPanel } from "./PreviewTestPanel";
 
 type EditorTab = "design" | "audience" | "preview";
 
@@ -100,6 +102,22 @@ export const EmailEditorPage: React.FC = () => {
   const handleSaveDraft = React.useCallback(() => {
     builderRef.current?.captureDesign(({ design, html }) => {
       save({ blockJson: JSON.stringify(design), renderedHtml: html }, { immediate: true });
+    });
+  }, [save]);
+
+  // Flush the builder's LATEST export + save and resolve once persisted. The
+  // Preview & Test panel awaits this before a server preview / test-send so the
+  // server renders the CURRENT design (not a stale autosave). If the builder
+  // isn't mounted yet we resolve immediately (nothing to flush).
+  const ensureExportedAndSaved = React.useCallback((): Promise<void> => {
+    const builder = builderRef.current;
+    if (!builder) return Promise.resolve();
+    return new Promise<void>((resolve) => {
+      builder.captureDesign(({ design, html }) => {
+        save({ blockJson: JSON.stringify(design), renderedHtml: html }, { immediate: true })
+          .catch(() => {}) // errors surface via the draft `error` Alert; don't block preview
+          .finally(() => resolve());
+      });
     });
   }, [save]);
 
@@ -208,7 +226,7 @@ export const EmailEditorPage: React.FC = () => {
           </Grid>
         </Grid>
 
-        {/* Tab host: Design (builder) + Audience/Preview placeholders for 12-07 */}
+        {/* Tab host: Design (builder) + Audience (12-07) + Preview & Test (12-07) */}
         <Tabs value={tab} onChange={(_e, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: "divider" }}>
           <Tab value="design" label="Design" />
           <Tab value="audience" label="Audience" />
@@ -227,17 +245,22 @@ export const EmailEditorPage: React.FC = () => {
           />
         </Box>
         <Box sx={{ display: tab === "audience" ? "block" : "none", py: 4 }}>
-          <Typography variant="body2" color="text.secondary">
-            Choose who receives this campaign.
-          </Typography>
-          {/* 12-07: <AudienceTab campaign={draft} /> */}
+          <AudienceTab
+            draft={draft}
+            onChange={(desc) => scheduleAutosave({ audienceFilterJson: JSON.stringify(desc) })}
+          />
         </Box>
-        <Box sx={{ display: tab === "preview" ? "block" : "none", py: 4 }}>
-          <Typography variant="body2" color="text.secondary">
-            Preview the rendered email and send yourself a test.
-          </Typography>
-          {/* 12-07: <PreviewAndTestTab campaign={draft} /> */}
-        </Box>
+        {/* Preview & Test — mounted only while active so switching TO it triggers a
+            fresh export+save (via onEnsureSaved) so the server renders current content. */}
+        {tab === "preview" && (
+          <Box sx={{ py: 4 }}>
+            <PreviewTestPanel
+              campaignId={draft?.id}
+              dirty
+              onEnsureSaved={ensureExportedAndSaved}
+            />
+          </Box>
+        )}
       </Box>
 
       <TemplatePickerDialog
