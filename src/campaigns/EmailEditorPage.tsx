@@ -30,8 +30,10 @@ import { TemplatePickerDialog } from "./TemplatePickerDialog";
 import { SaveAsTemplateDialog } from "./SaveAsTemplateDialog";
 import { AudienceTab } from "./AudienceTab";
 import { PreviewTestPanel } from "./PreviewTestPanel";
+import { StatsTab } from "./StatsTab";
+import { RecipientDrilldown } from "./RecipientDrilldown";
 
-type EditorTab = "design" | "audience" | "preview";
+type EditorTab = "design" | "audience" | "preview" | "stats";
 
 const formatTime = (d: Date) =>
   d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -50,6 +52,15 @@ export const EmailEditorPage: React.FC = () => {
   const [pickerRefresh, setPickerRefresh] = React.useState(0);
   // A design captured before the draft exists (queued to load once the builder is ready).
   const pendingDesignRef = React.useRef<UnlayerDesignJson | null>(null);
+
+  // Stats tab drill-down state: a stat card click opens the recipient list
+  // pre-filtered to the clicked status.
+  const [drillOpen, setDrillOpen] = React.useState(false);
+  const [drillStatus, setDrillStatus] = React.useState<string | undefined>(undefined);
+
+  // The Stats tab is shown only once the campaign has been sent (or is sending) —
+  // a draft has no engagement data to report (RESEARCH Pattern 8).
+  const showStats = draft?.status === "sent" || draft?.status === "sending";
 
   // On /email/new: open the template picker first (no design yet).
   React.useEffect(() => {
@@ -227,10 +238,16 @@ export const EmailEditorPage: React.FC = () => {
         </Grid>
 
         {/* Tab host: Design (builder) + Audience (12-07) + Preview & Test (12-07) */}
-        <Tabs value={tab} onChange={(_e, v) => setTab(v)} sx={{ mb: 2, borderBottom: 1, borderColor: "divider" }}>
+        <Tabs
+          value={tab === "stats" && !showStats ? "design" : tab}
+          onChange={(_e, v) => setTab(v)}
+          sx={{ mb: 2, borderBottom: 1, borderColor: "divider" }}
+        >
           <Tab value="design" label="Design" />
           <Tab value="audience" label="Audience" />
           <Tab value="preview" label="Preview & Test" />
+          {/* Stats appears only for sent/sending campaigns (drafts have no data). */}
+          {showStats && <Tab value="stats" label="Stats" data-testid="stats-tab-trigger" />}
         </Tabs>
 
         {/* Design tab — the builder stays mounted; we just hide non-active tabs so
@@ -261,7 +278,31 @@ export const EmailEditorPage: React.FC = () => {
             />
           </Box>
         )}
+        {/* Stats (13-04) — sent/sending only; mounted while active. A stat card
+            click opens the pre-filtered recipient drill-down. */}
+        {tab === "stats" && showStats && draft?.id && (
+          <Box sx={{ py: 4 }}>
+            <StatsTab
+              campaignId={draft.id}
+              onDrill={(s) => {
+                setDrillStatus(s);
+                setDrillOpen(true);
+              }}
+            />
+          </Box>
+        )}
       </Box>
+
+      {/* The stat-card recipient drill-down (mounted regardless of active tab so
+          it can open from a Stats card). */}
+      {showStats && draft?.id && (
+        <RecipientDrilldown
+          campaignId={draft.id}
+          initialStatus={drillStatus}
+          open={drillOpen}
+          onClose={() => setDrillOpen(false)}
+        />
+      )}
 
       <TemplatePickerDialog
         open={pickerOpen}
