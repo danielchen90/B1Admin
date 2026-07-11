@@ -153,7 +153,11 @@ export function useCampaignDraft(id?: string): UseCampaignDraft {
             ...fields,
             expectedVersion: expectedVersionRef.current,
           });
-          setDraft(saved);
+          // The update endpoint returns only { id, version } — merge it OVER the
+          // local draft so we keep every field we just sent (name/subject/blockJson/
+          // audienceFilterJson/campusId). Replacing wholesale would wipe the in-memory
+          // draft to {id,version}, which (e.g.) reverts the Audience tab to whole-church.
+          setDraft({ ...merged, ...saved });
           expectedVersionRef.current = saved.version;
           setLastSavedAt(new Date());
         } catch (err) {
