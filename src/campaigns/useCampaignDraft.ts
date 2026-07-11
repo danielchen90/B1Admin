@@ -43,6 +43,10 @@ export interface UseCampaignDraft {
   scheduleAutosave: (patch: DraftPatch) => void;
   // Immediate save (manual "Save Draft"). Resolves after the round-trip.
   save: (patch?: DraftPatch, opts?: { immediate?: boolean }) => Promise<void>;
+  // Re-fetch the campaign by id and replace draft state + reset the tracked
+  // expectedVersion. Needed after freeze/send so the editor reflects the server
+  // status (draft→scheduled→sending) and the bumped version.
+  reload: () => Promise<void>;
 }
 
 const AUTOSAVE_MS = 2500;
@@ -224,6 +228,22 @@ export function useCampaignDraft(id?: string): UseCampaignDraft {
 
   const clearNotice = React.useCallback(() => setNotice(""), []);
 
+  // Re-fetch the campaign fresh and replace draft state (mirrors the mount load).
+  // Resets expectedVersion to the server's version so the next OCC save/freeze
+  // uses the current value. A no-op if the draft has no id yet.
+  const reload = React.useCallback(async (): Promise<void> => {
+    const currentId = draftRef.current?.id ?? id;
+    if (!currentId) return;
+    try {
+      const fresh = await getCampaign(currentId);
+      setDraft(fresh);
+      expectedVersionRef.current = fresh.version;
+    } catch (err) {
+      setError(parseApiError(err).error || "Couldn't reload the campaign.");
+      throw err;
+    }
+  }, [id]);
+
   return {
     draft,
     loading,
@@ -235,6 +255,7 @@ export function useCampaignDraft(id?: string): UseCampaignDraft {
     patchLocal,
     scheduleAutosave,
     save,
+    reload,
   };
 }
 

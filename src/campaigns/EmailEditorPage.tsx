@@ -21,10 +21,16 @@ import {
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import SaveIcon from "@mui/icons-material/Save";
+import SendIcon from "@mui/icons-material/Send";
 import { PageHeader } from "@churchapps/apphelper";
 import { PageBreadcrumbs } from "../components/ui";
 import { useCampuses } from "../hooks/useCampuses";
 import { useCampaignDraft } from "./useCampaignDraft";
+import { freezeAudience } from "./campaignApi";
+import { parseApiError } from "./apiError";
+import { type AudienceDescriptor } from "./emailTypes";
+import { SendConfirmDialog } from "./SendConfirmDialog";
+import { SendProgress } from "./SendProgress";
 import { UnlayerBuilder, type UnlayerBuilderHandle, type UnlayerDesignJson } from "./UnlayerBuilder";
 import { TemplatePickerDialog } from "./TemplatePickerDialog";
 import { SaveAsTemplateDialog } from "./SaveAsTemplateDialog";
@@ -42,7 +48,7 @@ export const EmailEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const campuses = useCampuses();
   const draftApi = useCampaignDraft(id);
-  const { draft, loading, saving, lastSavedAt, error, notice, clearNotice, scheduleAutosave, save } = draftApi;
+  const { draft, loading, saving, lastSavedAt, error, notice, clearNotice, scheduleAutosave, save, reload } = draftApi;
 
   const builderRef = React.useRef<UnlayerBuilderHandle>(null);
   const [tab, setTab] = React.useState<EditorTab>("design");
@@ -58,9 +64,26 @@ export const EmailEditorPage: React.FC = () => {
   const [drillOpen, setDrillOpen] = React.useState(false);
   const [drillStatus, setDrillStatus] = React.useState<string | undefined>(undefined);
 
+  // Send flow (SND-02/06): freeze → confirm → send → live progress. `sendOpen`
+  // drives the review dialog; `freezing` guards the freeze round-trip against
+  // double-clicks; `sentInitiated` keeps the progress bar visible immediately
+  // after send (before the reload flips status to "sending").
+  const [sendOpen, setSendOpen] = React.useState(false);
+  const [freezing, setFreezing] = React.useState(false);
+  const [sentInitiated, setSentInitiated] = React.useState(false);
+
   // The Stats tab is shown only once the campaign has been sent (or is sending) —
   // a draft has no engagement data to report (RESEARCH Pattern 8).
   const showStats = draft?.status === "sent" || draft?.status === "sending";
+
+  // The Send button is offered while the campaign is still send-able (a draft to
+  // freeze, or an already-frozen "scheduled" campaign to review + fire).
+  const canOfferSend = !!draft?.id && (draft.status === "draft" || draft.status === "scheduled");
+
+  // A live ref to the draft so the send handlers read the latest id/status/version
+  // (avoids stale closures across the freeze/reload round-trips).
+  const draftRef = React.useRef(draft);
+  draftRef.current = draft;
 
   // On /email/new: open the template picker first (no design yet).
   React.useEffect(() => {
@@ -132,6 +155,65 @@ export const EmailEditorPage: React.FC = () => {
     });
   }, [save]);
 
+  // Parse the stored audience descriptor, defaulting to whole-church when empty.
+  const parseAudienceDescriptor = React.useCallback((): AudienceDescriptor => {
+    const json = draftRef.current?.audienceFilterJson;
+    if (!json) return { type: "church" };
+    try {
+      const parsed = JSON.parse(json) as AudienceDescriptor;
+      if (parsed && typeof parsed.type === "string") return parsed;
+    } catch {
+      /* fall through to whole-church default */
+    }
+    return { type: "church" };
+  }, []);
+
+  // "Send" click: draft → flush+save, freeze the audience under OCC, reload
+  // (status now "scheduled", recipientCount set), then open the review dialog.
+  // A 409 (already frozen) is non-fatal — we reopen the review over the fresh row.
+  // "scheduled" campaigns skip freeze and open the dialog directly.
+  const handleSendClick = React.useCallback(async () => {
+    if (!draftRef.current?.id || freezing) return;
+    if (draftRef.current.status === "scheduled") {
+      setSendOpen(true);
+      return;
+    }
+    setFreezing(true);
+    try {
+      await ensureExportedAndSaved();
+      const campaignId = draftRef.current.id;
+      const descriptor = parseAudienceDescriptor();
+      try {
+        await freezeAudience(campaignId, descriptor, draftRef.current.version);
+        await reload();
+      } catch (err) {
+        const body = parseApiError(err);
+        const code = (body.code || body.error || "").toLowerCase();
+        if (code === "conflict" || code === "not_draft" || (err instanceof Error && err.message.includes("409"))) {
+          // Already frozen by a concurrent action — reopen the review over the
+          // fresh (scheduled) row rather than failing the user's click.
+          await reload();
+        } else {
+          throw err;
+        }
+      }
+      setSendOpen(true);
+    } catch {
+      // ensureExportedAndSaved / reload surface their own errors via the draft
+      // `error` Alert; don't crash the click.
+    } finally {
+      setFreezing(false);
+    }
+  }, [freezing, ensureExportedAndSaved, parseAudienceDescriptor, reload]);
+
+  // Confirm dialog fired the send: close it, mark send initiated (keeps progress
+  // visible), and reload so status flips to "sending" (Stats tab appears).
+  const handleSent = React.useCallback(async () => {
+    setSendOpen(false);
+    setSentInitiated(true);
+    await reload();
+  }, [reload]);
+
   // Drain a queued design once the draft (with id) + builder exist.
   React.useEffect(() => {
     if (draft?.id && pendingDesignRef.current) {
@@ -160,6 +242,18 @@ export const EmailEditorPage: React.FC = () => {
 
       <Box sx={{ p: 3 }}>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+        {/* Live send progress (SND-06): visible while the campaign is sending, or
+            immediately after firing the send (before the reload flips status). */}
+        {draft?.id && (draft.status === "sending" || sentInitiated) && (
+          <Box
+            sx={{ mb: 2, p: 2, border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "background.paper" }}
+            data-testid="send-progress-panel"
+          >
+            <Typography variant="subtitle2" sx={{ mb: 0.5 }}>Sending this campaign</Typography>
+            <SendProgress campaignId={draft.id} onComplete={() => reload()} />
+          </Box>
+        )}
 
         {/* Header row: name + sending-as + save controls + template actions */}
         <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
@@ -207,6 +301,19 @@ export const EmailEditorPage: React.FC = () => {
               >
                 Save Draft
               </Button>
+              {canOfferSend && (
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="primary"
+                  startIcon={freezing ? <CircularProgress size={16} color="inherit" /> : <SendIcon />}
+                  onClick={handleSendClick}
+                  disabled={freezing}
+                  data-testid="send-campaign"
+                >
+                  {freezing ? "Preparing…" : "Send"}
+                </Button>
+              )}
             </Stack>
           </Grid>
         </Grid>
@@ -301,6 +408,19 @@ export const EmailEditorPage: React.FC = () => {
           initialStatus={drillStatus}
           open={drillOpen}
           onClose={() => setDrillOpen(false)}
+        />
+      )}
+
+      {/* The review & send dialog (SND-02) — opened after a successful freeze (or
+          directly for an already-scheduled campaign). onSent hands off to the
+          inline SendProgress. */}
+      {draft?.id && (
+        <SendConfirmDialog
+          campaignId={draft.id}
+          subject={draft.subject}
+          open={sendOpen}
+          onClose={() => setSendOpen(false)}
+          onSent={handleSent}
         />
       )}
 

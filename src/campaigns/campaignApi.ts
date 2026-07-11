@@ -69,6 +69,20 @@ export function previewAudience(
   return ApiHelper.post(`/campaigns/${id}/audience/preview`, descriptor, APP);
 }
 
+// POST /campaigns/:id/audience/freeze — freeze the resolved audience into
+// immutable campaignRecipients rows and flip the campaign draft→scheduled (setting
+// recipientCount). CRITICAL: the freeze endpoint reads req.body.descriptor +
+// req.body.expectedVersion (NOT the bare descriptor previewAudience posts), so we
+// wrap them: { descriptor, expectedVersion }. `expectedVersion` drives the OCC
+// guard (a stale version → 409 conflict / not_draft). BARE MessagingApi path.
+export function freezeAudience(
+  id: string,
+  descriptor: AudienceDescriptor,
+  expectedVersion?: number
+): Promise<{ frozen: number; skippedNoEmail: number; suppressed: number }> {
+  return ApiHelper.post(`/campaigns/${id}/audience/freeze`, { descriptor, expectedVersion }, APP);
+}
+
 // POST /campaigns/:id/test-send — deliver a single test to `to`, rendered as the
 // recipient at `recipientIndex` so merge fields resolve realistically. The 12-03
 // backend returns { sent, to, renderedFromRecipient } and writes ZERO recipient
