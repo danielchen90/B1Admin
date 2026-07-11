@@ -28,7 +28,7 @@ import { useCampuses } from "../hooks/useCampuses";
 import { useCampaignDraft } from "./useCampaignDraft";
 import { freezeAudience } from "./campaignApi";
 import { parseApiError } from "./apiError";
-import { type AudienceDescriptor } from "./emailTypes";
+import { type AudienceDescriptor, type CampaignInterface } from "./emailTypes";
 import { SendConfirmDialog } from "./SendConfirmDialog";
 import { SendProgress } from "./SendProgress";
 import { UnlayerBuilder, type UnlayerBuilderHandle, type UnlayerDesignJson } from "./UnlayerBuilder";
@@ -155,9 +155,11 @@ export const EmailEditorPage: React.FC = () => {
     });
   }, [save]);
 
-  // Parse the stored audience descriptor, defaulting to whole-church when empty.
-  const parseAudienceDescriptor = React.useCallback((): AudienceDescriptor => {
-    const json = draftRef.current?.audienceFilterJson;
+  // Parse the audience descriptor off a specific campaign row, defaulting to
+  // whole-church when empty/unparseable. Fed from the AUTHORITATIVE server row
+  // returned by reload() (never a post-await draftRef read).
+  const parseAudienceDescriptor = React.useCallback((row: CampaignInterface | null): AudienceDescriptor => {
+    const json = row?.audienceFilterJson;
     if (!json) return { type: "church" };
     try {
       const parsed = JSON.parse(json) as AudienceDescriptor;
@@ -168,35 +170,51 @@ export const EmailEditorPage: React.FC = () => {
     return { type: "church" };
   }, []);
 
-  // "Send" click: draft → flush+save, freeze the audience under OCC, reload
-  // (status now "scheduled", recipientCount set), then open the review dialog.
+  // "Send" click: draft → flush+save (bumps the server version), then reload to
+  // get the AUTHORITATIVE row and freeze the audience under OCC with that row's
+  // fresh version + descriptor, reload again (status now "scheduled",
+  // recipientCount set), and open the review dialog.
+  //
+  // The freeze's expectedVersion + the descriptor come from the value RETURNED by
+  // reload() — never from draftRef.current after an await, which is only refreshed
+  // on re-render and would send the pre-save version (the OCC would lose → 409 →
+  // recipients never materialized). See objective.
+  //
   // A 409 (already frozen) is non-fatal — we reopen the review over the fresh row.
-  // "scheduled" campaigns skip freeze and open the dialog directly.
+  // An already-"scheduled" campaign short-circuits: open the dialog directly.
   const handleSendClick = React.useCallback(async () => {
     if (!draftRef.current?.id || freezing) return;
+    // Already frozen → skip the save/reload/freeze entirely, review directly.
     if (draftRef.current.status === "scheduled") {
       setSendOpen(true);
       return;
     }
     setFreezing(true);
     try {
+      // Flush the current design + save. Bumps the server version.
       await ensureExportedAndSaved();
-      const campaignId = draftRef.current.id;
-      const descriptor = parseAudienceDescriptor();
-      try {
-        await freezeAudience(campaignId, descriptor, draftRef.current.version);
-        await reload();
-      } catch (err) {
-        const body = parseApiError(err);
-        const code = (body.code || body.error || "").toLowerCase();
-        if (code === "conflict" || code === "not_draft" || (err instanceof Error && err.message.includes("409"))) {
-          // Already frozen by a concurrent action — reopen the review over the
-          // fresh (scheduled) row rather than failing the user's click.
+      // Pull the authoritative row: fresh id/version/status/audienceFilterJson.
+      const fresh = await reload();
+      if (!fresh?.id) return;
+
+      if (fresh.status === "draft") {
+        const descriptor = parseAudienceDescriptor(fresh);
+        try {
+          await freezeAudience(fresh.id, descriptor, fresh.version);
           await reload();
-        } else {
-          throw err;
+        } catch (err) {
+          const body = parseApiError(err);
+          const code = (body.code || body.error || "").toLowerCase();
+          if (code === "conflict" || code === "not_draft" || (err instanceof Error && err.message.includes("409"))) {
+            // Already frozen by a concurrent action — reopen the review over the
+            // fresh (scheduled) row rather than failing the user's click.
+            await reload();
+          } else {
+            throw err;
+          }
         }
       }
+      // else already "scheduled"/beyond — no freeze needed.
       setSendOpen(true);
     } catch {
       // ensureExportedAndSaved / reload surface their own errors via the draft

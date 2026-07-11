@@ -45,8 +45,10 @@ export interface UseCampaignDraft {
   save: (patch?: DraftPatch, opts?: { immediate?: boolean }) => Promise<void>;
   // Re-fetch the campaign by id and replace draft state + reset the tracked
   // expectedVersion. Needed after freeze/send so the editor reflects the server
-  // status (draft→scheduled→sending) and the bumped version.
-  reload: () => Promise<void>;
+  // status (draft→scheduled→sending) and the bumped version. RETURNS the fresh
+  // server row so callers can read the authoritative version/status/audience
+  // WITHOUT waiting for a React re-render (the send flow depends on this).
+  reload: () => Promise<CampaignInterface | null>;
 }
 
 const AUTOSAVE_MS = 2500;
@@ -230,17 +232,20 @@ export function useCampaignDraft(id?: string): UseCampaignDraft {
 
   // Re-fetch the campaign fresh and replace draft state (mirrors the mount load).
   // Resets expectedVersion to the server's version so the next OCC save/freeze
-  // uses the current value. A no-op if the draft has no id yet.
-  const reload = React.useCallback(async (): Promise<void> => {
+  // uses the current value. RETURNS the fresh row (or null when there's no id /
+  // on error) so the send flow can read the authoritative version/status/audience
+  // immediately, without depending on a React re-render of draftRef.
+  const reload = React.useCallback(async (): Promise<CampaignInterface | null> => {
     const currentId = draftRef.current?.id ?? id;
-    if (!currentId) return;
+    if (!currentId) return null;
     try {
       const fresh = await getCampaign(currentId);
       setDraft(fresh);
       expectedVersionRef.current = fresh.version;
+      return fresh;
     } catch (err) {
       setError(parseApiError(err).error || "Couldn't reload the campaign.");
-      throw err;
+      return null;
     }
   }, [id]);
 
