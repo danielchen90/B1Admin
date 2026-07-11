@@ -17,7 +17,9 @@ import {
   type AudienceDescriptor,
   type AudiencePreviewResult,
   type CampaignInterface,
+  type CampaignStats,
   type PreviewResult,
+  type RecipientRow,
   type TemplateInterface,
 } from "./emailTypes";
 
@@ -97,6 +99,28 @@ export async function uploadCampaignImage(id: string, file: File): Promise<{ url
   const base64 = dataUrl.includes(",") ? dataUrl.slice(dataUrl.indexOf(",") + 1) : dataUrl;
   const body = { fileName: file.name, fileType: file.type, base64 };
   return ApiHelper.post(`/campaigns/${id}/upload-image`, body, APP);
+}
+
+// ---- Tracking / reporting (Plan 13-04) -----------------------------------
+
+// GET /campaigns/:id/stats — headline engagement counts + ranked per-link click
+// table (13-03 compute-on-read endpoint). Gated on Campaigns/View, church-scoped.
+// BARE path (MessagingApi base already ends in /messaging — a /messaging prefix
+// double-404s). Counts are recomputed from stamps each call (redelivery-safe).
+export function getCampaignStats(id: string): Promise<CampaignStats> {
+  return ApiHelper.get(`/campaigns/${id}/stats`, APP);
+}
+
+// GET /campaigns/:id/recipients?status= — per-recipient drill-down rows for the
+// clicked stat card (13-03). `status` pre-filters to a literal status (sent /
+// delivered / bounced / complained) or an engagement pseudo-status
+// (opened / clicked / unsubscribed); omitted → all recipients. BARE MessagingApi
+// path (see getCampaignStats). The status is URL-encoded to be safe.
+export function getCampaignRecipients(id: string, status?: string): Promise<RecipientRow[]> {
+  return ApiHelper.get(
+    `/campaigns/${id}/recipients${status ? `?status=${encodeURIComponent(status)}` : ""}`,
+    APP
+  );
 }
 
 // ---- Reusable templates (BLD-02) -----------------------------------------

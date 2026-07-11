@@ -80,6 +80,44 @@ export interface AudiencePreviewResult {
   recipients?: AudienceRecipient[];
 }
 
+// ---- Tracking / reporting (Plan 13-04) -----------------------------------
+
+// Headline engagement counts for a campaign + a ranked per-link click table
+// (GET /campaigns/:id/stats — the 13-03 compute-on-read endpoint). Every count
+// is recomputed from the per-recipient stamps + idempotent campaignEvents on
+// each call, so a redelivered SNS event can never move a number. `total` is the
+// frozen recipient count; `sent` is how many were dispatched. `unsubscribed` is
+// 0 this phase (no unsubscribe ingestion yet) — the UI renders it gracefully.
+export interface CampaignStats {
+  sent: number;
+  delivered: number;
+  opened: number;
+  clicked: number;
+  bounced: number;
+  complained: number;
+  unsubscribed: number;
+  total: number;
+  // Ranked (desc by count) per-link click table for the Stats tab.
+  linkClicks: { link: string; count: number }[];
+}
+
+// One recipient row for the drill-down list (GET /campaigns/:id/recipients).
+// `personId` is the deep-link key: when present the name links to the B1Admin
+// person record (/people/:personId in a new tab); when absent (an ad-hoc
+// address) the name renders as plain text. The three stamps drive the
+// Opened/Clicked columns; `lastActivity` is the most-recent engagement time.
+export interface RecipientRow {
+  id: string;
+  personId?: string;
+  name: string;
+  email: string;
+  status: string;
+  openedAt?: string;
+  clickedAt?: string;
+  bouncedAt?: string;
+  lastActivity?: string;
+}
+
 // A reusable email template (BLD-02). `blockJson` is present ONLY on get-template
 // (list omits the heavy payload); legacy HTML-only templates have it NULL, so the
 // editor must guard on `hasBlockJson` before calling `editor.loadDesign`.
