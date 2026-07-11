@@ -27,9 +27,12 @@ import React from "react";
 import {
   Box, Grid, Stack, Chip, Typography, TextField, MenuItem, Alert, Button,
   Card, CardContent, CircularProgress, Divider,
+  Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TablePagination,
 } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
 import { useCampuses } from "../hooks/useCampuses";
+import { useGroups } from "../hooks/useGroups";
+import { useAuxiliaries } from "../hooks/useAuxiliaries";
 import { previewAudience } from "./campaignApi";
 import { type AudienceDescriptor, type AudiencePreviewResult, type CampaignInterface } from "./emailTypes";
 import { apiErrorMessage } from "./apiError";
@@ -70,6 +73,8 @@ function parseDescriptor(json?: string): AudienceDescriptor {
 
 export const AudienceTab: React.FC<AudienceTabProps> = ({ draft, onChange }) => {
   const campuses = useCampuses();
+  const groups = useGroups();
+  const auxiliaries = useAuxiliaries();
   const descriptor = React.useMemo(() => parseDescriptor(draft?.audienceFilterJson), [draft?.audienceFilterJson]);
 
   // A campaign is only editable while it is still a draft (CONTEXT: freely
@@ -79,6 +84,15 @@ export const AudienceTab: React.FC<AudienceTabProps> = ({ draft, onChange }) => 
   const [preview, setPreview] = React.useState<AudiencePreviewResult | null>(null);
   const [previewLoading, setPreviewLoading] = React.useState(false);
   const [previewError, setPreviewError] = React.useState("");
+
+  // Recipient-list pagination so users can page through EVERY recipient, not just
+  // the first screenful. Reset to page 0 whenever the resolved list changes.
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(25);
+  const recipients = preview?.recipients ?? [];
+  React.useEffect(() => {
+    setPage(0);
+  }, [recipients.length, descriptor]);
 
   const campusName = React.useMemo(() => {
     if (!draft?.campusId) return "All campuses";
@@ -121,16 +135,21 @@ export const AudienceTab: React.FC<AudienceTabProps> = ({ draft, onChange }) => 
     }
     const typeLabel = AUDIENCE_TYPES.find((t) => t.value === descriptor.type)?.label ?? descriptor.type;
     if (TARGETED_TYPES.includes(descriptor.type) && descriptor.targetId) {
-      // For a campus target we can name it; group/auxiliary ids stay opaque here.
+      // Name the target from the loaded lists so the summary reads human-readably.
       if (descriptor.type === "campus") {
         const name = campuses.find((c) => c.id === descriptor.targetId)?.name;
         return name ? `Campus: ${name}` : `Campus (${descriptor.targetId})`;
       }
-      return `${typeLabel} (${descriptor.targetId})`;
+      if (descriptor.type === "group") {
+        const name = groups.find((g) => g.id === descriptor.targetId)?.name;
+        return name ? `Group: ${name}` : `Group (${descriptor.targetId})`;
+      }
+      const auxName = auxiliaries.find((a) => a.id === descriptor.targetId)?.name;
+      return auxName ? `Auxiliary: ${auxName}` : `Auxiliary (${descriptor.targetId})`;
     }
     if (descriptor.filterJson) return `${typeLabel} — filtered`;
     return typeLabel;
-  }, [descriptor, campuses]);
+  }, [descriptor, campuses, groups, auxiliaries]);
 
   const emit = React.useCallback(
     (next: AudienceDescriptor) => {
@@ -276,17 +295,53 @@ export const AudienceTab: React.FC<AudienceTabProps> = ({ draft, onChange }) => 
                     </TextField>
                   )}
 
-                  {(descriptor.type === "group" || descriptor.type === "auxiliary") && (
+                  {descriptor.type === "group" && (
                     <TextField
-                      label={descriptor.type === "group" ? "Group ID" : "Auxiliary ID"}
+                      select
+                      label="Group"
                       size="small"
                       fullWidth
-                      value={descriptor.targetId ?? ""}
+                      value={groups.some((g) => g.id === descriptor.targetId) ? descriptor.targetId : ""}
                       disabled={!editable}
                       onChange={(e) => handleTargetIdChange(e.target.value)}
-                      helperText={`The ${descriptor.type} to send to. Re-resolved to its current members at send.`}
-                      data-testid="audience-target-id"
-                    />
+                      helperText="The group to send to. Re-resolved to its current members at send."
+                      data-testid="audience-group"
+                    >
+                      <MenuItem value="">Select a group…</MenuItem>
+                      {groups
+                        .slice()
+                        .sort((a, b) =>
+                          (a.categoryName ?? "").localeCompare(b.categoryName ?? "") ||
+                          (a.name ?? "").localeCompare(b.name ?? "")
+                        )
+                        .map((g) => (
+                          <MenuItem key={g.id} value={g.id}>
+                            {g.categoryName ? `${g.categoryName} — ${g.name}` : g.name}
+                          </MenuItem>
+                        ))}
+                    </TextField>
+                  )}
+
+                  {descriptor.type === "auxiliary" && (
+                    <TextField
+                      select
+                      label="Auxiliary"
+                      size="small"
+                      fullWidth
+                      value={auxiliaries.some((a) => a.id === descriptor.targetId) ? descriptor.targetId : ""}
+                      disabled={!editable}
+                      onChange={(e) => handleTargetIdChange(e.target.value)}
+                      helperText="The auxiliary to send to. Re-resolved to its current members at send."
+                      data-testid="audience-auxiliary"
+                    >
+                      <MenuItem value="">Select an auxiliary…</MenuItem>
+                      {auxiliaries
+                        .slice()
+                        .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))
+                        .map((a) => (
+                          <MenuItem key={a.id} value={a.id}>{a.name}</MenuItem>
+                        ))}
+                    </TextField>
                   )}
 
                   <Typography variant="caption" color="text.secondary">
@@ -294,6 +349,85 @@ export const AudienceTab: React.FC<AudienceTabProps> = ({ draft, onChange }) => 
                     The count on the left updates to match.
                   </Typography>
                 </Stack>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Full-width: the exact list of people this campaign will be sent to.
+            Populated from the SAME resolver the freeze uses, for ANY audience type
+            (church / campus / group / auxiliary / explicit people). */}
+        <Grid size={{ xs: 12 }}>
+          <Card variant="outlined">
+            <CardContent>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                <GroupsIcon color="action" fontSize="small" />
+                <Typography variant="subtitle2">
+                  Recipients{preview ? ` (${preview.deliverableCount.toLocaleString()})` : ""}
+                </Typography>
+              </Stack>
+
+              {!draft?.id ? (
+                <Typography variant="body2" color="text.secondary">
+                  Save the campaign to see who it will be sent to.
+                </Typography>
+              ) : previewLoading ? (
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <CircularProgress size={18} />
+                  <Typography variant="body2" color="text.secondary">Resolving recipients…</Typography>
+                </Stack>
+              ) : previewError ? (
+                <Alert severity="warning">{previewError}</Alert>
+              ) : preview && preview.recipients && recipients.length > 0 ? (
+                <Box data-testid="audience-recipient-list">
+                  <TableContainer sx={{ maxHeight: 440 }}>
+                    <Table size="small" stickyHeader>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Name</TableCell>
+                          <TableCell>Email</TableCell>
+                          <TableCell>Campus</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {recipients
+                          .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                          .map((r) => (
+                            <TableRow key={r.personId} hover>
+                              <TableCell>{r.name}</TableCell>
+                              <TableCell>{r.email}</TableCell>
+                              <TableCell>{r.campusName || "—"}</TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  <TablePagination
+                    component="div"
+                    count={recipients.length}
+                    page={page}
+                    onPageChange={(_e, p) => setPage(p)}
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={(e) => {
+                      setRowsPerPage(parseInt(e.target.value, 10));
+                      setPage(0);
+                    }}
+                    rowsPerPageOptions={[25, 50, 100, 250]}
+                  />
+                </Box>
+              ) : preview && !preview.recipients ? (
+                <Typography variant="body2" color="text.secondary">
+                  This deployment doesn&rsquo;t return the recipient list yet — {preview.deliverableCount.toLocaleString()} deliverable.
+                </Typography>
+              ) : descriptor.type === "people" && (descriptor.personIds?.length ?? 0) === 0 ? (
+                <Typography variant="body2" color="text.secondary">
+                  No people selected yet. Use &ldquo;Email these people&rdquo; from the People or
+                  Leadership Report page to pick a specific set, or choose a different audience type.
+                </Typography>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No deliverable recipients for this audience.
+                </Typography>
               )}
             </CardContent>
           </Card>

@@ -62,10 +62,22 @@ export interface PreviewResult {
 // people with no/invalid email; `suppressed` are on the unsubscribe/suppression
 // list. The three are computed by the SAME resolver freeze uses, so a preview can
 // never drift from the eventual frozen list.
+// One resolved deliverable recipient, surfaced so the Audience tab can show the
+// exact list of people a campaign will reach (any audience type).
+export interface AudienceRecipient {
+  personId: string;
+  name: string;
+  email: string;
+  campusName: string;
+}
+
 export interface AudiencePreviewResult {
   deliverableCount: number;
   skippedNoEmailCount: number;
   suppressedCount: number;
+  // The full deliverable roster (name + email + campus). Optional for back-compat
+  // with an older Api that returned counts only.
+  recipients?: AudienceRecipient[];
 }
 
 // A reusable email template (BLD-02). `blockJson` is present ONLY on get-template
