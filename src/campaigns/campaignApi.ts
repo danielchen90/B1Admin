@@ -130,11 +130,14 @@ export function getCampaignStats(id: string): Promise<CampaignStats> {
 // delivered / bounced / complained) or an engagement pseudo-status
 // (opened / clicked / unsubscribed); omitted → all recipients. BARE MessagingApi
 // path (see getCampaignStats). The status is URL-encoded to be safe.
-export function getCampaignRecipients(id: string, status?: string): Promise<RecipientRow[]> {
-  return ApiHelper.get(
+export async function getCampaignRecipients(id: string, status?: string): Promise<RecipientRow[]> {
+  // The endpoint wraps the rows as { recipients: [...] } (unlike /stats which is a
+  // bare object) — unwrap so callers get the plain RecipientRow[] the type promises.
+  const res = await ApiHelper.get(
     `/campaigns/${id}/recipients${status ? `?status=${encodeURIComponent(status)}` : ""}`,
     APP
   );
+  return (res?.recipients ?? res ?? []) as RecipientRow[];
 }
 
 // ---- Reusable templates (BLD-02) -----------------------------------------
