@@ -91,6 +91,10 @@ export function SendConfirmDialog(props: Props) {
   const [churchTz, setChurchTz] = React.useState(DEFAULT_TZ);
   const [value, setValue] = React.useState<Dayjs | null>(null);
   const [scheduling, setScheduling] = React.useState(false);
+  // Whether the user has manually picked a time — once true we stop auto-defaulting
+  // the picker to the earliest valid slot (so a resolved tz change doesn't clobber
+  // a deliberate choice).
+  const [touched, setTouched] = React.useState(false);
 
   // Live audience preview (pre-freeze) — the SAME resolver the freeze uses, so
   // deliverableCount here is exactly what confirming will materialize. This is the
@@ -145,8 +149,30 @@ export function SendConfirmDialog(props: Props) {
     if (open) {
       setMode(onSchedule ? initialMode : "now");
       setValue(null);
+      setTouched(false);
     }
   }, [open, initialMode, onSchedule]);
+
+  // The earliest VALID pre-selection: the smallest 5-minute boundary that is at
+  // least 5 minutes out, in the church tz. A full datetime, so it also rolls the
+  // date forward correctly near midnight (e.g. 11:58 PM → 12:05 AM tomorrow).
+  const earliestValid = React.useCallback((tz: string): Dayjs => {
+    const min = dayjs().tz(tz).add(5, "minute"); // must be >= this
+    let t = dayjs().tz(tz).second(0).millisecond(0);
+    const rem = t.minute() % 5;
+    if (rem !== 0) t = t.add(5 - rem, "minute"); // round up to the next 5-min mark
+    while (t.isBefore(min)) t = t.add(5, "minute"); // ensure the 5-min lead
+    return t;
+  }, []);
+
+  // Default the picker to the earliest valid time whenever the user is in schedule
+  // mode and hasn't chosen a time yet. Re-runs when the church tz resolves so the
+  // default tracks the real zone (until the user picks their own time).
+  React.useEffect(() => {
+    if (open && onSchedule && mode === "later" && !touched) {
+      setValue(earliestValid(churchTz));
+    }
+  }, [open, onSchedule, mode, churchTz, touched, earliestValid]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -363,7 +389,7 @@ export function SendConfirmDialog(props: Props) {
                       <DateTimePicker
                         label={`Send time (${churchTz})`}
                         value={value}
-                        onChange={setValue}
+                        onChange={(v) => { setTouched(true); setValue(v); }}
                         minutesStep={5}
                         minDateTime={minDateTime}
                         slotProps={{ textField: { fullWidth: true, size: "small", "data-testid": "schedule-datetime" } as any }}
