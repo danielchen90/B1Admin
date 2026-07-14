@@ -31,6 +31,20 @@ export interface CampaignInterface {
   // ISO UTC instant a scheduled campaign will fire at (set by POST /:id/schedule,
   // surfaced on the list payload). Optional — drafts / send-immediately rows have none.
   scheduledAt?: string;
+  // ── Phase 16: history-record fields the list (16-02) + detail (16-03) consume ──
+  // "Who it was sent as" — the church's configured from-name (server sets the same
+  // value on every list row this phase; a per-creator facet may come later).
+  sender?: string;
+  // ISO UTC instant the campaign flipped to `sent`. Distinct from createdAt (draft
+  // time) and scheduledAt (fire time). ABSENT for draft/scheduled/failed/canceled.
+  sentAt?: string;
+  // Per-row engagement counts. Present ONLY for sent/sending rows; the server OMITS
+  // them (leaves undefined — NOT 0) for draft/scheduled/failed/canceled rows so the
+  // UI renders BLANK not 0% (mirrors the Task-2 server contract / Pitfall 4). Always
+  // guard `opened !== undefined` before rendering a rate.
+  opened?: number;
+  clicked?: number;
+  delivered?: number;
 }
 
 // Client mirror of the audience descriptor (closed union — 12-02). The "people"
@@ -43,12 +57,21 @@ export interface AudienceDescriptor {
   personIds?: string[];
 }
 
-// The controlled filter state for the campaign LIST page. `statuses` / `campusIds`
-// are multi-select intersections; empty arrays mean "no status/campus filter".
+// The controlled filter state for the campaign LIST page. Multi-select facets are
+// OR-within (any of the picked values matches) and AND-across (a row must satisfy
+// every non-empty facet) — the ordination-report filter behavior. An empty array =
+// that facet is off; absent dateFrom/dateTo = no date bound.
 export interface CampaignListFilter {
   search?: string;
   statuses: string[];
   campusIds: string[];
+  // Phase 16 — Sender facet: match rows whose `sender` is any of these (empty = no
+  // sender filter).
+  senders: string[];
+  // Phase 16 — Date-range facet (ISO date bounds, inclusive). Absent = no bound on
+  // that side.
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 // One preview render for a specific frozen recipient (test-send / preview flow).

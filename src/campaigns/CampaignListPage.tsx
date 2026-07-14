@@ -48,7 +48,7 @@ export const CampaignListPage: React.FC = () => {
   const [campaigns, setCampaigns] = React.useState<CampaignInterface[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
-  const [filter, setFilter] = React.useState<CampaignListFilter>({ search: "", statuses: [], campusIds: [] });
+  const [filter, setFilter] = React.useState<CampaignListFilter>({ search: "", statuses: [], campusIds: [], senders: [] });
   // The church scheduling tz drives the "Scheduled for" column formatting so a
   // scheduled time always reads the same church-local value regardless of the
   // viewer's browser timezone. Default while /timezone loads / on error.
