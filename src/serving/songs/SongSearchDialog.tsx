@@ -222,7 +222,7 @@ export const SongSearchDialog: React.FC<Props> = memo((props) => {
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: "100%" }}>
           <Typography variant="caption" color="text.secondary">
             {Locale.label("songs.songSearchDialog.poweredBy")}{" "}
-            <a href="https://www.praisecharts.com/?XID=churchapps" target="_blank" rel="noopener noreferrer" style={{ color: "inherit" }}>
+            <a href="https://www.praisecharts.com/?XID=huro" target="_blank" rel="noopener noreferrer" style={{ color: "inherit" }}>
               PraiseCharts
             </a>
           </Typography>

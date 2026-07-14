@@ -201,7 +201,7 @@ export const SermonEdit: React.FC<Props> = (props) => {
 
   switch (watchedVideoType) {
     case "youtube_channel":
-      keyLabel = <>{Locale.label("sermons.sermonEdit.youtubeChannelId")} <span className="description" style={{ float: "right", marginTop: 3, paddingLeft: 5 }}><a target="blank" rel="noreferrer noopener" href="https://support.churchapps.org/docs/b1-admin/sermons/live-streaming">{Locale.label("sermons.sermonEdit.getYourChannelId")}</a></span></>;
+      keyLabel = <>{Locale.label("sermons.sermonEdit.youtubeChannelId")} <span className="description" style={{ float: "right", marginTop: 3, paddingLeft: 5 }}><a target="blank" rel="noreferrer noopener" href="https://huro.church">{Locale.label("sermons.sermonEdit.getYourChannelId")}</a></span></>;
       keyPlaceholder = Locale.label("sermons.sermonEdit.youtubeChannelIdHelpPlaceholder");
       break;
     case "youtube":

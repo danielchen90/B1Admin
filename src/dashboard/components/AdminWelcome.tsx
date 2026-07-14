@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, Stack, Typography } from "@mui/material";
-import { Image, Language, VolunteerActivism, MusicNote, Person, Groups, LiveTv, Lock, CameraAlt, SmartDisplay } from "@mui/icons-material";
+import { Image, Language, VolunteerActivism, Person, Groups, LiveTv, Lock, CameraAlt } from "@mui/icons-material";
 import { ApiHelper, UserHelper, Locale } from "@churchapps/apphelper";
 import { QuickActionItem } from "./QuickActionItem";
 import { QuickSetupModal, type WizardType } from "./QuickSetupModal";
@@ -13,16 +13,12 @@ export const AdminWelcome: React.FC = () => {
   const subDomain = UserHelper.currentUserChurch?.church?.subDomain || "";
   const b1Url = EnvironmentHelper.B1Url.replace("{subdomain}", subDomain);
   const [wizardType, setWizardType] = React.useState<WizardType | null>(null);
-  const [hasTeams, setHasTeams] = React.useState<boolean | null>(null);
   const [hasPages, setHasPages] = React.useState<boolean | null>(null);
   const [hasGroups, setHasGroups] = React.useState<boolean | null>(null);
-  const [hasPlanTypes, setHasPlanTypes] = React.useState<boolean | null>(null);
 
   React.useEffect(() => {
-    ApiHelper.get("/groups/tag/team", "MembershipApi").then((data: any) => setHasTeams(data?.length > 0)).catch(() => setHasTeams(false));
     ApiHelper.get("/pages", "ContentApi").then((data: any) => setHasPages(data?.length > 0)).catch(() => setHasPages(false));
     ApiHelper.get("/groups/tag/standard", "MembershipApi").then((data: any) => setHasGroups(data?.length > 0)).catch(() => setHasGroups(false));
-    ApiHelper.get("/planTypes", "DoingApi").then((data: any) => setHasPlanTypes(data?.length > 0)).catch(() => setHasPlanTypes(false));
   }, []);
 
   const handleCardClick = (wizardKey: WizardType, existsAlready: boolean | null, fallbackUrl: string) => {
@@ -50,8 +46,7 @@ export const AdminWelcome: React.FC = () => {
     {
       label: Locale.label("dashboard.adminWelcome.servingAndContent"),
       items: [
-        { icon: <MusicNote fontSize="small" />, title: Locale.label("dashboard.adminWelcome.freeShowTitle"), onClick: () => handleCardClick("freeshow", hasTeams, "/serving") },
-        { icon: <SmartDisplay fontSize="small" />, title: Locale.label("dashboard.adminWelcome.freePlayTitle"), onClick: () => handleCardClick("freeplay", hasPlanTypes, "/serving") },
+        // FreeShow / FreePlay are external ChurchApps products — cross-promo hidden per rebrand.
         { icon: <LiveTv fontSize="small" />, title: Locale.label("dashboard.adminWelcome.uploadSermonTitle"), linkUrl: "/sermons" }
       ]
     },

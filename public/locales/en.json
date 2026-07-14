@@ -1198,7 +1198,7 @@
         "templates": "Templates",
         "welcome_volunteers": {
           "heading": "Welcome Volunteers",
-          "message": "Welcome Thank you for volunteering.\n\nPlease download the Huro app and login to manage your schedule. https://support.churchapps.org/docs/b1-mobile/getting-started/installing"
+          "message": "Welcome Thank you for volunteering.\n\nPlease download the Huro app and login to manage your schedule. https://huro.church/app"
         }
       },
       "unknown": "Unknown"

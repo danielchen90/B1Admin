@@ -97,7 +97,7 @@ export function HelpDialog(props: HelpDialogProps) {
         <Button
           variant="text"
           color="primary"
-          href="https://support.churchapps.org/docs/b1-admin/website/managing-pages"
+          href="https://huro.church"
           target="_blank"
           rel="noopener noreferrer"
           endIcon={<Icon fontSize="small">open_in_new</Icon>}

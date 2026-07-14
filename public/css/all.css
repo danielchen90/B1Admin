@@ -823,3 +823,13 @@ label .description {
   position: absolute;
   align-self: auto;
 }
+
+/* Hide cross-promo app-switcher links (B1.Church / Lessons.church) rendered by the
+   vendored @churchapps/apphelper UserMenu app list. No prop disables them, so they
+   are hidden here by their stable data-testid (NavItem emits nav-item-<label-slug>). */
+[data-testid="nav-item-b1.church"],
+[data-testid="nav-item-lessons.church"],
+a:has(> [data-testid="nav-item-b1.church"]),
+a:has(> [data-testid="nav-item-lessons.church"]) {
+  display: none !important;
+}

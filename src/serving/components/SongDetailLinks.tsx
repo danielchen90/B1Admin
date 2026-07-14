@@ -68,7 +68,7 @@ export const SongDetailLinks: React.FC<Props> = (props) => {
         {songDetailLinks?.map((sd) => <React.Fragment key={sd.id}>{getLink(sd)}</React.Fragment>)}
         {props.songDetail?.praiseChartsId && (
           <React.Fragment key="praisecharts">
-            {getLink({ service: "PraiseCharts", url: `https://www.praisecharts.com/songs/details/${props.songDetail?.praiseChartsId}?XID=churchapps` })}
+            {getLink({ service: "PraiseCharts", url: `https://www.praisecharts.com/songs/details/${props.songDetail?.praiseChartsId}?XID=huro` })}
           </React.Fragment>
         )}
       </Stack>

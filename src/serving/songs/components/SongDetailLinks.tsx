@@ -57,7 +57,7 @@ export const SongDetailLinks = memo((props: Props) => {
     if (props.songDetail?.praiseChartsId) {
       links.push({
         service: "PraiseCharts",
-        url: `https://www.praisecharts.com/songs/details/${props.songDetail.praiseChartsId}?XID=churchapps`
+        url: `https://www.praisecharts.com/songs/details/${props.songDetail.praiseChartsId}?XID=huro`
       });
     }
 

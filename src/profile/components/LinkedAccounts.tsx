@@ -69,7 +69,7 @@ export const LinkedAccounts = () => {
                     variant="contained"
                     color="primary"
                     onClick={() => {
-                      const newWindow = window.open("https://www.praisecharts.com/?XID=churchapps", "_blank");
+                      const newWindow = window.open("https://www.praisecharts.com/?XID=huro", "_blank");
                       if (newWindow) newWindow.opener = null;
                     }}>
                     {Locale.label("profile.linkedAccounts.signUp")}

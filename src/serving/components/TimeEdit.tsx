@@ -86,7 +86,7 @@ export const TimeEdit = (props: Props) => {
       return (
         <Typography sx={{ fontSize: "13px", fontStyle: "italic" }}>
           {Locale.label("plans.timeEdit.tip")}{" "}
-          <a href="https://support.churchapps.org/docs/b1-admin/serving/plans" target="_blank" rel="noopener noreferrer">
+          <a href="https://huro.church" target="_blank" rel="noopener noreferrer">
             {Locale.label("plans.timeEdit.followGuide")}
           </a>
         </Typography>
