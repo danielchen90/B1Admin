@@ -29,12 +29,17 @@ import SendIcon from "@mui/icons-material/Send";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LockIcon from "@mui/icons-material/Lock";
+import ReplayIcon from "@mui/icons-material/Replay";
 import { PageHeader } from "@churchapps/apphelper";
 import { PageBreadcrumbs } from "../components/ui";
 import { useCampuses } from "../hooks/useCampuses";
+import { useGroups } from "../hooks/useGroups";
+import { useAuxiliaries } from "../hooks/useAuxiliaries";
 import { useCampaignDraft } from "./useCampaignDraft";
-import { freezeAudience, scheduleCampaign, cancelCampaign } from "./campaignApi";
-import { parseApiError } from "./apiError";
+import { freezeAudience, scheduleCampaign, cancelCampaign, resendAsNew, getSchedulingTimezone } from "./campaignApi";
+import { describeAudience } from "./describeAudience";
+import { parseApiError, apiErrorMessage } from "./apiError";
 import { type AudienceDescriptor, type CampaignInterface } from "./emailTypes";
 import { SendConfirmDialog } from "./SendConfirmDialog";
 import { SendProgress } from "./SendProgress";
@@ -58,6 +63,8 @@ export const EmailEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const campuses = useCampuses();
+  const groups = useGroups();
+  const auxiliaries = useAuxiliaries();
   const draftApi = useCampaignDraft(id);
   const { draft, loading, saving, lastSavedAt, error, notice, clearNotice, scheduleAutosave, save, reload } = draftApi;
 
@@ -111,6 +118,79 @@ export const EmailEditorPage: React.FC = () => {
   // sending/sent/canceled refuse). Same predicate as canOfferSend today.
   const canCancel = canOfferSend;
   const isScheduled = draft?.status === "scheduled";
+
+  // Phase-16 HST-02: a sent (or otherwise terminal) campaign is an IMMUTABLE
+  // RECORD, not an editable draft. When locked we (a) surface a prominent
+  // "Sent · locked" banner, (b) offer "Resend as new" as the only path forward,
+  // (c) disable every editable field so nothing reads as changeable. sending is
+  // included (in-flight, no longer editable); failed/canceled are terminal records.
+  const isLockedRecord =
+    draft?.status === "sent" ||
+    draft?.status === "sending" ||
+    draft?.status === "failed" ||
+    draft?.status === "canceled";
+
+  // Resend-as-new (HST-03): clone content-only into a fresh draft and navigate to
+  // it (lands in the Unlayer builder). `resending` guards the round-trip.
+  const [resending, setResending] = React.useState(false);
+  const [resendError, setResendError] = React.useState("");
+
+  // The frozen, plain-language audience summary for the locked record banner —
+  // read from the campaign's stored descriptor via the SHARED describeAudience
+  // helper (same string AudienceTab renders), so the record's audience reads
+  // exactly as it did as a draft, just frozen.
+  const lockedAudienceSummary = React.useMemo(() => {
+    if (!draft) return "";
+    const json = draft.audienceFilterJson;
+    let descriptor: AudienceDescriptor = { type: "church" };
+    if (json) {
+      try {
+        const parsed = JSON.parse(json) as AudienceDescriptor;
+        if (parsed && typeof parsed.type === "string") descriptor = parsed;
+      } catch {
+        /* fall through to whole-church default */
+      }
+    }
+    return describeAudience(descriptor, { campuses, groups, auxiliaries });
+  }, [draft, campuses, groups, auxiliaries]);
+
+  // The frozen recipient count for the record — what was actually dispatched
+  // (sentCount) plus any failures, i.e. the size of the frozen audience. Falls
+  // back to undefined so the banner omits it when the server didn't report counts.
+  const frozenCount = React.useMemo(() => {
+    if (!draft) return undefined;
+    const sent = draft.sentCount;
+    const failed = draft.failedCount;
+    if (sent === undefined && failed === undefined) return undefined;
+    return (sent ?? 0) + (failed ?? 0);
+  }, [draft]);
+
+  // Church scheduling timezone — so the record's sent time reads in the church's
+  // zone regardless of the viewer's browser (matches the list page's "Sent"
+  // column). Fetched once; defaults to America/New_York while loading / on error.
+  const [churchTz, setChurchTz] = React.useState("America/New_York");
+  React.useEffect(() => {
+    let active = true;
+    getSchedulingTimezone()
+      .then((r) => {
+        if (active && r?.timezone) setChurchTz(r.timezone);
+      })
+      .catch(() => {
+        /* keep the default */
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Format a sent-at ISO instant in the church timezone for the locked banner.
+  const formatSentAt = React.useCallback(
+    (iso: string) => {
+      const d = dayjs.utc(iso);
+      return d.isValid() ? d.tz(churchTz).format("MMM D, YYYY h:mm A") : iso;
+    },
+    [churchTz]
+  );
 
   // A live ref to the draft so the send handlers read the latest id/status/version
   // (avoids stale closures across the freeze/reload round-trips).
@@ -315,6 +395,25 @@ export const EmailEditorPage: React.FC = () => {
     }
   }, [canceling, reload]);
 
+  // HST-03 — "Resend as new": clone the locked record's CONTENT only into a fresh
+  // draft (name "Copy of …", subject/preheader/blockJson — NO audience) and
+  // navigate to it so the user lands in the Unlayer builder and re-picks the
+  // audience from scratch. Purely client-side over getCampaign + createDraft.
+  const handleResend = React.useCallback(async () => {
+    const current = draftRef.current;
+    if (!current?.id || resending) return;
+    setResending(true);
+    setResendError("");
+    try {
+      const created = await resendAsNew(current.id);
+      if (created?.id) navigate("/email/" + created.id);
+    } catch (err) {
+      setResendError(apiErrorMessage(err, "Couldn't start a resend. Please try again."));
+    } finally {
+      setResending(false);
+    }
+  }, [resending, navigate]);
+
   // Drain a queued design once the draft (with id) + builder exist.
   React.useEffect(() => {
     if (draft?.id && pendingDesignRef.current) {
@@ -344,6 +443,57 @@ export const EmailEditorPage: React.FC = () => {
       <Box sx={{ p: 3 }}>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
+        {/* Sent · locked banner (HST-02): a sent/terminal campaign is an IMMUTABLE
+            RECORD. This prominent banner communicates immutability, recaps who it
+            was sent as / when / to which audience, and offers "Resend as new" as
+            the only path forward (HST-03). */}
+        {isLockedRecord && draft && (
+          <Alert
+            severity="info"
+            icon={<LockIcon fontSize="inherit" />}
+            data-testid="sent-locked-banner"
+            sx={{ mb: 2 }}
+            action={
+              <Button
+                color="inherit"
+                size="small"
+                startIcon={resending ? <CircularProgress size={16} color="inherit" /> : <ReplayIcon />}
+                onClick={handleResend}
+                disabled={resending}
+                data-testid="resend-as-new"
+              >
+                {resending ? "Copying…" : "Resend as new"}
+              </Button>
+            }
+          >
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              {draft.status === "sent"
+                ? `Sent${draft.sentAt ? ` on ${formatSentAt(draft.sentAt)}` : ""} · locked`
+                : draft.status === "sending"
+                ? "Sending · locked"
+                : draft.status === "failed"
+                ? "Send failed · locked"
+                : "Canceled · locked"}
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 0.5 }}>
+              This record can’t be edited.
+              {draft.sender ? ` Sent as ${draft.sender}.` : ""}
+              {lockedAudienceSummary ? ` Audience: ${lockedAudienceSummary}` : ""}
+              {frozenCount !== undefined
+                ? ` (${frozenCount.toLocaleString()} ${frozenCount === 1 ? "recipient" : "recipients"}).`
+                : lockedAudienceSummary
+                ? "."
+                : ""}{" "}
+              To send it again, use <strong>Resend as new</strong> — it copies the content into a fresh draft (the audience is re-picked from scratch).
+            </Typography>
+            {resendError && (
+              <Typography variant="body2" color="error" sx={{ mt: 0.5 }} data-testid="resend-error">
+                {resendError}
+              </Typography>
+            )}
+          </Alert>
+        )}
+
         {/* Live send progress (SND-06): visible while the campaign is sending, or
             immediately after firing the send (before the reload flips status). */}
         {draft?.id && (draft.status === "sending" || sentInitiated) && (
@@ -365,6 +515,7 @@ export const EmailEditorPage: React.FC = () => {
               size="small"
               value={draft?.name ?? ""}
               onChange={(e) => scheduleAutosave({ name: e.target.value })}
+              disabled={isLockedRecord}
               data-testid="campaign-name"
             />
           </Grid>
@@ -373,17 +524,25 @@ export const EmailEditorPage: React.FC = () => {
           </Grid>
           <Grid size={{ xs: 12, md: 5 }}>
             <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center" flexWrap="wrap">
-              <Typography variant="caption" color="text.secondary" data-testid="autosave-status">
-                {saving ? "Saving…" : lastSavedAt ? `Saved ${formatTime(lastSavedAt)}` : "Not saved yet"}
-              </Typography>
-              <Button
-                size="small"
-                startIcon={<DashboardCustomizeIcon />}
-                onClick={() => setPickerOpen(true)}
-                data-testid="open-template-picker"
-              >
-                Templates
-              </Button>
+              {/* Autosave / edit affordances are suppressed on a locked record — a
+                  sent campaign is display-only (HST-02), the banner's "Resend as
+                  new" is the path forward. "Save as template" stays available (a
+                  harmless read-only capture of the design for reuse). */}
+              {!isLockedRecord && (
+                <Typography variant="caption" color="text.secondary" data-testid="autosave-status">
+                  {saving ? "Saving…" : lastSavedAt ? `Saved ${formatTime(lastSavedAt)}` : "Not saved yet"}
+                </Typography>
+              )}
+              {!isLockedRecord && (
+                <Button
+                  size="small"
+                  startIcon={<DashboardCustomizeIcon />}
+                  onClick={() => setPickerOpen(true)}
+                  data-testid="open-template-picker"
+                >
+                  Templates
+                </Button>
+              )}
               <Button
                 size="small"
                 startIcon={<BookmarkAddIcon />}
@@ -392,16 +551,18 @@ export const EmailEditorPage: React.FC = () => {
               >
                 Save as template
               </Button>
-              <Button
-                size="small"
-                variant="contained"
-                startIcon={<SaveIcon />}
-                onClick={handleSaveDraft}
-                disabled={saving}
-                data-testid="save-draft"
-              >
-                Save Draft
-              </Button>
+              {!isLockedRecord && (
+                <Button
+                  size="small"
+                  variant="contained"
+                  startIcon={<SaveIcon />}
+                  onClick={handleSaveDraft}
+                  disabled={saving}
+                  data-testid="save-draft"
+                >
+                  Save Draft
+                </Button>
+              )}
               {canCancel && (
                 <Button
                   size="small"
@@ -454,6 +615,7 @@ export const EmailEditorPage: React.FC = () => {
               size="small"
               value={draft?.subject ?? ""}
               onChange={(e) => scheduleAutosave({ subject: e.target.value })}
+              disabled={isLockedRecord}
               helperText="Merge fields like {{firstName|Friend}} are supported."
               data-testid="campaign-subject"
             />
@@ -465,6 +627,7 @@ export const EmailEditorPage: React.FC = () => {
               size="small"
               value={draft?.preheader ?? ""}
               onChange={(e) => scheduleAutosave({ preheader: e.target.value })}
+              disabled={isLockedRecord}
               helperText="Shown after the subject in most inboxes."
               data-testid="campaign-preheader"
             />
@@ -477,24 +640,55 @@ export const EmailEditorPage: React.FC = () => {
           onChange={(_e, v) => setTab(v)}
           sx={{ mb: 2, borderBottom: 1, borderColor: "divider" }}
         >
-          <Tab value="design" label="Design" />
+          <Tab value="design" label={isLockedRecord ? "Email" : "Design"} />
           <Tab value="audience" label="Audience" />
           <Tab value="preview" label="Preview & Test" />
           {/* Stats appears only for sent/sending campaigns (drafts have no data). */}
           {showStats && <Tab value="stats" label="Stats" data-testid="stats-tab-trigger" />}
         </Tabs>
 
-        {/* Design tab — the builder stays mounted; we just hide non-active tabs so
-            the editor state (and any in-flight upload) survives tab switches. */}
-        <Box sx={{ display: tab === "design" ? "block" : "none" }}>
-          <UnlayerBuilder
-            ref={builderRef}
-            initialDesign={initialDesign}
-            campaignId={draft?.id}
-            onExport={handleBuilderExport}
-            minHeight={640}
-          />
-        </Box>
+        {/* Design tab. For a LOCKED record (HST-02) we render the FROZEN
+            renderedHtml read-only (the exact email that went out) instead of the
+            editable Unlayer builder — nothing on a sent record is editable. For a
+            draft/scheduled campaign the builder stays mounted; we just hide
+            non-active tabs so editor state (and any in-flight upload) survives tab
+            switches. */}
+        {isLockedRecord ? (
+          <Box sx={{ display: tab === "design" ? "block" : "none" }} data-testid="locked-email-render">
+            {draft?.renderedHtml ? (
+              <Box
+                sx={{
+                  border: 1,
+                  borderColor: "divider",
+                  borderRadius: 1,
+                  overflow: "hidden",
+                  bgcolor: "background.paper",
+                }}
+              >
+                <iframe
+                  title="Sent email"
+                  srcDoc={draft.renderedHtml}
+                  style={{ width: "100%", height: 640, border: "none" }}
+                />
+              </Box>
+            ) : (
+              <Alert severity="info">
+                The rendered email for this record isn’t available. Open <strong>Preview &amp; Test</strong> to
+                render it, or use <strong>Resend as new</strong> to work from a copy.
+              </Alert>
+            )}
+          </Box>
+        ) : (
+          <Box sx={{ display: tab === "design" ? "block" : "none" }}>
+            <UnlayerBuilder
+              ref={builderRef}
+              initialDesign={initialDesign}
+              campaignId={draft?.id}
+              onExport={handleBuilderExport}
+              minHeight={640}
+            />
+          </Box>
+        )}
         <Box sx={{ display: tab === "audience" ? "block" : "none", py: 4 }}>
           <AudienceTab
             draft={draft}
