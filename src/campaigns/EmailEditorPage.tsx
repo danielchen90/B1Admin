@@ -17,16 +17,19 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import {
   Box, Grid, Stack, Button, TextField, Typography, Chip, Tabs, Tab, Alert, Snackbar, CircularProgress,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
 } from "@mui/material";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import SaveIcon from "@mui/icons-material/Save";
 import SendIcon from "@mui/icons-material/Send";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import BlockIcon from "@mui/icons-material/Block";
 import { PageHeader } from "@churchapps/apphelper";
 import { PageBreadcrumbs } from "../components/ui";
 import { useCampuses } from "../hooks/useCampuses";
 import { useCampaignDraft } from "./useCampaignDraft";
-import { freezeAudience, scheduleCampaign } from "./campaignApi";
+import { freezeAudience, scheduleCampaign, cancelCampaign } from "./campaignApi";
 import { parseApiError } from "./apiError";
 import { type AudienceDescriptor, type CampaignInterface } from "./emailTypes";
 import { SendConfirmDialog } from "./SendConfirmDialog";
@@ -71,6 +74,17 @@ export const EmailEditorPage: React.FC = () => {
   const [sendOpen, setSendOpen] = React.useState(false);
   const [freezing, setFreezing] = React.useState(false);
   const [sentInitiated, setSentInitiated] = React.useState(false);
+  // Which mode the review dialog opens in — set by the header's two distinct
+  // buttons ("Send now" vs "Schedule for later") so the choice is explicit up
+  // front and clicking one never implies the other fires.
+  const [dialogMode, setDialogMode] = React.useState<"now" | "later">("now");
+
+  // SND-05 cancel: a clear "Cancel campaign" affordance on the details page for
+  // draft/scheduled campaigns, behind a confirm dialog (marking canceled can't be
+  // undone). Also the way to clear a leftover frozen-but-unsent campaign.
+  const [cancelOpen, setCancelOpen] = React.useState(false);
+  const [canceling, setCanceling] = React.useState(false);
+  const [cancelError, setCancelError] = React.useState("");
 
   // The Stats tab is shown only once the campaign has been sent (or is sending) —
   // a draft has no engagement data to report (RESEARCH Pattern 8).
@@ -79,6 +93,10 @@ export const EmailEditorPage: React.FC = () => {
   // The Send button is offered while the campaign is still send-able (a draft to
   // freeze, or an already-frozen "scheduled" campaign to review + fire).
   const canOfferSend = !!draft?.id && (draft.status === "draft" || draft.status === "scheduled");
+  // Cancel is legal only while draft or scheduled (matching the server guard —
+  // sending/sent/canceled refuse). Same predicate as canOfferSend today.
+  const canCancel = canOfferSend;
+  const isScheduled = draft?.status === "scheduled";
 
   // A live ref to the draft so the send handlers read the latest id/status/version
   // (avoids stale closures across the freeze/reload round-trips).
@@ -182,8 +200,9 @@ export const EmailEditorPage: React.FC = () => {
   //
   // A 409 (already frozen) is non-fatal — we reopen the review over the fresh row.
   // An already-"scheduled" campaign short-circuits: open the dialog directly.
-  const handleSendClick = React.useCallback(async () => {
+  const handleSendClick = React.useCallback(async (mode: "now" | "later" = "now") => {
     if (!draftRef.current?.id || freezing) return;
+    setDialogMode(mode);
     // Already frozen → skip the save/reload/freeze entirely, review directly.
     if (draftRef.current.status === "scheduled") {
       setSendOpen(true);
@@ -249,6 +268,32 @@ export const EmailEditorPage: React.FC = () => {
     },
     [reload]
   );
+
+  // SND-05 — cancel a draft/scheduled campaign (→ canceled) under OCC, then
+  // reload so the page reflects the terminal state. A 409 means it already moved
+  // on (e.g. the poller claimed it → sending); surface it rather than silently
+  // failing. Uses the fresh draftRef version to satisfy the server's OCC guard.
+  const handleCancelCampaign = React.useCallback(async () => {
+    const current = draftRef.current;
+    if (!current?.id || canceling) return;
+    setCanceling(true);
+    setCancelError("");
+    try {
+      await cancelCampaign(current.id, current.version ?? 0);
+      await reload();
+      setCancelOpen(false);
+    } catch (err) {
+      const body = parseApiError(err);
+      if (body.error === "conflict" || body.code === "BAD_STATUS" || body.error === "not_cancelable") {
+        setCancelError("This campaign can no longer be canceled — it may already be sending or sent.");
+        await reload();
+      } else {
+        setCancelError(body.error || "Couldn't cancel the campaign.");
+      }
+    } finally {
+      setCanceling(false);
+    }
+  }, [canceling, reload]);
 
   // Drain a queued design once the draft (with id) + builder exist.
   React.useEffect(() => {
@@ -337,17 +382,43 @@ export const EmailEditorPage: React.FC = () => {
               >
                 Save Draft
               </Button>
+              {canCancel && (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  startIcon={<BlockIcon />}
+                  onClick={() => { setCancelError(""); setCancelOpen(true); }}
+                  disabled={freezing || canceling}
+                  data-testid="cancel-campaign"
+                >
+                  {isScheduled ? "Cancel scheduled send" : "Cancel campaign"}
+                </Button>
+              )}
+              {canOfferSend && (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                  startIcon={freezing && dialogMode === "later" ? <CircularProgress size={16} color="inherit" /> : <ScheduleIcon />}
+                  onClick={() => handleSendClick("later")}
+                  disabled={freezing || canceling}
+                  data-testid="schedule-campaign"
+                >
+                  Schedule for later
+                </Button>
+              )}
               {canOfferSend && (
                 <Button
                   size="small"
                   variant="contained"
                   color="primary"
-                  startIcon={freezing ? <CircularProgress size={16} color="inherit" /> : <SendIcon />}
-                  onClick={handleSendClick}
-                  disabled={freezing}
+                  startIcon={freezing && dialogMode === "now" ? <CircularProgress size={16} color="inherit" /> : <SendIcon />}
+                  onClick={() => handleSendClick("now")}
+                  disabled={freezing || canceling}
                   data-testid="send-campaign"
                 >
-                  {freezing ? "Preparing…" : "Send"}
+                  {freezing && dialogMode === "now" ? "Preparing…" : "Send now"}
                 </Button>
               )}
             </Stack>
@@ -455,11 +526,40 @@ export const EmailEditorPage: React.FC = () => {
           campaignId={draft.id}
           subject={draft.subject}
           open={sendOpen}
+          initialMode={dialogMode}
           onClose={() => setSendOpen(false)}
           onSent={handleSent}
           onSchedule={handleSchedule}
         />
       )}
+
+      {/* SND-05 — confirm before canceling a draft/scheduled campaign. */}
+      <Dialog open={cancelOpen} onClose={canceling ? undefined : () => setCancelOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>{isScheduled ? "Cancel scheduled send?" : "Cancel this campaign?"}</DialogTitle>
+        <DialogContent>
+          {cancelError && <Alert severity="error" sx={{ mb: 2 }}>{cancelError}</Alert>}
+          <DialogContentText>
+            {isScheduled
+              ? "This campaign is scheduled to send. Canceling stops it — it will not be sent — and marks it canceled. This can’t be undone."
+              : "This will mark the campaign canceled and remove it from your active campaigns. This can’t be undone."}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCancelOpen(false)} disabled={canceling} data-testid="cancel-dialog-keep">
+            Keep campaign
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleCancelCampaign}
+            disabled={canceling}
+            startIcon={canceling ? <CircularProgress size={16} color="inherit" /> : <BlockIcon />}
+            data-testid="cancel-dialog-confirm"
+          >
+            {canceling ? "Canceling…" : isScheduled ? "Cancel send" : "Cancel campaign"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <TemplatePickerDialog
         open={pickerOpen}

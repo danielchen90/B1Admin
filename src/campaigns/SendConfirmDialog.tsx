@@ -1,5 +1,7 @@
 import React from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Alert, CircularProgress, Box, Stack, Divider, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
@@ -38,6 +40,10 @@ interface Props {
   // SND-04 schedule-for-later: called with a UTC ISO instant when the user
   // confirms a scheduled send. Absent → the dialog offers only "Send now".
   onSchedule?: (scheduledAtIso: string) => Promise<void> | void;
+  // Which mode the dialog opens in. The caller's two distinct header buttons
+  // ("Send now" / "Schedule for later") drive this so the user lands directly on
+  // the action they picked — no ambiguity about whether "Send" fires immediately.
+  initialMode?: "now" | "later";
 }
 
 interface StatusData {
@@ -58,7 +64,7 @@ interface Settings {
 const DEFAULT_TZ = "America/New_York";
 
 export function SendConfirmDialog(props: Props) {
-  const { campaignId, subject, open = true, onSent, onClose, onSchedule } = props;
+  const { campaignId, subject, open = true, onSent, onClose, onSchedule, initialMode = "now" } = props;
   const [loading, setLoading] = React.useState(true);
   const [status, setStatus] = React.useState<StatusData | null>(null);
   const [settings, setSettings] = React.useState<Settings | null>(null);
@@ -93,13 +99,14 @@ export function SendConfirmDialog(props: Props) {
   }, [open]);
 
   // Reset the mode/value each time the dialog opens so a prior schedule attempt
-  // doesn't leak into the next open.
+  // doesn't leak into the next open. Open in the mode the caller's header button
+  // chose ("Send now" vs "Schedule for later").
   React.useEffect(() => {
     if (open) {
-      setMode("now");
+      setMode(onSchedule ? initialMode : "now");
       setValue(null);
     }
-  }, [open]);
+  }, [open, initialMode, onSchedule]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -220,7 +227,7 @@ export function SendConfirmDialog(props: Props) {
 
   return (
     <Dialog open={open} onClose={sending ? undefined : onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Review &amp; send</DialogTitle>
+      <DialogTitle>{onSchedule && mode === "later" ? "Schedule for later" : "Review & send now"}</DialogTitle>
       <DialogContent>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
@@ -276,8 +283,12 @@ export function SendConfirmDialog(props: Props) {
                   sx={{ mb: 2 }}
                   data-testid="send-mode-toggle"
                 >
-                  <ToggleButton value="now" data-testid="mode-send-now">Send now</ToggleButton>
-                  <ToggleButton value="later" data-testid="mode-schedule">Schedule for later</ToggleButton>
+                  <ToggleButton value="now" data-testid="mode-send-now">
+                    <SendIcon fontSize="small" sx={{ mr: 0.75 }} /> Send now
+                  </ToggleButton>
+                  <ToggleButton value="later" data-testid="mode-schedule">
+                    <ScheduleIcon fontSize="small" sx={{ mr: 0.75 }} /> Schedule for later
+                  </ToggleButton>
                 </ToggleButtonGroup>
 
                 {mode === "later" && (
@@ -307,13 +318,13 @@ export function SendConfirmDialog(props: Props) {
         {onSchedule && mode === "later" ? (
           <Button
             variant="contained"
-            color="primary"
+            color="info"
             onClick={handleSchedule}
             disabled={!canSchedule}
-            startIcon={scheduling ? <CircularProgress size={16} color="inherit" /> : null}
+            startIcon={scheduling ? <CircularProgress size={16} color="inherit" /> : <ScheduleIcon />}
             data-testid="confirm-schedule"
           >
-            {scheduling ? "Scheduling…" : "Schedule"}
+            {scheduling ? "Scheduling…" : "Schedule send"}
           </Button>
         ) : (
           <Button
@@ -321,7 +332,7 @@ export function SendConfirmDialog(props: Props) {
             color="primary"
             onClick={handleSend}
             disabled={!canSend}
-            startIcon={sending ? <CircularProgress size={16} color="inherit" /> : null}
+            startIcon={sending ? <CircularProgress size={16} color="inherit" /> : <SendIcon />}
             data-testid="confirm-send-now"
           >
             {sending ? "Sending…" : "Send now"}
