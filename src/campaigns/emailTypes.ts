@@ -28,6 +28,9 @@ export interface CampaignInterface {
   version?: number;
   sentCount?: number;
   failedCount?: number;
+  // Frozen audience size — set at freeze, carried on the list DTO (16-01 server
+  // projection). Drives the list "Audience" column; absent on unfrozen drafts.
+  recipientCount?: number;
   // ISO UTC instant a scheduled campaign will fire at (set by POST /:id/schedule,
   // surfaced on the list payload). Optional — drafts / send-immediately rows have none.
   scheduledAt?: string;
