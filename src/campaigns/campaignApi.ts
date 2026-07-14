@@ -51,6 +51,28 @@ export function updateDraft(
   return ApiHelper.post(`/campaigns/${id}`, body, APP);
 }
 
+// resendAsNew (Plan 16-03, HST-03) — clone a SENT (or terminal) campaign into a
+// FRESH draft, CONTENT-ONLY. Reads the source via getCampaign (full design incl.
+// blockJson/subject/preheader) then createDraft with a "Copy of …" name. The
+// audience is DELIBERATELY NOT copied (no audienceFilterJson) — CONTEXT locks a
+// content-only clone so a resend can never accidentally re-blast the original
+// list; the user re-picks the audience from scratch in the new draft. This is a
+// PURELY CLIENT-SIDE compose over the existing getCampaign + createDraft — there
+// is NO backend clone/resend route (Pitfall 1). `duplicateCampaign` is an alias
+// so either import name works from the list-row Resend button / record banner.
+export async function resendAsNew(id: string): Promise<CampaignInterface> {
+  const src = await getCampaign(id); // full design incl. blockJson, subject, preheader
+  return createDraft({
+    name: `Copy of ${src.name || "campaign"}`, // CONTEXT: "Copy of {title}", editable before send
+    subject: src.subject,
+    preheader: src.preheader, // copied explicitly (don't rely on blockJson round-trip)
+    blockJson: src.blockJson,
+    // DO NOT copy audienceFilterJson — content-only clone (CONTEXT lock; guards
+    // against an accidental re-blast to the original frozen audience).
+  });
+}
+export const duplicateCampaign = resendAsNew;
+
 // POST /campaigns/:id/preview — render the campaign for one frozen recipient.
 export function previewCampaign(id: string, recipientIndex: number): Promise<PreviewResult> {
   return ApiHelper.post(`/campaigns/${id}/preview`, { recipientIndex }, APP);

@@ -34,6 +34,7 @@ import { useCampuses } from "../hooks/useCampuses";
 import { useGroups } from "../hooks/useGroups";
 import { useAuxiliaries } from "../hooks/useAuxiliaries";
 import { previewAudience } from "./campaignApi";
+import { describeAudience } from "./describeAudience";
 import { type AudienceDescriptor, type AudiencePreviewResult, type CampaignInterface } from "./emailTypes";
 import { apiErrorMessage } from "./apiError";
 
@@ -127,29 +128,13 @@ export const AudienceTab: React.FC<AudienceTabProps> = ({ draft, onChange }) => 
     };
   }, [draft?.id, descriptor]);
 
-  // Human-readable summary of the descriptor (BOTH carry types).
-  const summary = React.useMemo(() => {
-    if (descriptor.type === "people") {
-      const n = descriptor.personIds?.length ?? 0;
-      return `${n} specific ${n === 1 ? "person" : "people"} selected`;
-    }
-    const typeLabel = AUDIENCE_TYPES.find((t) => t.value === descriptor.type)?.label ?? descriptor.type;
-    if (TARGETED_TYPES.includes(descriptor.type) && descriptor.targetId) {
-      // Name the target from the loaded lists so the summary reads human-readably.
-      if (descriptor.type === "campus") {
-        const name = campuses.find((c) => c.id === descriptor.targetId)?.name;
-        return name ? `Campus: ${name}` : `Campus (${descriptor.targetId})`;
-      }
-      if (descriptor.type === "group") {
-        const name = groups.find((g) => g.id === descriptor.targetId)?.name;
-        return name ? `Group: ${name}` : `Group (${descriptor.targetId})`;
-      }
-      const auxName = auxiliaries.find((a) => a.id === descriptor.targetId)?.name;
-      return auxName ? `Auxiliary: ${auxName}` : `Auxiliary (${descriptor.targetId})`;
-    }
-    if (descriptor.filterJson) return `${typeLabel} — filtered`;
-    return typeLabel;
-  }, [descriptor, campuses, groups, auxiliaries]);
+  // Human-readable summary of the descriptor (BOTH carry types). Delegated to the
+  // shared describeAudience helper (16-03) so the editable tab and the locked
+  // Phase-16 record view render the SAME summary from ONE source of truth.
+  const summary = React.useMemo(
+    () => describeAudience(descriptor, { campuses, groups, auxiliaries }),
+    [descriptor, campuses, groups, auxiliaries]
+  );
 
   const emit = React.useCallback(
     (next: AudienceDescriptor) => {
