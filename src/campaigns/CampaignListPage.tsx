@@ -4,11 +4,19 @@ import {
   Box, Grid, Card, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Chip, Typography, CircularProgress, Alert
 } from "@mui/material";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import { useCampuses } from "../hooks/useCampuses";
 import { apiErrorMessage } from "./apiError";
-import { listCampaigns } from "./campaignApi";
+import { listCampaigns, getSchedulingTimezone } from "./campaignApi";
 import { type CampaignInterface, type CampaignListFilter, type CampaignStatus } from "./emailTypes";
 import { CampaignListFilterPanel } from "./CampaignListFilterPanel";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const DEFAULT_TZ = "America/New_York";
 
 // Status → MUI Chip color. Keeps the sent/failed record legible at a glance.
 const STATUS_COLOR: Record<CampaignStatus, "default" | "info" | "warning" | "success" | "error"> = {
@@ -41,6 +49,34 @@ export const CampaignListPage: React.FC = () => {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
   const [filter, setFilter] = React.useState<CampaignListFilter>({ search: "", statuses: [], campusIds: [] });
+  // The church scheduling tz drives the "Scheduled for" column formatting so a
+  // scheduled time always reads the same church-local value regardless of the
+  // viewer's browser timezone. Default while /timezone loads / on error.
+  const [churchTz, setChurchTz] = React.useState(DEFAULT_TZ);
+
+  React.useEffect(() => {
+    let active = true;
+    getSchedulingTimezone()
+      .then((r) => {
+        if (active && r?.timezone) setChurchTz(r.timezone);
+      })
+      .catch(() => {
+        /* keep DEFAULT_TZ */
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Format a scheduled UTC instant in the church timezone (— when absent).
+  const formatScheduled = React.useCallback(
+    (iso?: string) => {
+      if (!iso) return "—";
+      const d = dayjs.utc(iso);
+      return d.isValid() ? d.tz(churchTz).format("MMM D, YYYY h:mm A") : "—";
+    },
+    [churchTz]
+  );
 
   React.useEffect(() => {
     let active = true;
@@ -108,6 +144,7 @@ export const CampaignListPage: React.FC = () => {
                   <TableCell>Status</TableCell>
                   <TableCell>Campus</TableCell>
                   <TableCell>Created</TableCell>
+                  <TableCell>Scheduled for</TableCell>
                   <TableCell align="right">Sent / Failed</TableCell>
                 </TableRow>
               </TableHead>
@@ -126,6 +163,7 @@ export const CampaignListPage: React.FC = () => {
                     <TableCell><StatusChip status={c.status} /></TableCell>
                     <TableCell>{campusName(c.campusId)}</TableCell>
                     <TableCell>{formatDate(c.createdAt)}</TableCell>
+                    <TableCell>{formatScheduled(c.scheduledAt)}</TableCell>
                     <TableCell align="right">
                       {c.status === "sent" || c.status === "sending"
                         ? `${c.sentCount ?? 0} / ${c.failedCount ?? 0}`
