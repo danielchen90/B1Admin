@@ -115,6 +115,36 @@ export async function uploadCampaignImage(id: string, file: File): Promise<{ url
   return ApiHelper.post(`/campaigns/${id}/upload-image`, body, APP);
 }
 
+// ---- Scheduling / cancel (Plan 15-03) ------------------------------------
+
+// POST /campaigns/:id/schedule — stamp a future UTC instant on an already-frozen
+// (scheduled) campaign. scheduledAtIso is a UTC ISO string (the church-local→UTC
+// conversion happens in the SendConfirmDialog via dayjs .tz(churchTz,true).utc()).
+// The server re-validates the 5-min lead + verified domain (SND-04); a stale
+// version or a <5-min lead throws (parsed via apiError). BARE MessagingApi path.
+export function scheduleCampaign(
+  id: string,
+  scheduledAtIso: string,
+  expectedVersion: number
+): Promise<{ status: string; scheduledAt: string }> {
+  return ApiHelper.post(`/campaigns/${id}/schedule`, { scheduledAt: scheduledAtIso, expectedVersion }, APP);
+}
+
+// POST /campaigns/:id/cancel — cancel a draft/scheduled campaign before it is
+// handed to the provider (SND-05). Refuses sending/sent/canceled (409). BARE path.
+export function cancelCampaign(
+  id: string,
+  expectedVersion: number
+): Promise<{ status: string }> {
+  return ApiHelper.post(`/campaigns/${id}/cancel`, { expectedVersion }, APP);
+}
+
+// GET /campaigns/timezone — the church scheduling timezone (drives the picker
+// label + church-local→UTC conversion). Defaults server-side to America/New_York.
+export function getSchedulingTimezone(): Promise<{ timezone: string }> {
+  return ApiHelper.get("/campaigns/timezone", APP);
+}
+
 // ---- Tracking / reporting (Plan 13-04) -----------------------------------
 
 // GET /campaigns/:id/stats — headline engagement counts + ranked per-link click

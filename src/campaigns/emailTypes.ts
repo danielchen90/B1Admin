@@ -28,6 +28,9 @@ export interface CampaignInterface {
   version?: number;
   sentCount?: number;
   failedCount?: number;
+  // ISO UTC instant a scheduled campaign will fire at (set by POST /:id/schedule,
+  // surfaced on the list payload). Optional — drafts / send-immediately rows have none.
+  scheduledAt?: string;
 }
 
 // Client mirror of the audience descriptor (closed union — 12-02). The "people"
