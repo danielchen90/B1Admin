@@ -36,11 +36,14 @@ interface Props {
   // Subject is not on /status — the caller (the builder/list) passes it in.
   subject?: string;
   open?: boolean;
-  onSent: () => void;
+  // Called after /send is accepted (202); carries the frozen recipient count for
+  // the success confirmation.
+  onSent: (recipientCount?: number) => void;
   onClose: () => void;
-  // SND-04 schedule-for-later: called with a UTC ISO instant + the POST-freeze
-  // version when the user confirms a scheduled send. Absent → "Send now" only.
-  onSchedule?: (scheduledAtIso: string, version: number) => Promise<void> | void;
+  // SND-04 schedule-for-later: called with a UTC ISO instant, the POST-freeze
+  // version, and the church tz (for the success confirmation) when the user
+  // confirms a scheduled send. Absent → "Send now" only.
+  onSchedule?: (scheduledAtIso: string, version: number, churchTz: string) => Promise<void> | void;
   // Which mode the dialog opens in. The caller's two distinct header buttons
   // ("Send now" / "Schedule for later") drive this so the user lands directly on
   // the action they picked — no ambiguity about whether "Send" fires immediately.
@@ -196,10 +199,10 @@ export function SendConfirmDialog(props: Props) {
       // Freeze the audience NOW (at confirmation), not on open — the campaign was
       // an editable draft until this click. draft→scheduled, then claim → sending.
       if (onFreeze) await onFreeze();
-      await ApiHelper.post("/campaigns/" + campaignId + "/send", {}, "MessagingApi");
-      // 202 accepted — the worker sends off-thread. Hand off to the caller, which
-      // swaps in SendProgress.
-      onSent();
+      const res: { recipientCount?: number } = await ApiHelper.post("/campaigns/" + campaignId + "/send", {}, "MessagingApi");
+      // 202 accepted — the worker sends off-thread. Hand the frozen recipient count
+      // to the caller for the success confirmation.
+      onSent(res?.recipientCount);
     } catch (err: unknown) {
       const body = parseApiError(err);
       // Map the machine codes to clear, actionable messages (DLV-02 hard block +
@@ -239,7 +242,7 @@ export function SendConfirmDialog(props: Props) {
       // Freeze the audience NOW (at schedule confirmation), not on open. The
       // post-freeze version drives the /schedule OCC guard.
       const version = onFreeze ? await onFreeze() : 0;
-      await onSchedule(scheduledAtIso, version);
+      await onSchedule(scheduledAtIso, version, churchTz);
       // The parent reloads the draft (status stays "scheduled", now with
       // scheduledAt) and closes the dialog on success.
     } catch (err: unknown) {

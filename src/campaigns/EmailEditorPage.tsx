@@ -14,7 +14,10 @@
 // design straight from the builder and needs NO campaign id.
 
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import {
   Box, Grid, Stack, Button, TextField, Typography, Chip, Tabs, Tab, Alert, Snackbar, CircularProgress,
   Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
@@ -25,6 +28,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import SendIcon from "@mui/icons-material/Send";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import BlockIcon from "@mui/icons-material/Block";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { PageHeader } from "@churchapps/apphelper";
 import { PageBreadcrumbs } from "../components/ui";
 import { useCampuses } from "../hooks/useCampuses";
@@ -42,6 +46,9 @@ import { PreviewTestPanel } from "./PreviewTestPanel";
 import { StatsTab } from "./StatsTab";
 import { RecipientDrilldown } from "./RecipientDrilldown";
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 type EditorTab = "design" | "audience" | "preview" | "stats";
 
 const formatTime = (d: Date) =>
@@ -49,6 +56,7 @@ const formatTime = (d: Date) =>
 
 export const EmailEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const campuses = useCampuses();
   const draftApi = useCampaignDraft(id);
   const { draft, loading, saving, lastSavedAt, error, notice, clearNotice, scheduleAutosave, save, reload } = draftApi;
@@ -85,6 +93,12 @@ export const EmailEditorPage: React.FC = () => {
   const [cancelOpen, setCancelOpen] = React.useState(false);
   const [canceling, setCanceling] = React.useState(false);
   const [cancelError, setCancelError] = React.useState("");
+
+  // Success confirmation after a send or schedule commits. Shown as a clear modal,
+  // then "Back to campaigns" returns to the list (/email).
+  const [successOpen, setSuccessOpen] = React.useState(false);
+  const [successKind, setSuccessKind] = React.useState<"sent" | "scheduled">("sent");
+  const [successDetail, setSuccessDetail] = React.useState("");
 
   // The Stats tab is shown only once the campaign has been sent (or is sending) —
   // a draft has no engagement data to report (RESEARCH Pattern 8).
@@ -232,13 +246,27 @@ export const EmailEditorPage: React.FC = () => {
     return fresh?.version ?? 0;
   }, [parseAudienceDescriptor, reload]);
 
-  // Confirm dialog fired the send: close it, mark send initiated (keeps progress
-  // visible), and reload so status flips to "sending" (Stats tab appears).
-  const handleSent = React.useCallback(async () => {
+  // Confirm dialog fired the send: close it, reload so status reflects "sending",
+  // then show a clear success modal. "Back to campaigns" returns to the list.
+  const handleSent = React.useCallback(async (recipientCount?: number) => {
     setSendOpen(false);
     setSentInitiated(true);
     await reload();
+    const n = recipientCount ?? 0;
+    setSuccessKind("sent");
+    setSuccessDetail(
+      n > 0
+        ? `Your email is on its way to ${n.toLocaleString()} ${n === 1 ? "recipient" : "recipients"}.`
+        : "Your email is on its way."
+    );
+    setSuccessOpen(true);
   }, [reload]);
+
+  // "Back to campaigns" from the success modal → the campaigns list.
+  const goToList = React.useCallback(() => {
+    setSuccessOpen(false);
+    navigate("/email");
+  }, [navigate]);
 
   // Confirm dialog chose Schedule-for-later (SND-04). The dialog has just frozen
   // the audience (via onFreeze) and passes the POST-freeze `version` so the
@@ -247,12 +275,16 @@ export const EmailEditorPage: React.FC = () => {
   // Errors (422 LEAD_TIME / DOMAIN_UNVERIFIED, 409) propagate for the dialog to
   // surface via its parseApiError mapping — do NOT swallow them here.
   const handleSchedule = React.useCallback(
-    async (scheduledAtIso: string, version: number) => {
+    async (scheduledAtIso: string, version: number, churchTz: string) => {
       const current = draftRef.current;
       if (!current?.id) return;
       await scheduleCampaign(current.id, scheduledAtIso, version);
       await reload();
       setSendOpen(false);
+      const label = dayjs.utc(scheduledAtIso).tz(churchTz).format("MMM D, YYYY h:mm A");
+      setSuccessKind("scheduled");
+      setSuccessDetail(`It will send on ${label} (${churchTz}).`);
+      setSuccessOpen(true);
     },
     [reload]
   );
@@ -547,6 +579,24 @@ export const EmailEditorPage: React.FC = () => {
             data-testid="cancel-dialog-confirm"
           >
             {canceling ? "Canceling…" : isScheduled ? "Cancel send" : "Cancel campaign"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success confirmation after a send/schedule commits → back to the list. */}
+      <Dialog open={successOpen} onClose={goToList} maxWidth="xs" fullWidth data-testid="send-success-dialog">
+        <DialogTitle>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <CheckCircleIcon color="success" />
+            <span>{successKind === "scheduled" ? "Campaign scheduled" : "Campaign is sending"}</span>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>{successDetail}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" color="primary" onClick={goToList} data-testid="success-back-to-list">
+            Back to campaigns
           </Button>
         </DialogActions>
       </Dialog>
