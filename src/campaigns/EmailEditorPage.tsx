@@ -26,7 +26,7 @@ import { PageHeader } from "@churchapps/apphelper";
 import { PageBreadcrumbs } from "../components/ui";
 import { useCampuses } from "../hooks/useCampuses";
 import { useCampaignDraft } from "./useCampaignDraft";
-import { freezeAudience } from "./campaignApi";
+import { freezeAudience, scheduleCampaign } from "./campaignApi";
 import { parseApiError } from "./apiError";
 import { type AudienceDescriptor, type CampaignInterface } from "./emailTypes";
 import { SendConfirmDialog } from "./SendConfirmDialog";
@@ -231,6 +231,24 @@ export const EmailEditorPage: React.FC = () => {
     setSentInitiated(true);
     await reload();
   }, [reload]);
+
+  // Confirm dialog chose Schedule-for-later (SND-04). By the time the dialog is
+  // open the campaign is ALREADY frozen to "scheduled" (handleSendClick freezes
+  // first — RESEARCH Open Q2: reuse the existing freeze, then stamp scheduledAt).
+  // So we just POST /schedule against the fresh scheduled row's version, then
+  // reload (status stays "scheduled", now with scheduledAt) and close the dialog.
+  // Errors (422 LEAD_TIME / DOMAIN_UNVERIFIED, 409) propagate for the dialog to
+  // surface via its parseApiError mapping — do NOT swallow them here.
+  const handleSchedule = React.useCallback(
+    async (scheduledAtIso: string) => {
+      const current = draftRef.current;
+      if (!current?.id) return;
+      await scheduleCampaign(current.id, scheduledAtIso, current.version ?? 0);
+      await reload();
+      setSendOpen(false);
+    },
+    [reload]
+  );
 
   // Drain a queued design once the draft (with id) + builder exist.
   React.useEffect(() => {
@@ -439,6 +457,7 @@ export const EmailEditorPage: React.FC = () => {
           open={sendOpen}
           onClose={() => setSendOpen(false)}
           onSent={handleSent}
+          onSchedule={handleSchedule}
         />
       )}
 
