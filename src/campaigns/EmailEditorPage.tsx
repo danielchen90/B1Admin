@@ -188,52 +188,23 @@ export const EmailEditorPage: React.FC = () => {
     return { type: "church" };
   }, []);
 
-  // "Send" click: draft → flush+save (bumps the server version), then reload to
-  // get the AUTHORITATIVE row and freeze the audience under OCC with that row's
-  // fresh version + descriptor, reload again (status now "scheduled",
-  // recipientCount set), and open the review dialog.
-  //
-  // The freeze's expectedVersion + the descriptor come from the value RETURNED by
-  // reload() — never from draftRef.current after an await, which is only refreshed
-  // on re-render and would send the pre-save version (the OCC would lose → 409 →
-  // recipients never materialized). See objective.
-  //
-  // A 409 (already frozen) is non-fatal — we reopen the review over the fresh row.
-  // An already-"scheduled" campaign short-circuits: open the dialog directly.
+  // "Send now" / "Schedule for later" click: flush+save the current design, reload
+  // to get the AUTHORITATIVE row, then open the review dialog. The audience is NOT
+  // frozen here — the campaign stays a `draft` with an editable audience. The
+  // dialog shows a LIVE audience preview (the same resolver freeze uses), and the
+  // freeze happens only when the user actually confirms Send/Schedule (handleFreeze
+  // below). So closing the dialog after seeing a wrong count leaves the campaign a
+  // draft you can go back and re-audience — nothing was committed. (SND-04: freeze
+  // at send/schedule confirmation, not before.)
   const handleSendClick = React.useCallback(async (mode: "now" | "later" = "now") => {
     if (!draftRef.current?.id || freezing) return;
     setDialogMode(mode);
-    // Already frozen → skip the save/reload/freeze entirely, review directly.
-    if (draftRef.current.status === "scheduled") {
-      setSendOpen(true);
-      return;
-    }
     setFreezing(true);
     try {
-      // Flush the current design + save. Bumps the server version.
+      // Flush the current design + save so the preview/send renders current content.
       await ensureExportedAndSaved();
       // Pull the authoritative row: fresh id/version/status/audienceFilterJson.
-      const fresh = await reload();
-      if (!fresh?.id) return;
-
-      if (fresh.status === "draft") {
-        const descriptor = parseAudienceDescriptor(fresh);
-        try {
-          await freezeAudience(fresh.id, descriptor, fresh.version);
-          await reload();
-        } catch (err) {
-          const body = parseApiError(err);
-          const code = (body.code || body.error || "").toLowerCase();
-          if (code === "conflict" || code === "not_draft" || (err instanceof Error && err.message.includes("409"))) {
-            // Already frozen by a concurrent action — reopen the review over the
-            // fresh (scheduled) row rather than failing the user's click.
-            await reload();
-          } else {
-            throw err;
-          }
-        }
-      }
-      // else already "scheduled"/beyond — no freeze needed.
+      await reload();
       setSendOpen(true);
     } catch {
       // ensureExportedAndSaved / reload surface their own errors via the draft
@@ -241,7 +212,25 @@ export const EmailEditorPage: React.FC = () => {
     } finally {
       setFreezing(false);
     }
-  }, [freezing, ensureExportedAndSaved, parseAudienceDescriptor, reload]);
+  }, [freezing, ensureExportedAndSaved, reload]);
+
+  // Freeze the audience at CONFIRMATION time (the dialog calls this the instant the
+  // user commits to Send or Schedule). Flips draft→scheduled under OCC using the
+  // fresh row's version + descriptor and materializes the immutable
+  // campaignRecipients. Returns the post-freeze version so the caller can drive the
+  // subsequent /schedule (which needs expectedVersion) or /send. An already-frozen
+  // (scheduled) campaign is a no-op that returns its current version. Errors
+  // (409 conflict, etc.) propagate for the dialog to surface — the campaign stays
+  // whatever it was, never a half-committed state.
+  const handleFreeze = React.useCallback(async (): Promise<number> => {
+    const current = draftRef.current;
+    if (!current?.id) throw new Error("Campaign not ready.");
+    if (current.status === "scheduled") return current.version ?? 0; // already frozen
+    const descriptor = parseAudienceDescriptor(current);
+    await freezeAudience(current.id, descriptor, current.version ?? 0);
+    const fresh = await reload();
+    return fresh?.version ?? 0;
+  }, [parseAudienceDescriptor, reload]);
 
   // Confirm dialog fired the send: close it, mark send initiated (keeps progress
   // visible), and reload so status flips to "sending" (Stats tab appears).
@@ -251,18 +240,17 @@ export const EmailEditorPage: React.FC = () => {
     await reload();
   }, [reload]);
 
-  // Confirm dialog chose Schedule-for-later (SND-04). By the time the dialog is
-  // open the campaign is ALREADY frozen to "scheduled" (handleSendClick freezes
-  // first — RESEARCH Open Q2: reuse the existing freeze, then stamp scheduledAt).
-  // So we just POST /schedule against the fresh scheduled row's version, then
+  // Confirm dialog chose Schedule-for-later (SND-04). The dialog has just frozen
+  // the audience (via onFreeze) and passes the POST-freeze `version` so the
+  // /schedule OCC guard matches the now-"scheduled" row. We stamp scheduledAt, then
   // reload (status stays "scheduled", now with scheduledAt) and close the dialog.
   // Errors (422 LEAD_TIME / DOMAIN_UNVERIFIED, 409) propagate for the dialog to
   // surface via its parseApiError mapping — do NOT swallow them here.
   const handleSchedule = React.useCallback(
-    async (scheduledAtIso: string) => {
+    async (scheduledAtIso: string, version: number) => {
       const current = draftRef.current;
       if (!current?.id) return;
-      await scheduleCampaign(current.id, scheduledAtIso, current.version ?? 0);
+      await scheduleCampaign(current.id, scheduledAtIso, version);
       await reload();
       setSendOpen(false);
     },
@@ -527,6 +515,8 @@ export const EmailEditorPage: React.FC = () => {
           subject={draft.subject}
           open={sendOpen}
           initialMode={dialogMode}
+          descriptor={parseAudienceDescriptor(draft)}
+          onFreeze={handleFreeze}
           onClose={() => setSendOpen(false)}
           onSent={handleSent}
           onSchedule={handleSchedule}

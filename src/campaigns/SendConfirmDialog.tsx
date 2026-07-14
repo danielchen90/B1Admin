@@ -9,7 +9,8 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { ApiHelper } from "@churchapps/apphelper";
 import { parseApiError } from "./apiError";
-import { getSchedulingTimezone } from "./campaignApi";
+import { getSchedulingTimezone, previewAudience } from "./campaignApi";
+import { type AudienceDescriptor, type AudiencePreviewResult } from "./emailTypes";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -37,13 +38,20 @@ interface Props {
   open?: boolean;
   onSent: () => void;
   onClose: () => void;
-  // SND-04 schedule-for-later: called with a UTC ISO instant when the user
-  // confirms a scheduled send. Absent → the dialog offers only "Send now".
-  onSchedule?: (scheduledAtIso: string) => Promise<void> | void;
+  // SND-04 schedule-for-later: called with a UTC ISO instant + the POST-freeze
+  // version when the user confirms a scheduled send. Absent → "Send now" only.
+  onSchedule?: (scheduledAtIso: string, version: number) => Promise<void> | void;
   // Which mode the dialog opens in. The caller's two distinct header buttons
   // ("Send now" / "Schedule for later") drive this so the user lands directly on
   // the action they picked — no ambiguity about whether "Send" fires immediately.
   initialMode?: "now" | "later";
+  // The audience descriptor for the LIVE preview count (same resolver freeze uses).
+  // Shown pre-freeze so the review reflects the current, still-editable audience.
+  descriptor?: AudienceDescriptor;
+  // Freeze the audience at CONFIRMATION (draft→scheduled) and resolve to the
+  // post-freeze version. The dialog calls this the instant the user commits to
+  // Send/Schedule — NOT on open — so the audience stays editable until then.
+  onFreeze?: () => Promise<number>;
 }
 
 interface StatusData {
@@ -64,7 +72,7 @@ interface Settings {
 const DEFAULT_TZ = "America/New_York";
 
 export function SendConfirmDialog(props: Props) {
-  const { campaignId, subject, open = true, onSent, onClose, onSchedule, initialMode = "now" } = props;
+  const { campaignId, subject, open = true, onSent, onClose, onSchedule, initialMode = "now", descriptor, onFreeze } = props;
   const [loading, setLoading] = React.useState(true);
   const [status, setStatus] = React.useState<StatusData | null>(null);
   const [settings, setSettings] = React.useState<Settings | null>(null);
@@ -80,6 +88,35 @@ export function SendConfirmDialog(props: Props) {
   const [churchTz, setChurchTz] = React.useState(DEFAULT_TZ);
   const [value, setValue] = React.useState<Dayjs | null>(null);
   const [scheduling, setScheduling] = React.useState(false);
+
+  // Live audience preview (pre-freeze) — the SAME resolver the freeze uses, so
+  // deliverableCount here is exactly what confirming will materialize. This is the
+  // count the review shows (not the frozen /status.recipientCount, which is 0 for
+  // an unfrozen draft under the deferred-freeze flow).
+  const [preview, setPreview] = React.useState<AudiencePreviewResult | null>(null);
+  const [previewLoading, setPreviewLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!open || !descriptor) {
+      setPreview(null);
+      return;
+    }
+    let active = true;
+    setPreviewLoading(true);
+    previewAudience(campaignId, descriptor)
+      .then((r) => {
+        if (active) setPreview(r);
+      })
+      .catch(() => {
+        if (active) setPreview(null); // fall back to /status.recipientCount below
+      })
+      .finally(() => {
+        if (active) setPreviewLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open, campaignId, descriptor]);
 
   // Fetch the church scheduling tz once when the dialog opens (default while
   // loading / on error so the picker is always usable).
@@ -148,10 +185,17 @@ export function SendConfirmDialog(props: Props) {
     return settings.fromName ? `${settings.fromName} <${settings.fromEmail}>` : settings.fromEmail;
   }, [settings]);
 
+  // The count shown in the review: the LIVE preview deliverable count (pre-freeze)
+  // when available, else the frozen recipientCount (already-scheduled campaigns).
+  const recipientCount = preview?.deliverableCount ?? status?.recipientCount ?? 0;
+
   const handleSend = async () => {
     setSending(true);
     setError("");
     try {
+      // Freeze the audience NOW (at confirmation), not on open — the campaign was
+      // an editable draft until this click. draft→scheduled, then claim → sending.
+      if (onFreeze) await onFreeze();
       await ApiHelper.post("/campaigns/" + campaignId + "/send", {}, "MessagingApi");
       // 202 accepted — the worker sends off-thread. Hand off to the caller, which
       // swaps in SendProgress.
@@ -192,7 +236,10 @@ export function SendConfirmDialog(props: Props) {
     setError("");
     try {
       const scheduledAtIso = value.tz(churchTz, true).utc().toISOString();
-      await onSchedule(scheduledAtIso);
+      // Freeze the audience NOW (at schedule confirmation), not on open. The
+      // post-freeze version drives the /schedule OCC guard.
+      const version = onFreeze ? await onFreeze() : 0;
+      await onSchedule(scheduledAtIso, version);
       // The parent reloads the draft (status stays "scheduled", now with
       // scheduledAt) and closes the dialog on success.
     } catch (err: unknown) {
@@ -237,11 +284,27 @@ export function SendConfirmDialog(props: Props) {
           <>
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              This will email{" "}
-              <strong>{(status?.recipientCount ?? 0).toLocaleString()}</strong>{" "}
-              {status?.recipientCount === 1 ? "person" : "people"}. This can&rsquo;t be undone.
+            <Typography variant="body1" sx={{ mb: preview ? 0.5 : 2 }}>
+              {previewLoading ? (
+                "Resolving the audience…"
+              ) : (
+                <>
+                  This will email{" "}
+                  <strong>{recipientCount.toLocaleString()}</strong>{" "}
+                  {recipientCount === 1 ? "person" : "people"}.{" "}
+                  {mode === "later" ? "It will send at the scheduled time." : "This can’t be undone."}
+                </>
+              )}
             </Typography>
+            {preview && (preview.skippedNoEmailCount > 0 || preview.suppressedCount > 0) && (
+              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
+                {preview.skippedNoEmailCount.toLocaleString()} skipped (missing / invalid email),{" "}
+                {preview.suppressedCount.toLocaleString()} suppressed (unsubscribed / bounced)
+              </Typography>
+            )}
+            {preview && preview.skippedNoEmailCount === 0 && preview.suppressedCount === 0 && (
+              <Box sx={{ mb: 2 }} />
+            )}
 
             <Divider sx={{ mb: 2 }} />
 
@@ -314,7 +377,7 @@ export function SendConfirmDialog(props: Props) {
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={busy}>Cancel</Button>
+        <Button onClick={onClose} disabled={busy}>Back to editing</Button>
         {onSchedule && mode === "later" ? (
           <Button
             variant="contained"
