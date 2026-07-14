@@ -8,13 +8,23 @@ import { type CampaignListFilter } from "./emailTypes";
 // this fixed order as multi-select checkboxes.
 export const CAMPAIGN_STATUSES = ["draft", "scheduled", "sending", "sent", "failed", "canceled"] as const;
 
-// Left-column CONTROLLED filter surface for the campaign list (Plan 12-04),
-// following the project list-page-filter-style (mirrors ordinations ReportFilterPanel):
-// a search field + STATUS multi-select + CAMPUS multi-select. Holds NO
-// source-of-truth — it renders exactly what `filter` says and re-emits the whole
+// Left-column CONTROLLED filter surface for the campaign list — the Phase-16
+// activity-dashboard sidebar (HST-04), following the project list-page-filter-style
+// (mirrors ordinations ReportFilterPanel): a search field + FOUR facets in fixed
+// order — STATUS + CAMPUS + SENDER multi-selects + a DATE-RANGE from/to pair. Holds
+// NO source-of-truth — it renders exactly what `filter` says and re-emits the whole
 // CampaignListFilter on every change.
+//
+// CAMPUS ROLE-SCOPING (Pitfall 3): this panel is a pure renderer of whatever
+// `accessibleCampuses` the CALLER passes. useCampuses() returns the church-WIDE
+// campus list (NOT role-scoped), so the CALLER (CampaignListPage) is responsible for
+// passing only the campuses the current user may access — never expose campuses the
+// user can't see. The sender options likewise come from the caller (`senderOptions`,
+// derived from the loaded DTO) — this component never derives them itself.
 interface CampaignListFilterPanelProps {
   accessibleCampuses: CampusInterface[];
+  // Distinct sender labels derived by the list page from the loaded campaign DTO.
+  senderOptions: string[];
   filter: CampaignListFilter;
   onChange: (next: CampaignListFilter) => void;
   disabled?: boolean;
@@ -34,7 +44,7 @@ const SelectAllClear: React.FC<{ onAll: () => void; onClear: () => void; disable
   </Stack>
 );
 
-export const CampaignListFilterPanel: React.FC<CampaignListFilterPanelProps> = ({ accessibleCampuses, filter, onChange, disabled }) => {
+export const CampaignListFilterPanel: React.FC<CampaignListFilterPanelProps> = ({ accessibleCampuses, senderOptions, filter, onChange, disabled }) => {
   const toggleStatus = (status: string) => {
     const next = filter.statuses.includes(status) ? filter.statuses.filter((s) => s !== status) : [...filter.statuses, status];
     onChange({ ...filter, statuses: next });
@@ -49,17 +59,24 @@ export const CampaignListFilterPanel: React.FC<CampaignListFilterPanelProps> = (
   const setAllCampuses = () => onChange({ ...filter, campusIds: accessibleCampuses.map((c) => c.id).filter((id): id is string => !!id) });
   const clearCampuses = () => onChange({ ...filter, campusIds: [] });
 
+  const toggleSender = (sender: string) => {
+    const next = filter.senders.includes(sender) ? filter.senders.filter((s) => s !== sender) : [...filter.senders, sender];
+    onChange({ ...filter, senders: next });
+  };
+  const setAllSenders = () => onChange({ ...filter, senders: [...senderOptions] });
+  const clearSenders = () => onChange({ ...filter, senders: [] });
+
   const search = filter.search ?? "";
 
   return (
     <Card sx={{ p: 2 }}>
       <Stack spacing={2}>
-        {/* SEARCH */}
+        {/* SEARCH — subject + sender (matching happens in the list-page filter memo). */}
         <Box>
           <TextField
             fullWidth
             size="small"
-            placeholder="Search name or subject"
+            placeholder="Search subject or sender"
             value={search}
             onChange={(e) => onChange({ ...filter, search: e.target.value })}
             disabled={disabled}
@@ -99,7 +116,7 @@ export const CampaignListFilterPanel: React.FC<CampaignListFilterPanelProps> = (
 
         <Divider sx={{ borderColor: "var(--border-light)" }} />
 
-        {/* CAMPUS — multi-select over the accessible campuses. */}
+        {/* CAMPUS — multi-select over the caller-scoped accessible campuses. */}
         <Box>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>Campuses</Typography>
           {accessibleCampuses.length === 0 ? (
@@ -118,6 +135,58 @@ export const CampaignListFilterPanel: React.FC<CampaignListFilterPanelProps> = (
               </FormGroup>
             </>
           )}
+        </Box>
+
+        <Divider sx={{ borderColor: "var(--border-light)" }} />
+
+        {/* SENDER — multi-select over the distinct sender labels the caller derived. */}
+        <Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>Sender</Typography>
+          {senderOptions.length === 0 ? (
+            <Typography variant="body2" sx={{ color: "var(--text-muted)" }}>No senders</Typography>
+          ) : (
+            <>
+              <SelectAllClear onAll={setAllSenders} onClear={clearSenders} disabled={disabled} />
+              <FormGroup>
+                {senderOptions.map((sender) => (
+                  <FormControlLabel
+                    key={sender}
+                    control={<Checkbox size="small" checked={filter.senders.includes(sender)} onChange={() => toggleSender(sender)} disabled={disabled} />}
+                    label={sender}
+                  />
+                ))}
+              </FormGroup>
+            </>
+          )}
+        </Box>
+
+        <Divider sx={{ borderColor: "var(--border-light)" }} />
+
+        {/* DATE RANGE — sent/scheduled effective-date from/to (ISO yyyy-mm-dd). */}
+        <Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>Date range</Typography>
+          <Stack spacing={1.5}>
+            <TextField
+              fullWidth
+              size="small"
+              type="date"
+              label="From"
+              InputLabelProps={{ shrink: true }}
+              value={filter.dateFrom ?? ""}
+              onChange={(e) => onChange({ ...filter, dateFrom: e.target.value || undefined })}
+              disabled={disabled}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              type="date"
+              label="To"
+              InputLabelProps={{ shrink: true }}
+              value={filter.dateTo ?? ""}
+              onChange={(e) => onChange({ ...filter, dateTo: e.target.value || undefined })}
+              disabled={disabled}
+            />
+          </Stack>
         </Box>
       </Stack>
     </Card>
