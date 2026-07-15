@@ -25,17 +25,21 @@
 
 import React from "react";
 import {
-  Box, Grid, Stack, Chip, Typography, Alert,
+  Box, Grid, Stack, Chip, Typography, Alert, Button, Tooltip,
   Card, CardContent, CircularProgress, Divider,
   Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TablePagination,
 } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
+import SaveIcon from "@mui/icons-material/BookmarkAdd";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import { useCampuses } from "../hooks/useCampuses";
 import { useGroups } from "../hooks/useGroups";
 import { useAuxiliaries } from "../hooks/useAuxiliaries";
 import { previewAudience } from "./campaignApi";
 import { describeAudience } from "./describeAudience";
 import { AudienceDescriptorControls } from "./AudienceDescriptorControls";
+import { SaveAudienceDialog } from "./SaveAudienceDialog";
+import { LoadAudienceDialog } from "./LoadAudienceDialog";
 import { type AudienceDescriptor, type AudiencePreviewResult, type CampaignInterface } from "./emailTypes";
 import { apiErrorMessage } from "./apiError";
 
@@ -77,6 +81,13 @@ export const AudienceTab: React.FC<AudienceTabProps> = ({ draft, onChange }) => 
   const [preview, setPreview] = React.useState<AudiencePreviewResult | null>(null);
   const [previewLoading, setPreviewLoading] = React.useState(false);
   const [previewError, setPreviewError] = React.useState("");
+
+  // Save / Load saved-audience dialogs (AUD-09) — open state managed locally.
+  const [saveOpen, setSaveOpen] = React.useState(false);
+  const [loadOpen, setLoadOpen] = React.useState(false);
+  // people-type descriptors can't be saved — there's no personIds column to persist
+  // (toSaved drops it), so the Save affordance is disabled + tooltipped in that case.
+  const canSave = editable && descriptor.type !== "people";
 
   // Recipient-list pagination so users can page through EVERY recipient, not just
   // the first screenful. Reset to page 0 whenever the resolved list changes.
@@ -205,7 +216,47 @@ export const AudienceTab: React.FC<AudienceTabProps> = ({ draft, onChange }) => 
         <Grid size={{ xs: 12, md: 6 }}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="subtitle2" sx={{ mb: 2 }}>Edit audience</Typography>
+              <Stack
+                direction="row"
+                spacing={1}
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{ mb: 2 }}
+              >
+                <Typography variant="subtitle2">Edit audience</Typography>
+                <Stack direction="row" spacing={1}>
+                  {/* Save is disabled + tooltipped for people-type (no personIds column). */}
+                  <Tooltip
+                    title={
+                      descriptor.type === "people"
+                        ? "Only filter-based audiences — church, campus, group, or auxiliary — can be saved."
+                        : ""
+                    }
+                  >
+                    {/* span wrapper so the Tooltip still shows over a disabled button. */}
+                    <span>
+                      <Button
+                        size="small"
+                        startIcon={<SaveIcon />}
+                        onClick={() => setSaveOpen(true)}
+                        disabled={!canSave}
+                        data-testid="save-audience-open"
+                      >
+                        Save this audience
+                      </Button>
+                    </span>
+                  </Tooltip>
+                  <Button
+                    size="small"
+                    startIcon={<FolderOpenIcon />}
+                    onClick={() => setLoadOpen(true)}
+                    disabled={!editable}
+                    data-testid="load-audience-open"
+                  >
+                    Load saved audience
+                  </Button>
+                </Stack>
+              </Stack>
 
               <AudienceDescriptorControls
                 descriptor={descriptor}
@@ -298,6 +349,23 @@ export const AudienceTab: React.FC<AudienceTabProps> = ({ draft, onChange }) => 
           </Card>
         </Grid>
       </Grid>
+
+      {/* Save the current descriptor under a label (people-type is guarded above). */}
+      <SaveAudienceDialog
+        open={saveOpen}
+        descriptor={descriptor}
+        onClose={() => setSaveOpen(false)}
+      />
+
+      {/* Pick a saved audience back into the tab — routed through the SAME onChange
+          the controls use (emit), so the live count re-previews automatically. */}
+      <LoadAudienceDialog
+        open={loadOpen}
+        draftId={draft?.id}
+        lists={{ campuses, groups, auxiliaries }}
+        onClose={() => setLoadOpen(false)}
+        onPick={emit}
+      />
     </Box>
   );
 };
