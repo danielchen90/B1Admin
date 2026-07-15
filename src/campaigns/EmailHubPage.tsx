@@ -4,6 +4,7 @@ import { PageHeader } from "@churchapps/apphelper";
 import { Box, Button, Stack } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SettingsIcon from "@mui/icons-material/Settings";
+import GroupsIcon from "@mui/icons-material/Groups";
 import { PageBreadcrumbs } from "../components/ui";
 import { CampaignListPage } from "./CampaignListPage";
 
@@ -20,6 +21,15 @@ export const EmailHubPage: React.FC = () => {
       <PageHeader title="Email" subtitle="Create, send, and track email campaigns across your campuses." />
       <Box sx={{ p: 3 }}>
         <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ mb: 3 }}>
+          <Button
+            variant="outlined"
+            component={RouterLink}
+            to="/email/audiences"
+            startIcon={<GroupsIcon />}
+            data-testid="saved-audiences-link"
+          >
+            Saved Audiences
+          </Button>
           <Button
             variant="outlined"
             component={RouterLink}

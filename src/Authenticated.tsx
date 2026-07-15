@@ -78,6 +78,7 @@ const AdminDashboardPage = React.lazy(() => import("./dashboard/admin/AdminDashb
 // (a minimal placeholder stub exists so /email/new and /email/:id route now).
 const EmailHubPage = React.lazy(() => import("./campaigns/EmailHubPage").then((m) => ({ default: m.EmailHubPage })));
 const EmailEditorPage = React.lazy(() => import("./campaigns/EmailEditorPage").then((m) => ({ default: m.EmailEditorPage })));
+const SavedAudiencesPage = React.lazy(() => import("./campaigns/SavedAudiencesPage").then((m) => ({ default: m.SavedAudiencesPage })));
 
 // The `/` landing gate: admins (canWriteOrdinations) land on the domain-specific Admin
 // Dashboard; everyone else keeps the person DashboardPage. `/dashboard` always renders the
@@ -143,6 +144,8 @@ export const Authenticated: React.FC = () => {
           <Route path="/ordinations/print-station/:batchId" element={<PrintStationPage />} />
           <Route path="/ordinations/print-station" element={<PrintStationPage />} />
           <Route path="/license-templates/:id" element={<TemplateEditor />} />
+          {/* /email/audiences BEFORE /email/:id and /email — more-specific path first so it isn't swallowed (messaging-route-collision-alphabetical). */}
+          <Route path="/email/audiences" element={<SavedAudiencesPage />} />
           <Route path="/email/new" element={<EmailEditorPage />} />
           <Route path="/email/:id" element={<EmailEditorPage />} />
           <Route path="/email" element={<EmailHubPage />} />
