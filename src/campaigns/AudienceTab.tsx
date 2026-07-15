@@ -25,7 +25,7 @@
 
 import React from "react";
 import {
-  Box, Grid, Stack, Chip, Typography, TextField, MenuItem, Alert, Button,
+  Box, Grid, Stack, Chip, Typography, Alert,
   Card, CardContent, CircularProgress, Divider,
   Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TablePagination,
 } from "@mui/material";
@@ -35,6 +35,7 @@ import { useGroups } from "../hooks/useGroups";
 import { useAuxiliaries } from "../hooks/useAuxiliaries";
 import { previewAudience } from "./campaignApi";
 import { describeAudience } from "./describeAudience";
+import { AudienceDescriptorControls } from "./AudienceDescriptorControls";
 import { type AudienceDescriptor, type AudiencePreviewResult, type CampaignInterface } from "./emailTypes";
 import { apiErrorMessage } from "./apiError";
 
@@ -47,17 +48,8 @@ export interface AudienceTabProps {
   onChange: (descriptor: AudienceDescriptor) => void;
 }
 
-// The selectable audience types, in the order the dropdown offers them.
-const AUDIENCE_TYPES: { value: AudienceDescriptor["type"]; label: string }[] = [
-  { value: "church", label: "Whole church" },
-  { value: "campus", label: "A campus" },
-  { value: "group", label: "A group" },
-  { value: "auxiliary", label: "An auxiliary" },
-  { value: "people", label: "Specific people" },
-];
-
-// Types that resolve from a targetId (campus/group/auxiliary point at one record).
-const TARGETED_TYPES: AudienceDescriptor["type"][] = ["campus", "group", "auxiliary"];
+// AUDIENCE_TYPES + TARGETED_TYPES now live in AudienceDescriptorControls (the
+// single source both the tab and the manage editor share).
 
 // Parse the stored audienceFilterJson into a descriptor, defaulting to whole-church
 // when absent/unparseable so the tab always has an editable starting point.
@@ -136,35 +128,22 @@ export const AudienceTab: React.FC<AudienceTabProps> = ({ draft, onChange }) => 
     [descriptor, campuses, groups, auxiliaries]
   );
 
+  // Emit a descriptor change. Guards editability (frozen campaigns are read-only)
+  // and preserves the campus-target default: when the controls switch to a fresh
+  // campus type with no targetId, seed it from the draft's campusId (the behavior
+  // that used to live in the tab's handleTypeChange — kept here because it needs
+  // draft.campusId, which the presentational controls don't know about).
   const emit = React.useCallback(
     (next: AudienceDescriptor) => {
       if (!editable) return;
+      if (next.type === "campus" && !next.targetId && draft?.campusId) {
+        onChange({ ...next, targetId: draft.campusId });
+        return;
+      }
       onChange(next);
     },
-    [editable, onChange]
+    [editable, onChange, draft?.campusId]
   );
-
-  // Switch the audience type. Dropping to a coarse type clears the now-irrelevant
-  // targetId / personIds so the descriptor never carries stale carriers.
-  const handleTypeChange = (type: AudienceDescriptor["type"]) => {
-    if (type === "people") {
-      emit({ type: "people", personIds: descriptor.personIds ?? [] });
-    } else if (TARGETED_TYPES.includes(type)) {
-      // Preserve a campus target when narrowing from another targeted type.
-      const targetId = type === "campus" ? draft?.campusId ?? descriptor.targetId : undefined;
-      emit({ type, ...(targetId ? { targetId } : {}) });
-    } else {
-      emit({ type });
-    }
-  };
-
-  const handleTargetIdChange = (targetId: string) => {
-    emit({ ...descriptor, targetId: targetId || undefined });
-  };
-
-  // Clear the explicit-people carry — falls back to an editable whole-church
-  // filter the user can then re-scope (broaden/replace).
-  const handleClearPeople = () => emit({ type: "church" });
 
   return (
     <Box data-testid="audience-tab">
@@ -228,113 +207,14 @@ export const AudienceTab: React.FC<AudienceTabProps> = ({ draft, onChange }) => 
             <CardContent>
               <Typography variant="subtitle2" sx={{ mb: 2 }}>Edit audience</Typography>
 
-              {descriptor.type === "people" ? (
-                <Stack spacing={2}>
-                  <Typography variant="body2" color="text.secondary">
-                    This campaign targets an explicit set of{" "}
-                    {(descriptor.personIds?.length ?? 0).toLocaleString()} selected people
-                    (still campus-scoped when it sends).
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    disabled={!editable}
-                    onClick={handleClearPeople}
-                    data-testid="audience-clear-people"
-                  >
-                    Clear selection &amp; pick an audience instead
-                  </Button>
-                </Stack>
-              ) : (
-                <Stack spacing={2}>
-                  <TextField
-                    select
-                    label="Send to"
-                    size="small"
-                    fullWidth
-                    value={descriptor.type}
-                    disabled={!editable}
-                    onChange={(e) => handleTypeChange(e.target.value as AudienceDescriptor["type"])}
-                    data-testid="audience-type"
-                  >
-                    {AUDIENCE_TYPES.map((t) => (
-                      <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>
-                    ))}
-                  </TextField>
-
-                  {descriptor.type === "campus" && (
-                    <TextField
-                      select
-                      label="Campus"
-                      size="small"
-                      fullWidth
-                      value={descriptor.targetId ?? ""}
-                      disabled={!editable}
-                      onChange={(e) => handleTargetIdChange(e.target.value)}
-                      data-testid="audience-campus"
-                    >
-                      <MenuItem value="">All campuses in scope</MenuItem>
-                      {campuses.map((c) => (
-                        <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
-                      ))}
-                    </TextField>
-                  )}
-
-                  {descriptor.type === "group" && (
-                    <TextField
-                      select
-                      label="Group"
-                      size="small"
-                      fullWidth
-                      value={groups.some((g) => g.id === descriptor.targetId) ? descriptor.targetId : ""}
-                      disabled={!editable}
-                      onChange={(e) => handleTargetIdChange(e.target.value)}
-                      helperText="The group to send to. Re-resolved to its current members at send."
-                      data-testid="audience-group"
-                    >
-                      <MenuItem value="">Select a group…</MenuItem>
-                      {groups
-                        .slice()
-                        .sort((a, b) =>
-                          (a.categoryName ?? "").localeCompare(b.categoryName ?? "") ||
-                          (a.name ?? "").localeCompare(b.name ?? "")
-                        )
-                        .map((g) => (
-                          <MenuItem key={g.id} value={g.id}>
-                            {g.categoryName ? `${g.categoryName} — ${g.name}` : g.name}
-                          </MenuItem>
-                        ))}
-                    </TextField>
-                  )}
-
-                  {descriptor.type === "auxiliary" && (
-                    <TextField
-                      select
-                      label="Auxiliary"
-                      size="small"
-                      fullWidth
-                      value={auxiliaries.some((a) => a.id === descriptor.targetId) ? descriptor.targetId : ""}
-                      disabled={!editable}
-                      onChange={(e) => handleTargetIdChange(e.target.value)}
-                      helperText="The auxiliary to send to. Re-resolved to its current members at send."
-                      data-testid="audience-auxiliary"
-                    >
-                      <MenuItem value="">Select an auxiliary…</MenuItem>
-                      {auxiliaries
-                        .slice()
-                        .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))
-                        .map((a) => (
-                          <MenuItem key={a.id} value={a.id}>{a.name}</MenuItem>
-                        ))}
-                    </TextField>
-                  )}
-
-                  <Typography variant="caption" color="text.secondary">
-                    Broaden, narrow, or replace the audience any time before you send.
-                    The count on the left updates to match.
-                  </Typography>
-                </Stack>
-              )}
+              <AudienceDescriptorControls
+                descriptor={descriptor}
+                onChange={emit}
+                campuses={campuses}
+                groups={groups}
+                auxiliaries={auxiliaries}
+                disabled={!editable}
+              />
             </CardContent>
           </Card>
         </Grid>
