@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Permissions, UserHelper, type PersonInterface } from "@churchapps/helpers";
-import { Loading, PageHeader } from "@churchapps/apphelper";
-import { Box, Grid, Stack, Button, CircularProgress, Snackbar, Alert } from "@mui/material";
+import { Loading, PageHeader, PersonHelper } from "@churchapps/apphelper";
+import { Box, Grid, Stack, Button, CircularProgress, Snackbar, Alert, Dialog, DialogTitle, DialogContent } from "@mui/material";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import EmailIcon from "@mui/icons-material/Email";
 import { ExportButton, PageBreadcrumbs } from "../../components/ui";
 import { useCampuses } from "../../hooks/useCampuses";
@@ -24,6 +25,8 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { canManageOrdinationTypes, canWriteOrdinations } from "../../helpers/OrdinationHelper";
 import { createBatch } from "../printStation/printBatchApi";
 import { emailThesePeople } from "../../campaigns/emailThesePeople";
+import { PersonAdd } from "../../components/PersonAdd";
+import { OrdinationIssueDialog } from "../../people/components/OrdinationIssueDialog";
 
 // Grant-license default dates, computed in LOCAL time to avoid a UTC off-by-one (Pitfall 4):
 // granted = the Friday of NEXT week; expiration = one year later minus a day.
@@ -131,6 +134,24 @@ export const LeadershipReportPage: React.FC = () => {
     }
   };
 
+  // Add Ordination — pick any person (search box), then issue a credential (type +
+  // dates) via the shared OrdinationIssueDialog. Mirrors the leadership-hub flow so a
+  // first credential can be created straight from the report. On success, refetch so
+  // the new holder appears in the roster.
+  const [addPerson, setAddPerson] = useState<PersonInterface | null>(null);
+  const [personSearchOpen, setPersonSearchOpen] = useState(false);
+  const [issueOpen, setIssueOpen] = useState(false);
+  const handleAddPerson = (person: PersonInterface) => {
+    setAddPerson(person);
+    setPersonSearchOpen(false);
+    setIssueOpen(true);
+  };
+  const handleIssued = async () => {
+    setIssueOpen(false);
+    await ordQuery.refetch();
+    setSuccessMsg("Credential issued" + (addPerson?.name?.display ? ` for ${addPerson.name.display}` : "") + ".");
+  };
+
   // Bulk grant — POST every visible id, refetch, and summarize granted/skipped.
   const [grantOpen, setGrantOpen] = useState(false);
   const grantDefaults = useMemo(() => {
@@ -192,10 +213,22 @@ export const LeadershipReportPage: React.FC = () => {
               Manage Types
             </Button>
           )}
-          {/* Batch-print the currently-visible people → jump to the print-station batch view. */}
+          {/* Credential any person straight from the report: search a person, then pick a type. */}
           {canWrite && (
             <Button
               variant="contained"
+              size="small"
+              startIcon={<PersonAddIcon />}
+              onClick={() => setPersonSearchOpen(true)}
+              data-testid="report-add-ordination-button"
+            >
+              Add Ordination
+            </Button>
+          )}
+          {/* Batch-print the currently-visible people → jump to the print-station batch view. */}
+          {canWrite && (
+            <Button
+              variant="outlined"
               size="small"
               startIcon={printing ? <CircularProgress size={16} /> : <PrintIcon />}
               disabled={printing || visiblePersonIds.length === 0}
@@ -259,6 +292,33 @@ export const LeadershipReportPage: React.FC = () => {
           </Grid>
         )}
       </Box>
+
+      {/* Step 1: choose the person to credential. */}
+      {canWrite && (
+        <Dialog open={personSearchOpen} onClose={() => setPersonSearchOpen(false)} fullWidth maxWidth="sm">
+          <DialogTitle>Add Ordination — Select Person</DialogTitle>
+          <DialogContent>
+            <Box sx={{ pt: 1 }}>
+              <PersonAdd
+                getPhotoUrl={PersonHelper.getPhotoUrl}
+                addFunction={handleAddPerson}
+                actionLabel="Select"
+                showCreatePersonOnNotFound
+              />
+            </Box>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Step 2: pick the ordination type + details and issue the credential. */}
+      {canWrite && addPerson && (
+        <OrdinationIssueDialog
+          open={issueOpen}
+          personId={addPerson.id}
+          onClose={() => setIssueOpen(false)}
+          onIssued={handleIssued}
+        />
+      )}
 
       <GrantLicensesDialog
         open={grantOpen}

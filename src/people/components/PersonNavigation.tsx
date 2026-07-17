@@ -17,7 +17,7 @@ interface Props {
 }
 
 export const PersonNavigation = memo((props: Props) => {
-  const { selectedTab, onTabChange, ordinationCount } = props;
+  const { selectedTab, onTabChange } = props;
 
   const tabs: NavigationTab[] = useMemo(() => {
     const t: NavigationTab[] = [
@@ -27,12 +27,12 @@ export const PersonNavigation = memo((props: Props) => {
       { value: "attendance", label: Locale.label("people.personNavigation.attendance"), icon: <AttendanceIcon /> },
       { value: "donations", label: Locale.label("people.personNavigation.donations"), icon: <DonationIcon /> }
     ];
-    // Count-gated: the Ordinations tab is shown only when the person already
-    // holds >=1 credential (locked decision; the "credential a person with none"
-    // entry point lives in the leadership hub, Plan 05).
-    if ((ordinationCount ?? 0) > 0) t.push({ value: "ordinations", label: "Ordinations", icon: <OrdinationIcon /> });
+    // Always show the Ordinations tab, even for people with no current credential,
+    // so staff can add a first ordination straight from the person's detail page
+    // (the tab's empty state hosts the "Add ordination" flow).
+    t.push({ value: "ordinations", label: "Ordinations", icon: <OrdinationIcon /> });
     return t;
-  }, [ordinationCount]);
+  }, []);
 
   return (
     <NavigationTabs
