@@ -30,6 +30,9 @@ const textCss = (font: TextStyle): React.CSSProperties => ({
   fontFamily: fontCss(font.family),
   fontSize: ptToPx(font.sizePt),
   fontWeight: font.weight,
+  // Never fake a weight the family lacks — a 700 request on a regular-only face
+  // (e.g. Pinyon Script) falls back to the real regular glyphs, matching the server PDF.
+  fontSynthesis: "none",
   color: font.color,
   textAlign: font.align,
   lineHeight: font.lineHeight ?? 1.2,
