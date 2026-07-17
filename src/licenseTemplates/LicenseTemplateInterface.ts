@@ -13,11 +13,20 @@
 // so the background fills 0,0 → widthMm,heightMm (edge-to-edge / to bleed) and
 // Phase 6 renders with no negative coordinates.
 
+// Page format the template is authored at. Absent => "card" (every pre-existing
+// row stays a CR80 card). "letter-portrait"/"letter-landscape" are US-Letter
+// certificates (8.5x11). Stored INSIDE layoutJson (which flows verbatim through
+// save/load/render), so NO DB column is needed — see coords.ts FORMATS.
+export type TemplateFormat = "card" | "letter-portrait" | "letter-landscape";
+
 export interface LicenseTemplateLayout {
   schemaVersion: 1; // bump ONLY on a breaking schema change (guards Phase 6)
   canvas: {
-    trimWidthMm: 85.6; // CR80 trim (PROJECT.md)
-    trimHeightMm: 53.98;
+    // format-driven trim (mm). card = CR80 85.6x53.98; letter = 215.9x279.4.
+    // Widened from the literal CR80 types to `number` so Letter fits.
+    trimWidthMm: number; // CR80 trim = 85.6 (PROJECT.md); Letter = 215.9/279.4
+    trimHeightMm: number; // CR80 trim = 53.98; Letter = 279.4/215.9
+    format?: TemplateFormat; // absent => "card" (back-compat)
     bleedMm: number; // default 2 — a calibration value, NOT assumed correct
     safeMm: number; // safe-area inset from trim, default 3
     // Derived from trim + bleed, but stored for renderer clarity:
