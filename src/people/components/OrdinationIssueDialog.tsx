@@ -24,6 +24,15 @@ type IssueForm = {
 
 const EMPTY: IssueForm = { ordinationTypeId: "", campusId: "", credentialNumber: "", grantedDate: "", expirationDate: "", notes: "" };
 
+// Expiration defaults to one year minus a day from the granted date. Parsed/formatted
+// in LOCAL time (not new Date("YYYY-MM-DD"), which is UTC) to avoid an off-by-one day.
+const plusYearMinusDay = (ymd: string): string => {
+  const [y, m, d] = ymd.split("-").map(Number);
+  if (!y || !m || !d) return "";
+  const exp = new Date(y + 1, m - 1, d - 1);
+  return `${exp.getFullYear()}-${String(exp.getMonth() + 1).padStart(2, "0")}-${String(exp.getDate()).padStart(2, "0")}`;
+};
+
 // Shared issue dialog reused by the Person credential tab (Plan 04) and the Nav
 // hub (Plan 05). Issuing always creates a PENDING credential (server default), so
 // we never send `status`; `version`/`activeFlag` are server-owned and never sent.
@@ -35,12 +44,23 @@ export const OrdinationIssueDialog: React.FC<Props> = (props) => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState("");
 
-  const { register, control, handleSubmit, reset, formState } = useForm<IssueForm>({ defaultValues: EMPTY });
+  const { register, control, handleSubmit, reset, setValue, watch, formState } = useForm<IssueForm>({ defaultValues: EMPTY });
   const e = formState.errors as any;
 
+  // Once the user hand-edits the expiration, stop auto-deriving it from the granted date.
+  const expirationTouched = React.useRef(false);
+
   React.useEffect(() => {
-    if (props.open) { reset(EMPTY); setErrorMsg(""); }
+    if (props.open) { reset(EMPTY); setErrorMsg(""); expirationTouched.current = false; }
   }, [props.open, reset]);
+
+  // Auto-populate expiration = granted + 1 year - 1 day, until the user overrides it.
+  const grantedDate = watch("grantedDate");
+  React.useEffect(() => {
+    if (expirationTouched.current || !grantedDate) return;
+    const exp = plusYearMinusDay(grantedDate);
+    if (exp) setValue("expirationDate", exp);
+  }, [grantedDate, setValue]);
 
   const onValid = async (values: IssueForm) => {
     setIsSubmitting(true);
@@ -88,7 +108,7 @@ export const OrdinationIssueDialog: React.FC<Props> = (props) => {
           <TextField fullWidth label="Credential Number" data-testid="ordination-credential-number-input" {...register("credentialNumber")} />
           <Stack direction="row" spacing={2}>
             <TextField fullWidth type="date" label="Granted Date" InputLabelProps={{ shrink: true }} data-testid="ordination-granted-date-input" {...register("grantedDate")} />
-            <TextField fullWidth type="date" label="Expiration Date" InputLabelProps={{ shrink: true }} data-testid="ordination-expiration-date-input" {...register("expirationDate")} />
+            <TextField fullWidth type="date" label="Expiration Date" InputLabelProps={{ shrink: true }} helperText="Defaults to 1 year minus a day from the granted date" data-testid="ordination-expiration-date-input" {...register("expirationDate", { onChange: () => { expirationTouched.current = true; } })} />
           </Stack>
           <TextField fullWidth multiline rows={2} label="Notes" data-testid="ordination-notes-input" {...register("notes")} />
         </Stack>
