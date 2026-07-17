@@ -1,19 +1,22 @@
 import React from "react";
-import { Card, CardContent, Grid, Stack, Typography, Chip, Link } from "@mui/material";
-import { LocationOn as LocationOnIcon, Language as WebIcon, Schedule as TzIcon } from "@mui/icons-material";
+import { Card, CardContent, Grid, Stack, Typography, Chip, Link, Button } from "@mui/material";
+import { LocationOn as LocationOnIcon, Language as WebIcon, Schedule as TzIcon, Edit as EditIcon } from "@mui/icons-material";
+import { UserHelper, Permissions } from "@churchapps/apphelper";
 import { type CampusInterface } from "../../settings/components/CampusInterface";
 import { CampusMap } from "./CampusMap";
 
 interface Props {
   campus?: CampusInterface;
   memberCount?: number;
+  onEdit?: () => void;
 }
 
 // Detail-page hero: campus name in the header, full address, quick facts, and a
 // single-pin map of the location (satisfies the "detailed view of that location").
-export const CampusBanner: React.FC<Props> = ({ campus, memberCount }) => {
+export const CampusBanner: React.FC<Props> = ({ campus, memberCount, onEdit }) => {
   if (!campus?.id) return null;
   const address = [campus.address1, campus.address2, campus.city, campus.state, campus.zip, campus.country].filter(Boolean).join(", ");
+  const canEdit = UserHelper.checkAccess(Permissions.membershipApi.settings.edit);
   return (
     <Card sx={{ mt: 2, mb: 2 }}>
       <CardContent>
@@ -22,6 +25,9 @@ export const CampusBanner: React.FC<Props> = ({ campus, memberCount }) => {
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
               <LocationOnIcon color="primary" />
               <Typography variant="h4">{campus.name}</Typography>
+              {canEdit && onEdit && (
+                <Button size="small" variant="outlined" startIcon={<EditIcon />} onClick={onEdit} data-testid="campus-edit-button">Edit</Button>
+              )}
             </Stack>
             <Typography variant="body1" color="text.secondary">{address || "No address on file"}</Typography>
             <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
