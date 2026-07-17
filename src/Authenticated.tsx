@@ -71,6 +71,7 @@ const Mobile = React.lazy(() => import("./mobile").then((module) => ({ default: 
 const EmailTemplatesPage = React.lazy(() => import("./settings/EmailTemplatesPage").then((module) => ({ default: module.EmailTemplatesPage })));
 const OrdinationsHubPage = React.lazy(() => import("./ordinations/OrdinationsHubPage").then((m) => ({ default: m.OrdinationsHubPage })));
 const TemplateEditor = React.lazy(() => import("./licenseTemplates/editor/TemplateEditor").then((m) => ({ default: m.TemplateEditor })));
+const CertificatesPage = React.lazy(() => import("./licenseTemplates/certificates/CertificatesPage").then((m) => ({ default: m.CertificatesPage })));
 const PrintStationPage = React.lazy(() => import("./ordinations/printStation/PrintStationPage").then((m) => ({ default: m.PrintStationPage })));
 const LeadershipReportPage = React.lazy(() => import("./ordinations/reports/LeadershipReportPage").then((m) => ({ default: m.LeadershipReportPage })));
 const AdminDashboardPage = React.lazy(() => import("./dashboard/admin/AdminDashboardPage").then((m) => ({ default: m.AdminDashboardPage })));
@@ -144,6 +145,10 @@ export const Authenticated: React.FC = () => {
           <Route path="/ordinations/print-station/:batchId" element={<PrintStationPage />} />
           <Route path="/ordinations/print-station" element={<PrintStationPage />} />
           <Route path="/license-templates/:id" element={<TemplateEditor />} />
+          {/* Ordination Certificates — a standalone print area (Quick-5) reusing only the
+              render engine. A top-level path (NOT under /license-templates/:id, which would
+              swallow it — route-collision-alphabetical). */}
+          <Route path="/certificates" element={<CertificatesPage />} />
           {/* /email/audiences BEFORE /email/:id and /email — more-specific path first so it isn't swallowed (messaging-route-collision-alphabetical). */}
           <Route path="/email/audiences" element={<SavedAudiencesPage />} />
           <Route path="/email/new" element={<EmailEditorPage />} />

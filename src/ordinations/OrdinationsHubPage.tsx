@@ -5,6 +5,7 @@ import type { PersonInterface } from "@churchapps/helpers";
 import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import AssessmentIcon from "@mui/icons-material/Assessment";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { PageBreadcrumbs } from "../components/ui";
 import { PersonAdd } from "../components/PersonAdd";
 import { OrdinationIssueDialog } from "../people/components/OrdinationIssueDialog";
@@ -74,6 +75,26 @@ export const OrdinationsHubPage: React.FC = () => {
                   data-testid="manage-ordination-types-link"
                 >
                   Manage ordination types
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {canWrite && (
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>Ordination Certificates</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Print a formal 8.5×11 ordination certificate: pick a person and ordination, choose a certificate template, and generate a printable PDF.
+                </Typography>
+                <Button
+                  variant="outlined"
+                  component={RouterLink}
+                  to="/certificates"
+                  startIcon={<PictureAsPdfIcon />}
+                  data-testid="ordination-certificates-link"
+                >
+                  Print ordination certificates
                 </Button>
               </CardContent>
             </Card>
