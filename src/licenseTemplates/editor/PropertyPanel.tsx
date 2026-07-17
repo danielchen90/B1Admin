@@ -56,13 +56,51 @@ async function capPixels(dataUrl: string, fileName: string, maxEdge: number): Pr
   });
 }
 
+// Cap a raw File's longest edge (aspect preserved, NO crop) → base64 data URL. Unlike
+// the ImageEditor cropper — which forces a fixed 400×300 output and would distort a
+// non-4:3 picture — this keeps the WHOLE image, so a template can hold a full,
+// uncropped image; the element's `fit` (contain/cover) then decides how it sits.
+async function capImageFile(file: File, maxEdge: number): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    try {
+      Resizer.imageFileResizer(file, maxEdge, maxEdge, "PNG", 100, 0, (uri: string) => resolve(String(uri)), "base64");
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+// Natural width/height ratio of a data-URL image (null if it can't be read).
+function imageAspect(dataUrl: string): Promise<number | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img.naturalHeight > 0 ? img.naturalWidth / img.naturalHeight : null);
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+
 export const PropertyPanel: React.FC<Props> = ({ el, onChange, onBackgroundChange, background, canvas }) => {
-  // Which ImageEditor (if any) is open: the selected image element, or the bg slot.
-  const [editing, setEditing] = useState<null | "image" | "background">(null);
+  // Whether the background ImageEditor (crop-to-bleed) is open. Image ELEMENTS no longer
+  // use the cropper — they take a full, uncropped image via a direct file upload.
+  const [editing, setEditing] = useState<null | "background">(null);
 
   const num = (v: string) => {
     const n = parseFloat(v);
     return Number.isFinite(n) ? n : 0;
+  };
+
+  // Add/replace an image element's picture with a FULL, uncropped image, then fit the
+  // element box to the image's aspect so `contain` shows all of it with no letterbox.
+  const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>, target: LayoutElement) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-picking the same file
+    if (!file) return;
+    const src = await capImageFile(file, 600);
+    const patch: Record<string, any> = { src };
+    const aspect = await imageAspect(src);
+    if (aspect && target.wMm > 0) patch.hMm = Math.round((target.wMm / aspect) * 10) / 10;
+    onChange(target.id, patch);
   };
 
   // ----- shared geometry block (every element has ElementBase mm fields) -------------
@@ -199,10 +237,14 @@ export const PropertyPanel: React.FC<Props> = ({ el, onChange, onBackgroundChang
             {el.type === "image" && (
               <>
                 <Divider />
-                <Button variant="outlined" size="small" onClick={() => setEditing("image")}>{el.src ? "Change image" : "Add image"}</Button>
+                <Button variant="outlined" size="small" component="label">
+                  {el.src ? "Change image" : "Add image"}
+                  <input type="file" accept="image/*" hidden onChange={(e) => handleImageFile(e, el)} />
+                </Button>
+                <Typography variant="caption" color="text.secondary">Full image, uncropped. Fit controls how it sits in its box.</Typography>
                 <TextField select label="Fit" size="small" value={el.fit} onChange={(e) => onChange(el.id, { fit: e.target.value })}>
-                  <MenuItem value="contain">Contain</MenuItem>
-                  <MenuItem value="cover">Cover</MenuItem>
+                  <MenuItem value="contain">Contain (whole image)</MenuItem>
+                  <MenuItem value="cover">Cover (fill &amp; crop)</MenuItem>
                 </TextField>
               </>
             )}
@@ -224,19 +266,6 @@ export const PropertyPanel: React.FC<Props> = ({ el, onChange, onBackgroundChang
           </>
         )}
       </Stack>
-
-      {/* Logo upload — free-ish aspect locked to the placed box; capped to 600px. */}
-      {editing === "image" && el?.type === "image" && (
-        <ImageEditor
-          photoUrl={resolveSrc(el.src)}
-          aspectRatio={el.hMm > 0 ? el.wMm / el.hMm : 1}
-          onUpdate={async (dataUrl) => {
-            if (dataUrl) onChange(el.id, { src: await capPixels(dataUrl, "logo.png", 600) });
-            setEditing(null);
-          }}
-          onCancel={() => setEditing(null)}
-        />
-      )}
 
       {/* Background upload — locked to the bleed-box aspect; target ≈ 1013×638px. */}
       {editing === "background" && (
