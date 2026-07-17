@@ -150,7 +150,25 @@ export const PropertyPanel: React.FC<Props> = ({ el, onChange, onBackgroundChang
                 </Stack>
                 <TextField label="Fallback" size="small" fullWidth value={el.fallback ?? ""} onChange={(e) => onChange(el.id, { fallback: e.target.value })} />
                 {BINDING_CATALOG.find((b) => b.key === el.binding)?.isDate && (
-                  <TextField label="Date format (dayjs)" size="small" fullWidth value={el.dateFormat ?? "MMM D, YYYY"} onChange={(e) => onChange(el.id, { dateFormat: e.target.value })} />
+                  <>
+                    {/* "[FORMAL]" is a reserved sentinel (bindings.ts) that both the editor
+                        preview and the server PDF render via the shared formatFormalDate. */}
+                    <TextField
+                      select
+                      label="Date style"
+                      size="small"
+                      fullWidth
+                      value={el.dateFormat === "[FORMAL]" ? "[FORMAL]" : "custom"}
+                      onChange={(e) =>
+                        onChange(el.id, { dateFormat: e.target.value === "[FORMAL]" ? "[FORMAL]" : "MMM D, YYYY" })
+                      }>
+                      <MenuItem value="custom">Custom (dayjs pattern)</MenuItem>
+                      <MenuItem value="[FORMAL]">Formal English (January 15th, 2024)</MenuItem>
+                    </TextField>
+                    {el.dateFormat !== "[FORMAL]" && (
+                      <TextField label="Date format (dayjs)" size="small" fullWidth value={el.dateFormat ?? "MMM D, YYYY"} onChange={(e) => onChange(el.id, { dateFormat: e.target.value })} />
+                    )}
+                  </>
                 )}
                 {textStyle(el.id, el.font)}
               </>

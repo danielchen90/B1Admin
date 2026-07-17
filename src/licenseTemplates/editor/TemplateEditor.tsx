@@ -32,7 +32,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Alert, Box, Button, Checkbox, CircularProgress, Collapse, FormControlLabel, MenuItem, Select, Slider, Snackbar, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { ApiHelper, PageHeader, PersonHelper, UniqueIdHelper, UserHelper } from "@churchapps/apphelper";
 import type { PersonInterface } from "@churchapps/helpers";
-import type { LayoutElement, LicenseTemplateInterface, LicenseTemplateLayout } from "../LicenseTemplateInterface";
+import type { LayoutElement, LicenseTemplateInterface, LicenseTemplateLayout, TemplateFormat } from "../LicenseTemplateInterface";
 import { newLayout } from "../helpers/coords";
 import { PageBreadcrumbs } from "../../components/ui";
 import { BINDING_CATALOG, SAMPLE_BINDINGS, formatCampusAddress } from "../helpers/bindings";
@@ -92,6 +92,10 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
 
   const [layout, setLayout] = useState<LicenseTemplateLayout>(() => initialLayout ?? newLayout());
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Creation-time page format (card / letter certificate). Only offered while creating a
+  // brand-new, empty template — switching re-seeds the canvas via newLayout(format), which
+  // resets geometry (acceptable when empty). Not shown once elements exist or a row loaded.
+  const [format, setFormat] = useState<TemplateFormat>(() => (initialLayout?.canvas.format ?? "card"));
   const [zoom, setZoom] = useState<number>(3); // fit-to-screen default (manual zoom, no snapping)
   const [previewData, setPreviewData] = useState<Record<string, string>>(SAMPLE_BINDINGS);
   const [previewMode, setPreviewMode] = useState<"sample" | "person">("sample");
@@ -129,9 +133,26 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
     setCurrentVersion(row.currentVersion);
     setVersion(row.version);
     if (row.layoutJson) {
-      try { setLayout(JSON.parse(row.layoutJson)); } catch { /* keep current layout on parse failure */ }
+      try {
+        const parsed = JSON.parse(row.layoutJson) as LicenseTemplateLayout;
+        setLayout(parsed);
+        setFormat(parsed.canvas.format ?? "card");
+      } catch { /* keep current layout on parse failure */ }
     }
   };
+
+  // Re-seed a brand-new empty template to the chosen page format (resets geometry — safe
+  // while empty). Guarded by the picker's own visibility (no id, no elements).
+  const handleFormatChange = (next: TemplateFormat | null) => {
+    if (!next) return;
+    setFormat(next);
+    setLayout(newLayout(next));
+    setSelectedId(null);
+  };
+
+  // The format picker is only meaningful for a brand-new, empty template: re-seeding
+  // would discard element geometry, so hide it once a row loaded or any element exists.
+  const canChooseFormat = !templateId && (!id || id === "new") && layout.elements.length === 0;
 
   const loadRow = (rowId: string) => {
     setLoading(true);
@@ -297,6 +318,20 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
       {/* Lifecycle row: name + default/active + ordination-type binding (TPL-04). */}
       <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" sx={{ p: 1.5, borderBottom: "1px solid", borderColor: "divider" }}>
         <TextField size="small" label="Template name" value={name} onChange={(e) => setName(e.target.value)} sx={{ minWidth: 220 }} />
+        {canChooseFormat && (
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="caption">Size</Typography>
+            <Select
+              size="small"
+              value={format}
+              onChange={(e) => handleFormatChange(e.target.value as TemplateFormat)}
+              sx={{ minWidth: 240 }}>
+              <MenuItem value="card">ID Card (CR80)</MenuItem>
+              <MenuItem value="letter-portrait">Certificate — Portrait (8.5×11)</MenuItem>
+              <MenuItem value="letter-landscape">Certificate — Landscape (11×8.5)</MenuItem>
+            </Select>
+          </Stack>
+        )}
         <FormControlLabel control={<Checkbox checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} />} label="Default" />
         <FormControlLabel control={<Checkbox checked={active} onChange={(e) => setActive(e.target.checked)} />} label="Active" />
         <Stack direction="row" spacing={1} alignItems="center">
