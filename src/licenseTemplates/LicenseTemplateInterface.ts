@@ -35,7 +35,9 @@ export interface LicenseTemplateLayout {
   };
   // Named background slot (NOT an element) — fills 0,0 → widthMm,heightMm to bleed.
   // Structural placement guarantees "fills to bleed" vs "respects safe-area".
-  background?: { src: string; fit: "cover" | "contain" }; // FileStorage key/url
+  // `scale` is a centered zoom multiplier applied ON TOP of `fit` (absent => 1.0);
+  // it clips to the card on both the editor preview and the server render.
+  background?: { src: string; fit: "cover" | "contain"; scale?: number }; // FileStorage key/url
   // Render in array order = back → front; `z` mirrors index for explicit reorder.
   elements: LayoutElement[];
 }

@@ -231,8 +231,8 @@ export const TemplateEditor: React.FC<Props> = ({ initialLayout }) => {
 
   const selectElement = (elId: string | null) => setSelectedId(elId);
 
-  const setBackground = (src: string | undefined, fit: "cover" | "contain") =>
-    setLayout((prev) => ({ ...prev, background: src ? { src, fit } : undefined }));
+  const setBackground = (src: string | undefined, fit: "cover" | "contain", scale?: number) =>
+    setLayout((prev) => ({ ...prev, background: src ? { src, fit, scale } : undefined }));
 
   // z-order ops for the LayersPanel. reorder rewrites each element's z to its index in
   // the supplied back→front ordering; bringToFront bumps one element above the rest.

@@ -67,21 +67,26 @@ export const Canvas: React.FC<Props> = ({ layout, zoom, onSelect, children }) =>
             if (e.target === e.currentTarget) onSelect(null);
           }}
         >
-          {/* Background slot — BEHIND everything, fills 0,0 → widthMm,heightMm (to bleed). */}
+          {/* Background slot — BEHIND everything, fills 0,0 → widthMm,heightMm (to bleed).
+              Wrapped in a card-sized clip so a scale>1 zoom crops to the card edge,
+              exactly as the server's overflow:hidden .card does (preview == PDF). */}
           {bg?.src && (
-            <img
-              src={resolveSrc(bg.src)}
-              alt=""
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                width: `${widthMm}mm`,
-                height: `${heightMm}mm`,
-                objectFit: bg.fit,
-                pointerEvents: "none"
-              }}
-            />
+            <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+              <img
+                src={resolveSrc(bg.src)}
+                alt=""
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  width: `${widthMm}mm`,
+                  height: `${heightMm}mm`,
+                  objectFit: bg.fit,
+                  transform: `scale(${bg.scale ?? 1})`,
+                  transformOrigin: "center"
+                }}
+              />
+            </div>
           )}
 
           {/* Elements injected by the editor (05-05) — between background and guides. */}

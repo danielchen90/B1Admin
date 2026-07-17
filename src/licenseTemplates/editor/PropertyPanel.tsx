@@ -17,7 +17,7 @@ import ResizerModule from "react-image-file-resizer";
 // so the default import can resolve to the outer object. Unwrap defensively to the layer that
 // actually carries imageFileResizer (works whether Vite hands back the inner or outer object).
 const Resizer: any = (ResizerModule as any)?.imageFileResizer ? ResizerModule : (ResizerModule as any)?.default;
-import { Box, Button, Divider, MenuItem, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Box, Button, Divider, MenuItem, Slider, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { HexColorPicker } from "react-colorful";
 import { ImageEditor } from "@churchapps/apphelper";
 import type { LayoutElement, TextStyle } from "../LicenseTemplateInterface";
@@ -28,8 +28,8 @@ import { resolveSrc } from "./Canvas";
 interface Props {
   el: LayoutElement | null;
   onChange: (id: string, patch: Record<string, any>) => void;
-  onBackgroundChange: (src: string | undefined, fit: "cover" | "contain") => void;
-  background?: { src: string; fit: "cover" | "contain" };
+  onBackgroundChange: (src: string | undefined, fit: "cover" | "contain", scale?: number) => void;
+  background?: { src: string; fit: "cover" | "contain"; scale?: number };
   canvas: { widthMm: number; heightMm: number };
 }
 
@@ -120,10 +120,24 @@ export const PropertyPanel: React.FC<Props> = ({ el, onChange, onBackgroundChang
       <Button variant="outlined" size="small" onClick={() => setEditing("background")}>{background?.src ? "Change background" : "Add background"}</Button>
       {background?.src && (
         <>
-          <TextField select label="Fit" size="small" value={background.fit} onChange={(e) => onBackgroundChange(background.src, e.target.value as "cover" | "contain")}>
+          <TextField select label="Fit" size="small" value={background.fit} onChange={(e) => onBackgroundChange(background.src, e.target.value as "cover" | "contain", background.scale)}>
             <MenuItem value="cover">Cover</MenuItem>
             <MenuItem value="contain">Contain</MenuItem>
           </TextField>
+          <Box>
+            <Typography variant="caption">Zoom ({Math.round((background.scale ?? 1) * 100)}%)</Typography>
+            <Slider
+              size="small"
+              min={0.25}
+              max={3}
+              step={0.05}
+              value={background.scale ?? 1}
+              valueLabelDisplay="auto"
+              valueLabelFormat={(v) => `${Math.round(v * 100)}%`}
+              marks={[{ value: 1, label: "100%" }]}
+              onChange={(_e, v) => onBackgroundChange(background.src, background.fit, Array.isArray(v) ? v[0] : v)}
+            />
+          </Box>
           <Button variant="text" color="error" size="small" onClick={() => onBackgroundChange(undefined, "cover")}>Remove background</Button>
         </>
       )}
@@ -232,7 +246,7 @@ export const PropertyPanel: React.FC<Props> = ({ el, onChange, onBackgroundChang
           outputWidth={1013}
           outputHeight={638}
           onUpdate={async (dataUrl) => {
-            if (dataUrl) onBackgroundChange(await capPixels(dataUrl, "background.png", 1013), background?.fit ?? "cover");
+            if (dataUrl) onBackgroundChange(await capPixels(dataUrl, "background.png", 1013), background?.fit ?? "cover", background?.scale);
             setEditing(null);
           }}
           onCancel={() => setEditing(null)}
