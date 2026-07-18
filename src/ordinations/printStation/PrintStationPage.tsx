@@ -2,6 +2,7 @@ import React from "react";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import { PageHeader } from "@churchapps/apphelper";
 import {
+  Accordion, AccordionDetails, AccordionSummary,
   Alert, Box, Button, Card, Chip, CircularProgress, Dialog, DialogActions,
   DialogContent, DialogContentText, DialogTitle, Divider, FormControl,
   Grid, IconButton, InputLabel, LinearProgress, MenuItem, Select, Stack,
@@ -10,7 +11,7 @@ import {
 import {
   Autorenew as RegenerateIcon, Download as DownloadIcon, History as HistoryIcon,
   Print as PrintIcon, Replay as ReprintIcon, Block as VoidIcon,
-  Warning as WarningIcon, PictureAsPdf as PdfIcon
+  Warning as WarningIcon, PictureAsPdf as PdfIcon, ExpandMore as ExpandMoreIcon
 } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import * as pdfjs from "pdfjs-dist";
@@ -405,10 +406,24 @@ export const PrintStationPage: React.FC = () => {
 
           {thumbError && <Alert severity="error">{thumbError}</Alert>}
 
-          {/* Per-card THUMBNAILS GRID pre-print preview */}
+          {/* PRIMARY preview: the assembled PDF — exactly what prints, in page order. */}
+          {isReady && pdfUrl && (
+            <Card sx={{ p: 2 }}>
+              <Typography variant="h6" sx={{ mb: 1.5 }}>Print preview</Typography>
+              <Box sx={{ width: "100%", height: 720, border: "1px solid", borderColor: "grey.300", borderRadius: 1, overflow: "hidden" }}>
+                <iframe title="Assembled batch PDF" src={pdfUrl} style={{ width: "100%", height: "100%", border: "none" }} />
+              </Box>
+            </Card>
+          )}
+
+          {/* SECONDARY: per-card grid (reprint/void individual cards). Collapsed by default so
+              the PDF preview stays primary; expand only to act on a single card. */}
           {isReady && (
-            <Box>
-              <Typography variant="h6" sx={{ mb: 1.5 }}>Card preview ({cards?.length ?? 0})</Typography>
+            <Accordion disableGutters defaultExpanded={false} sx={{ border: "1px solid", borderColor: "grey.200", borderRadius: 1, boxShadow: "none", "&:before": { display: "none" } }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h6">Card preview ({cards?.length ?? 0})</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
               {cardsQuery.isLoading && <Stack direction="row" spacing={1} alignItems="center"><CircularProgress size={18} /><Typography>Loading cards…</Typography></Stack>}
               <Grid container spacing={2}>
                 {(cards || []).map((card, i) => (
@@ -457,17 +472,8 @@ export const PrintStationPage: React.FC = () => {
                   </Grid>
                 ))}
               </Grid>
-            </Box>
-          )}
-
-          {/* Optional full-PDF view IN ADDITION to the grid */}
-          {isReady && pdfUrl && (
-            <Card sx={{ p: 2 }}>
-              <Typography variant="h6" sx={{ mb: 1.5 }}>Full assembled PDF</Typography>
-              <Box sx={{ width: "100%", height: 500, border: "1px solid", borderColor: "grey.300", borderRadius: 1, overflow: "hidden" }}>
-                <iframe title="Assembled batch PDF" src={pdfUrl} style={{ width: "100%", height: "100%", border: "none" }} />
-              </Box>
-            </Card>
+              </AccordionDetails>
+            </Accordion>
           )}
         </Stack>
       </Box>
