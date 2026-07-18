@@ -181,7 +181,10 @@ export const LeadershipReportPage: React.FC = () => {
     setPrinting(true);
     setPdfError(null);
     try {
-      const result = await createBatch({ personIds: visiblePersonIds, filterJson: JSON.stringify(spec), templateId });
+      // Restrict the printed cards to the credential types the report is filtered to, so a
+      // person holding several credentials prints ONLY the filtered type(s) — not a duplicate
+      // card for every credential. Empty ordinationTypeIds => all credentials (unchanged).
+      const result = await createBatch({ personIds: visiblePersonIds, ordinationTypeIds: spec.ordinationTypeIds, filterJson: JSON.stringify(spec), templateId });
       navigate("/ordinations/print-station/" + result.batchId);
     } catch (e: any) {
       setPdfError(e?.message ? String(e.message) : "Failed to start the print batch.");

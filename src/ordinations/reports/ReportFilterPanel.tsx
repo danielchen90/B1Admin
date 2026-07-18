@@ -149,10 +149,13 @@ export const ReportFilterPanel: React.FC<ReportFilterPanelProps> = ({ accessible
 
         <Divider sx={{ borderColor: "var(--border-light)" }} />
 
-        {/* ORDINATION TYPES */}
+        {/* ORDINATION TYPES — also scopes Print Licenses: only checked types are printed. */}
         <Box>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
             Ordination Types
+          </Typography>
+          <Typography variant="caption" sx={{ color: "var(--text-muted)", display: "block", mb: 0.5 }}>
+            Print Licenses prints only the checked types. Leave all unchecked to print every credential a person holds.
           </Typography>
           {ordinationTypes.length === 0 ? (
             <Typography variant="body2" sx={{ color: "var(--text-muted)" }}>
