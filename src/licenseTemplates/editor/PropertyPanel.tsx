@@ -182,6 +182,17 @@ export const PropertyPanel: React.FC<Props> = ({ el, onChange, onBackgroundChang
     </>
   );
 
+  // Background capture resolution — FORMAT-AWARE. The old fixed 1013×638 was dimensioned
+  // for a CR80 card (~300 DPI over ~89.6×57.98mm) and CRUSHED a Letter certificate
+  // background to ~638px on its long edge. Instead derive the crop output from the actual
+  // canvas at 300 DPI: a CR80 stays ~1058×685, a Letter portrait becomes ~2550×3300
+  // (a true 8.5×11 at 300 DPI). Well within the API's 50mb body limit.
+  const PX_PER_MM_300DPI = 300 / 25.4; // 11.811 px/mm
+  const bgAspect = canvas.heightMm > 0 ? canvas.widthMm / canvas.heightMm : 1.54;
+  const bgOutW = Math.max(1, Math.round(canvas.widthMm * PX_PER_MM_300DPI));
+  const bgOutH = Math.max(1, Math.round(canvas.heightMm * PX_PER_MM_300DPI));
+  const bgMaxEdge = Math.max(bgOutW, bgOutH);
+
   return (
     <Box sx={{ p: 2 }}>
       <Stack spacing={1.5}>
@@ -267,15 +278,16 @@ export const PropertyPanel: React.FC<Props> = ({ el, onChange, onBackgroundChang
         )}
       </Stack>
 
-      {/* Background upload — locked to the bleed-box aspect; target ≈ 1013×638px. */}
+      {/* Background upload — locked to the bleed-box aspect; capture res is format-aware
+          (bgOutW×bgOutH ≈ the canvas at 300 DPI) so Letter certificates stay sharp. */}
       {editing === "background" && (
         <ImageEditor
           photoUrl={background?.src ? resolveSrc(background.src) : ""}
-          aspectRatio={canvas.heightMm > 0 ? canvas.widthMm / canvas.heightMm : 1.54}
-          outputWidth={1013}
-          outputHeight={638}
+          aspectRatio={bgAspect}
+          outputWidth={bgOutW}
+          outputHeight={bgOutH}
           onUpdate={async (dataUrl) => {
-            if (dataUrl) onBackgroundChange(await capPixels(dataUrl, "background.png", 1013), background?.fit ?? "cover", background?.scale);
+            if (dataUrl) onBackgroundChange(await capPixels(dataUrl, "background.png", bgMaxEdge), background?.fit ?? "cover", background?.scale);
             setEditing(null);
           }}
           onCancel={() => setEditing(null)}
