@@ -27,6 +27,7 @@ import { createBatch } from "../printStation/printBatchApi";
 import { emailThesePeople } from "../../campaigns/emailThesePeople";
 import { PersonAdd } from "../../components/PersonAdd";
 import { OrdinationIssueDialog } from "../../people/components/OrdinationIssueDialog";
+import { PrintTemplateDialog } from "./PrintTemplateDialog";
 
 // Grant-license default dates, computed in LOCAL time to avoid a UTC off-by-one (Pitfall 4):
 // granted = the Friday of NEXT week; expiration = one year later minus a day.
@@ -165,15 +166,22 @@ export const LeadershipReportPage: React.FC = () => {
     setGrantOpen(false);
   };
 
-  // Print Licenses — build a print batch from the currently-visible people and jump to the
-  // batch view (progress → download/print → reprint/void). Whatever is filtered on screen is
-  // exactly what's sent; the server skips people with no active credential / template / photo.
-  const handlePrintLicenses = async () => {
+  // Print Licenses — FIRST ask which template to use (a license, a certificate, or auto),
+  // THEN build a print batch from the currently-visible people and jump to the batch view
+  // (progress → download/print → reprint/void). Whatever is filtered on screen is exactly
+  // what's sent; the server skips people with no active credential / template / photo.
+  const [printTemplateOpen, setPrintTemplateOpen] = useState(false);
+  const handlePrintLicenses = () => {
+    if (visiblePersonIds.length === 0 || printing) return;
+    setPrintTemplateOpen(true);
+  };
+  const handleConfirmPrint = async (templateId?: string) => {
+    setPrintTemplateOpen(false);
     if (visiblePersonIds.length === 0 || printing) return;
     setPrinting(true);
     setPdfError(null);
     try {
-      const result = await createBatch({ personIds: visiblePersonIds, filterJson: JSON.stringify(spec) });
+      const result = await createBatch({ personIds: visiblePersonIds, filterJson: JSON.stringify(spec), templateId });
       navigate("/ordinations/print-station/" + result.batchId);
     } catch (e: any) {
       setPdfError(e?.message ? String(e.message) : "Failed to start the print batch.");
@@ -317,6 +325,16 @@ export const LeadershipReportPage: React.FC = () => {
           personId={addPerson.id}
           onClose={() => setIssueOpen(false)}
           onIssued={handleIssued}
+        />
+      )}
+
+      {/* Step 1 of Print Licenses: choose the template for the whole batch. */}
+      {canWrite && (
+        <PrintTemplateDialog
+          open={printTemplateOpen}
+          count={visiblePersonIds.length}
+          onClose={() => setPrintTemplateOpen(false)}
+          onConfirm={handleConfirmPrint}
         />
       )}
 

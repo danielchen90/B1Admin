@@ -101,6 +101,9 @@ export const createBatch = (params: {
   personIds: string[];
   filterJson?: string;
   name?: string;
+  // OPTIONAL template override: force every card in the batch onto this one template
+  // (e.g. a certificate). Absent => the server auto-picks a template per ordination type.
+  templateId?: string;
 }): Promise<CreateBatchResult> => ApiHelper.post("/printBatches", params, "MembershipApi");
 
 // Light DB-backed poll target (07-06 polls this via React Query refetchInterval until
