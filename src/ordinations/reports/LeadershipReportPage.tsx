@@ -91,7 +91,15 @@ export const LeadershipReportPage: React.FC = () => {
   const visibleIds = useMemo(() => Array.from(new Set(filtered.map((r) => r.id).filter(Boolean))), [filtered]);
   // Distinct personIds passing ALL filters — the print-batch target (the server expands each
   // person into one card per active credential). Print Licenses jumps to the batch view.
-  const visiblePersonIds = useMemo(() => Array.from(new Set(filtered.map((r) => r.personId).filter(Boolean))), [filtered]);
+  //
+  // ORDER MATTERS: the batch prints in the exact order these ids are sent (the server renders
+  // and assembles pages index-aligned to the input). So derive the order from the on-screen
+  // `groups` (campus group order = master, name sort = secondary within each group), NOT the
+  // unsorted `filtered` list — this makes the printed page order match what the operator sees
+  // and sorts on screen. groups[].personIds are already name-sorted within each group (nested
+  // top-level groups aggregate their subGroups' personIds in order); the Set de-dupe keeps a
+  // multi-campus person at their first (master-order) occurrence.
+  const visiblePersonIds = useMemo(() => Array.from(new Set(groups.flatMap((g) => g.personIds).filter(Boolean))), [groups]);
 
   const navigate = useNavigate();
   const canWrite = canWriteOrdinations();
