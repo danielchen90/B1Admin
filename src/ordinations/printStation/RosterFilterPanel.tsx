@@ -93,10 +93,15 @@ export const RosterFilterPanel: React.FC<RosterFilterPanelProps> = ({ accessible
 
         <Divider sx={{ borderColor: "var(--border-light)" }} />
 
-        {/* CALLING section — multi-select ordination-type checkboxes (empty = all callings). */}
+        {/* CALLING section — multi-select ordination-type checkboxes (empty = all callings).
+            These ALSO restrict what prints: a person holding several credentials gets a card
+            only for the checked callings. Empty = every credential (one card per credential). */}
         <Box>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-            Callings
+            Callings to print
+          </Typography>
+          <Typography variant="caption" sx={{ color: "var(--text-muted)", display: "block", mb: 0.5 }}>
+            Only the checked callings are printed. Leave all unchecked to print every credential a person holds.
           </Typography>
           {callingTypes.length === 0 ? (
             <Typography variant="body2" sx={{ color: "var(--text-muted)" }}>

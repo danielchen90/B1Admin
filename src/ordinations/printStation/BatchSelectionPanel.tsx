@@ -152,8 +152,12 @@ export const BatchSelectionPanel = React.memo(() => {
     try {
       const result = await printBatchApi.createBatch({
         // UNIQUE personIds — do NOT collapse credentials; the server expands each into one card
-        // per active credential. filterJson = the structured spec for reproducible provenance.
+        // per active credential, RESTRICTED to ordinationTypeIds when the operator picked
+        // callings (so a multi-credential person prints only the selected type(s), not a
+        // duplicate for every credential). Empty => all credentials, unchanged.
+        // filterJson = the structured spec for reproducible provenance.
         personIds: Array.from(new Set(selectedPersonIds)),
+        ordinationTypeIds: spec.ordinationTypeIds,
         filterJson: JSON.stringify(spec)
       });
       const skipped = result.skipped || [];
