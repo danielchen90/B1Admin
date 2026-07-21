@@ -3059,11 +3059,15 @@
     "domainSettingsEdit": {
       "domMsg": "You can make your B1 website answer for any custom domain you wish.  Enter the associated domain name here and then add the following record to your DNS:",
       "domMsg2": "If your DNS provider will not allow you to add a CNAME record you can alternatively use an A record:",
-      "domMsg3": "If you receive SSL errors after adding the DNS entry.  Click here to ",
+      "domMsg3": "Saving a domain publishes its route automatically. It can take a few minutes for SSL to become active after the DNS entry propagates.",
       "domMsg4": ".  It can take up to 5 minutes.",
       "domMsgConnect": "connect",
       "domain": "Domain",
-      "domains": "Domains"
+      "domains": "Domains",
+      "status": "Status",
+      "live": "Live",
+      "notLive": "Not live yet",
+      "pushFailed": "Domain saved, but publishing its route failed. It is not live yet — leave it in place and save again to retry."
     },
     "emailTemplateEdit": {
       "bodyRequired": "Body content is required.",
