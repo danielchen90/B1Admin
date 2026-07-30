@@ -80,6 +80,8 @@ const AdminDashboardPage = React.lazy(() => import("./dashboard/admin/AdminDashb
 const EmailHubPage = React.lazy(() => import("./campaigns/EmailHubPage").then((m) => ({ default: m.EmailHubPage })));
 const EmailEditorPage = React.lazy(() => import("./campaigns/EmailEditorPage").then((m) => ({ default: m.EmailEditorPage })));
 const SavedAudiencesPage = React.lazy(() => import("./campaigns/SavedAudiencesPage").then((m) => ({ default: m.SavedAudiencesPage })));
+// Login-free submissions inbox (Plan 20-07, FRM-03) — campus-scoped prayer/contact reads.
+const InboxPage = React.lazy(() => import("./inbox/InboxPage").then((m) => ({ default: m.InboxPage })));
 
 // The `/` landing gate: admins (canWriteOrdinations) land on the domain-specific Admin
 // Dashboard; everyone else keeps the person DashboardPage. `/dashboard` always renders the
@@ -170,6 +172,8 @@ export const Authenticated: React.FC = () => {
           <Route path="/donations" element={<DonationsPage />} />
           <Route path="/forms/:id" element={<FormPage />} />
           <Route path="/forms" element={<FormsPage />} />
+          {/* Login-free submissions inbox (Plan 20-07) — single-segment, no /:id after it. */}
+          <Route path="/inbox" element={<InboxPage />} />
           <Route path="/reports/:keyName" element={<ReportPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/email-templates" element={<EmailTemplatesPage />} />

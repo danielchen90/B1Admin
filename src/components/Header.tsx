@@ -46,6 +46,9 @@ export const Header: React.FC = () => {
     // Campaigns constant). Distinct /email area for EMAIL campaigns — NOT the
     // /donations/campaigns giving-campaign routes.
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/email", icon: "mail", label: "Email" });
+    // Login-free submissions inbox (Plan 20-07, FRM-03) — gated on the forms perm (the
+    // SAME perm the API inbox read enforces); server-side campus scope decides what shows.
+    if (UserHelper.checkAccess(Permissions.membershipApi.forms.admin) || UserHelper.checkAccess(Permissions.membershipApi.forms.edit)) menuItems.push({ url: "/inbox", icon: "inbox", label: "Inbox" });
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view) || auxiliaries.length > 0) menuItems.push({ url: "/auxiliaries", icon: "workspaces", label: "Auxiliaries" });
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/groups", icon: "groups", label: "Groups" });
     if (UserHelper.checkAccess(Permissions.givingApi.donations.viewSummary)) menuItems.push({ url: "/donations", label: Locale.label("components.wrapper.don"), icon: donationIcon });
@@ -82,6 +85,7 @@ export const Header: React.FC = () => {
     else if (path.startsWith("/auxiliaries")) result = "Auxiliaries";
     else if (path.startsWith("/ordinations")) result = "Ordinations";
     else if (path.startsWith("/email")) result = "Email";
+    else if (path.startsWith("/inbox")) result = "Inbox";
     else if (path.startsWith("/attendance")) result = Locale.label("components.wrapper.ppl");
     else if (path.startsWith("/groups")) result = "Groups";
     else if (path.startsWith("/forms")) result = Locale.label("components.wrapper.ppl");
