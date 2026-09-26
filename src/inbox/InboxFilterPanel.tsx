@@ -5,6 +5,7 @@ import {
 } from "@mui/material";
 import { Search as SearchIcon, Clear as ClearIcon } from "@mui/icons-material";
 import { type CampusInterface } from "../settings/components/CampusInterface";
+import { SUBMISSION_TYPES, type SubmissionType } from "./submissionTypes";
 
 // Left-column CONTROLLED filter surface for the login-free submissions inbox (Phase 20,
 // Plan 07, FRM-03). Mirrors the standard B1Admin list style (ReportFilterPanel /
@@ -16,7 +17,7 @@ import { type CampusInterface } from "../settings/components/CampusInterface";
 // campus (an org/leadership admin) — a single-campus admin has nothing to filter by
 // (server-side scope already restricts them to their own campus).
 
-export type SubmissionTypeFilter = "prayer" | "contact";
+export type SubmissionTypeFilter = SubmissionType;
 export type ReadFilter = "unread" | "read";
 
 export interface InboxFilterSpec {
@@ -33,10 +34,7 @@ export const DEFAULT_INBOX_SPEC: InboxFilterSpec = {
   campusIds: []
 };
 
-const TYPE_OPTIONS: { value: SubmissionTypeFilter; label: string }[] = [
-  { value: "prayer", label: "Prayer Request" },
-  { value: "contact", label: "Contact" }
-];
+const TYPE_OPTIONS: { value: SubmissionTypeFilter; label: string; color: string }[] = SUBMISSION_TYPES.map((t) => ({ value: t.value, label: t.label, color: t.color }));
 
 const READ_OPTIONS: { value: ReadFilter; label: string }[] = [
   { value: "unread", label: "Unread" },
@@ -108,8 +106,8 @@ export const InboxFilterPanel: React.FC<Props> = ({ spec, onChange, visibleCampu
             {TYPE_OPTIONS.map((o) => (
               <FormControlLabel
                 key={o.value}
-                control={<Checkbox size="small" checked={spec.types.includes(o.value)} onChange={() => toggleType(o.value)} disabled={disabled} />}
-                label={o.label}
+                control={<Checkbox size="small" checked={spec.types.includes(o.value)} onChange={() => toggleType(o.value)} disabled={disabled} data-testid={"inbox-type-filter-" + o.value} />}
+                label={<Stack direction="row" spacing={1} alignItems="center"><Box component="span" sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: o.color, display: "inline-block" }} /><span>{o.label}</span></Stack>}
               />
             ))}
           </FormGroup>

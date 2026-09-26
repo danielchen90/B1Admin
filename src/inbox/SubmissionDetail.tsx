@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent, Box, Stack, Typography, Chip, Button, CircularProgress, Divider, Link } from "@mui/material";
 import { ApiHelper } from "@churchapps/apphelper";
+import { SubmissionTypeChip, formatVisitDate, type VisitExtra } from "./submissionTypes";
 
 // Detail pane for the login-free submissions inbox (Phase 20, Plan 07, FRM-03). Fetches
 // GET /formsubmissions/inbox/:id (the 20-03 scoped detail read — an out-of-scope or absent
@@ -19,6 +20,7 @@ export interface InboxDetailDto {
   message?: string | null;
   submissionDate?: string | Date | null;
   unread?: boolean;
+  extra?: VisitExtra | null;
 }
 
 interface Props {
@@ -35,8 +37,6 @@ const fmtDate = (d: string | Date | null | undefined): string => {
   if (isNaN(date.getTime())) return "";
   return date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 };
-
-const typeLabel = (t?: string) => (t === "prayer" ? "Prayer Request" : t === "contact" ? "Contact" : t || "");
 
 export const SubmissionDetail: React.FC<Props> = ({ submissionId, campusNameById, onMarkedRead }) => {
   const [detail, setDetail] = React.useState<InboxDetailDto | null>(null);
@@ -123,7 +123,7 @@ export const SubmissionDetail: React.FC<Props> = ({ submissionId, campusNameById
         <Stack spacing={2}>
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}>
             <Stack direction="row" spacing={1} alignItems="center">
-              <Chip size="small" label={typeLabel(detail.submissionType)} color={detail.submissionType === "prayer" ? "secondary" : "default"} />
+              <SubmissionTypeChip type={detail.submissionType} />
               {campusName && <Chip size="small" variant="outlined" label={campusName} />}
               {detail.unread && <Chip size="small" color="primary" label="Unread" />}
             </Stack>
@@ -158,14 +158,27 @@ export const SubmissionDetail: React.FC<Props> = ({ submissionId, campusNameById
             )}
           </Stack>
 
-          <Box>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-              Message
-            </Typography>
-            <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
-              {detail.message || ""}
-            </Typography>
-          </Box>
+          {detail.submissionType === "visit" && detail.extra && (detail.extra.visitDate || detail.extra.partySize || detail.extra.notes) && (
+            <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: "rgba(21, 101, 192, 0.06)", border: "1px solid rgba(21, 101, 192, 0.25)" }} data-testid="visit-details">
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>Visit details</Typography>
+              <Stack spacing={0.5}>
+                {detail.extra.visitDate && <Typography variant="body2"><strong>Planning to visit:</strong> {formatVisitDate(detail.extra.visitDate)}</Typography>}
+                {detail.extra.partySize && <Typography variant="body2"><strong>Party size:</strong> {detail.extra.partySize} {detail.extra.partySize === 1 ? "person" : "people"}</Typography>}
+                {detail.extra.notes && <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}><strong>Notes:</strong> {detail.extra.notes}</Typography>}
+              </Stack>
+            </Box>
+          )}
+
+          {detail.message && (
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                Message
+              </Typography>
+              <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
+                {detail.message}
+              </Typography>
+            </Box>
+          )}
         </Stack>
       </CardContent>
     </Card>

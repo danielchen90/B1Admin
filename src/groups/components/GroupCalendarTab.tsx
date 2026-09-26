@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ApiHelper, Locale } from "@churchapps/apphelper";
 import { type EventInterface, type GroupInterface } from "@churchapps/helpers";
-import { Box, Button, Card, IconButton, Stack, Table, TableBody, TableCell, TableRow, Typography } from "@mui/material";
-import { Event as EventIcon, Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import { Box, Button, Card, Chip, IconButton, Stack, Table, TableBody, TableCell, TableRow, Tooltip, Typography } from "@mui/material";
+import { Event as EventIcon, Add as AddIcon, Delete as DeleteIcon, Language as WebsiteIcon } from "@mui/icons-material";
 import { SortableTableHead } from "../../components/ui";
 import { BulkGroupEventsModal } from "./BulkGroupEventsModal";
+import { EventPublicListingModal, isListed } from "../../calendars/components/EventPublicListing";
 
 interface Props {
   group: GroupInterface;
@@ -13,6 +14,7 @@ interface Props {
 
 export const GroupCalendarTab = (props: Props) => {
   const [showBulkAdd, setShowBulkAdd] = useState(false);
+  const [listingEventId, setListingEventId] = useState<string | null>(null);
 
   const events = useQuery<EventInterface[]>({
     queryKey: [`/events/group/${props.group.id}`, "ContentApi"],
@@ -51,6 +53,7 @@ export const GroupCalendarTab = (props: Props) => {
   return (
     <Box sx={{ p: 3 }} data-testid="group-calendar-tab">
       {showBulkAdd && <BulkGroupEventsModal group={props.group} onDone={handleBulkDone} />}
+      {listingEventId && <EventPublicListingModal eventId={listingEventId} onDone={(saved) => { setListingEventId(null); if (saved) events.refetch(); }} />}
       <Card>
         <Box sx={{ p: 2, borderBottom: 1, borderColor: "var(--border-light)" }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -87,8 +90,16 @@ export const GroupCalendarTab = (props: Props) => {
                   <TableCell>{new Date(ev.start).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}</TableCell>
                   <TableCell>{describeRecurrence(ev.recurrenceRule)}</TableCell>
                   <TableCell>{(ev as any).exceptionDates?.length || 0}</TableCell>
-                  <TableCell>{ev.visibility === "private" ? Locale.label("calendars.newEvent.private") : Locale.label("calendars.newEvent.public")}</TableCell>
+                  <TableCell>
+                    {ev.visibility === "private" ? Locale.label("calendars.newEvent.private") : Locale.label("calendars.newEvent.public")}
+                    {isListed(ev) && <Chip size="small" color="success" icon={<WebsiteIcon />} label="On website" sx={{ ml: 1 }} />}
+                  </TableCell>
                   <TableCell align="right">
+                    <Tooltip title="Public website">
+                      <IconButton size="small" onClick={() => setListingEventId(ev.id)} aria-label="Public website" data-testid={`website-event-${ev.id}`}>
+                        <WebsiteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                     <IconButton size="small" onClick={() => handleDelete(ev)} aria-label={Locale.label("common.delete")} data-testid={`delete-event-${ev.id}`}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>

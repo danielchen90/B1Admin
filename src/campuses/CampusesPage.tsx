@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Card, CardContent, Stack, Typography, TextField, Select, MenuItem, FormControl, InputLabel, InputAdornment, Chip, Divider, Grid, Link } from "@mui/material";
-import { Search as SearchIcon, Public as PublicIcon } from "@mui/icons-material";
-import { PageHeader } from "@churchapps/apphelper";
+import { Box, Button, Card, CardContent, Stack, Typography, TextField, Select, MenuItem, FormControl, InputLabel, InputAdornment, Chip, Divider, Grid, Link } from "@mui/material";
+import { Search as SearchIcon, Public as PublicIcon, Language as WebsiteIcon } from "@mui/icons-material";
+import { ApiHelper, PageHeader } from "@churchapps/apphelper";
 import { type PersonInterface } from "@churchapps/helpers";
 import { useQuery } from "@tanstack/react-query";
 import { CountChip } from "../components/ui";
@@ -27,6 +27,11 @@ export const CampusesPage: React.FC = () => {
   const totalAssigned = useMemo(() => campuses.reduce((sum, c) => sum + countFor(c.id), 0), [campuses, countFor]);
 
   const [search, setSearch] = useState("");
+  // Leadership (org-wide) admins may edit the network-wide website defaults.
+  const [canEditWebsiteDefaults, setCanEditWebsiteDefaults] = useState(false);
+  React.useEffect(() => {
+    ApiHelper.get("/campusContent/admin", "MembershipApi").then((d: any) => setCanEditWebsiteDefaults(!!d?.canEditOrgDefault)).catch(() => setCanEditWebsiteDefaults(false));
+  }, []);
   const [sortBy, setSortBy] = useState<SortBy>("name");
 
   const groups = useMemo(() => {
@@ -52,6 +57,11 @@ export const CampusesPage: React.FC = () => {
     <>
       <PageHeader title="Campuses" subtitle={`${campuses.length} ${campuses.length === 1 ? "campus" : "campuses"} · ${totalAssigned} members assigned`}>
         <Chip label={`${totalAssigned} members`} sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", bgcolor: "rgba(255,255,255,0.1)" }} variant="outlined" />
+        {canEditWebsiteDefaults && (
+          <Button variant="outlined" startIcon={<WebsiteIcon />} onClick={() => navigate("/campuses/website")} sx={{ ml: 1, color: "#FFF", borderColor: "rgba(255,255,255,0.5)" }} data-testid="website-defaults-button">
+            Website defaults
+          </Button>
+        )}
       </PageHeader>
 
       <Box sx={{ p: 3 }}>

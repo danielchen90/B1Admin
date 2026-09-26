@@ -1,4 +1,4 @@
-import { People as PeopleIcon, Groups as GroupsIcon } from "@mui/icons-material";
+import { People as PeopleIcon, Groups as GroupsIcon, Language as WebsiteIcon } from "@mui/icons-material";
 import { memo, useMemo } from "react";
 import { NavigationTabs, type NavigationTab } from "../../components/ui";
 
@@ -12,7 +12,8 @@ interface Props {
 export const CampusNavigation = memo((props: Props) => {
   const tabs: NavigationTab[] = useMemo(() => [
     { value: "people", label: "People", icon: <PeopleIcon /> },
-    { value: "groups", label: "Groups", icon: <GroupsIcon /> }
+    { value: "groups", label: "Groups", icon: <GroupsIcon /> },
+    { value: "website", label: "Website", icon: <WebsiteIcon /> }
   ], []);
   return <NavigationTabs selectedTab={props.selectedTab} onTabChange={props.onTabChange} tabs={tabs} />;
 });

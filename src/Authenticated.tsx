@@ -13,6 +13,7 @@ const PersonPage = React.lazy(() => import("./people/PersonPage").then((module) 
 const DemographicsPage = React.lazy(() => import("./people/demographics/DemographicsPage").then((module) => ({ default: module.DemographicsPage })));
 const CampusesPage = React.lazy(() => import("./campuses/CampusesPage").then((module) => ({ default: module.CampusesPage })));
 const CampusPage = React.lazy(() => import("./campuses/CampusPage").then((module) => ({ default: module.CampusPage })));
+const CampusWebsiteDefaultsPage = React.lazy(() => import("./campuses/CampusWebsiteDefaultsPage").then((module) => ({ default: module.CampusWebsiteDefaultsPage })));
 const AuxiliariesPage = React.lazy(() => import("./auxiliaries/AuxiliariesPage").then((module) => ({ default: module.AuxiliariesPage })));
 const AuxiliaryPage = React.lazy(() => import("./auxiliaries/AuxiliaryPage").then((module) => ({ default: module.AuxiliaryPage })));
 const GroupsPage = React.lazy(() => import("./groups/GroupsPage"));
@@ -137,6 +138,7 @@ export const Authenticated: React.FC = () => {
           <Route path="/people/demographics" element={<DemographicsPage />} />
           <Route path="/people/:id" element={<PersonPage />} />
           <Route path="/people" element={<PeoplePage />} />
+          <Route path="/campuses/website" element={<CampusWebsiteDefaultsPage />} />
           <Route path="/campuses/:id" element={<CampusPage />} />
           <Route path="/campuses" element={<CampusesPage />} />
           <Route path="/auxiliaries/:id" element={<AuxiliaryPage />} />

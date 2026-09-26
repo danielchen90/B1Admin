@@ -3,6 +3,7 @@ import { ApiHelper, Locale } from "@churchapps/apphelper";
 import { type EventInterface, type GroupInterface } from "@churchapps/helpers";
 import { Alert, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, ListItemText, MenuItem, Stack, Switch, TextField } from "@mui/material";
 import { type ConflictInterface, type EventTemplateInterface, type ResourceInterface, type RoomInterface } from "../interfaces";
+import { EventPublicListingFields, listingPayload, type PublicListing } from "./EventPublicListing";
 
 interface Props {
   churchId: string;
@@ -41,6 +42,8 @@ export function NewEventModal(props: Props) {
   const [windowStart, setWindowStart] = useState("");
   const [windowEnd, setWindowEnd] = useState("");
   const [saving, setSaving] = useState(false);
+  const [listing, setListing] = useState<PublicListing>({ publicListing: false, campusId: null });
+  const [saveError, setSaveError] = useState("");
 
   const toInt = (v: string) => (v.trim() ? parseInt(v, 10) || 0 : 0);
 
@@ -124,7 +127,8 @@ export function NewEventModal(props: Props) {
         end: new Date(end),
         allDay: false,
         visibility,
-        recurrenceRule: getRecurrenceRule()
+        recurrenceRule: getRecurrenceRule(),
+        ...(listing.publicListing ? listingPayload(listing) : {})
       } as EventInterface;
       const savedEvents = await ApiHelper.post("/events", [event], "ContentApi");
       const eventId = savedEvents[0].id;
@@ -138,7 +142,8 @@ export function NewEventModal(props: Props) {
       if (bookings.length > 0) await ApiHelper.post("/eventBookings", bookings, "ContentApi");
       if (props.curatedCalendarId) await ApiHelper.post("/curatedEvents", [{ curatedCalendarId: props.curatedCalendarId, groupId, eventIds: [eventId] }], "ContentApi");
       props.onDone(true);
-    } catch {
+    } catch (e: any) {
+      setSaveError(e?.message || "Could not save the event.");
       setSaving(false);
     }
   };
@@ -177,6 +182,10 @@ export function NewEventModal(props: Props) {
               <MenuItem value="private">{Locale.label("calendars.newEvent.private")}</MenuItem>
             </TextField>
           </Stack>
+          <EventPublicListingFields value={listing} onChange={setListing} />
+          {listing.publicListing && visibility === "private" && (
+            <Alert severity="warning">Private events never show on the public website. Set Visibility to Public to list it.</Alert>
+          )}
           {rooms.length > 0 && (
             <TextField
               fullWidth
@@ -233,6 +242,7 @@ export function NewEventModal(props: Props) {
               )}
             </>
           )}
+          {saveError && <Alert severity="error">{saveError}</Alert>}
           {conflicts.length > 0 && (
             <Alert severity="warning" data-testid="new-event-conflict-warnings">
               <Stack spacing={0.5}>

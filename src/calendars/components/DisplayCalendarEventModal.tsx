@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogActions, Typography, Box, Button } from "@mui/material";
-import { HowToReg as RegIcon } from "@mui/icons-material";
+import { HowToReg as RegIcon, Language as WebsiteIcon } from "@mui/icons-material";
+import { EventPublicListingModal } from "./EventPublicListing";
 import { DateHelper, ApiHelper, Locale } from "@churchapps/apphelper";
 import { type CuratedEventWithEventInterface } from "@churchapps/helpers";
 
@@ -13,6 +15,7 @@ interface Props {
 
 export function DisplayCalendarEventModal(props: Props) {
   const navigate = useNavigate();
+  const [showListing, setShowListing] = useState(false);
   const realEventId = (props.event as CuratedEventWithEventInterface & { realEventId?: string }).realEventId;
 
   const getDisplayTime = () => {
@@ -74,6 +77,11 @@ export function DisplayCalendarEventModal(props: Props) {
           {Locale.label("calendars.calendarEvent.cancel")}
         </Button>
         {realEventId && props.mode === "edit" && (
+          <Button variant="outlined" startIcon={<WebsiteIcon />} onClick={() => setShowListing(true)} data-testid="calendar-event-website-button">
+            Public website
+          </Button>
+        )}
+        {realEventId && props.mode === "edit" && (
           <Button variant="outlined" startIcon={<RegIcon />} onClick={() => navigate("/registrations/" + realEventId)} data-testid="calendar-event-registrations-button">
             {Locale.label("calendars.calendarEvent.manageRegistrations")}
           </Button>
@@ -84,6 +92,7 @@ export function DisplayCalendarEventModal(props: Props) {
           </Button>
         )}
       </DialogActions>
+      {showListing && realEventId && <EventPublicListingModal eventId={realEventId} onDone={(saved) => { setShowListing(false); if (saved && props.onDone) props.onDone(); }} />}
     </Dialog>
   );
 }

@@ -2,11 +2,13 @@ import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Permissions, UserHelper } from "@churchapps/helpers";
 import { Loading, PageHeader } from "@churchapps/apphelper";
-import { Box, Grid, Card, List, ListItemButton, ListItemText, Typography, Chip, Stack } from "@mui/material";
+import { Box, Grid, Card, List, ListItemButton, ListItemText, Typography, Stack } from "@mui/material";
+import { Inbox as InboxIcon } from "@mui/icons-material";
 import { PageBreadcrumbs } from "../components/ui";
 import { useCampuses } from "../hooks/useCampuses";
 import { InboxFilterPanel, DEFAULT_INBOX_SPEC, type InboxFilterSpec } from "./InboxFilterPanel";
 import { SubmissionDetail } from "./SubmissionDetail";
+import { SubmissionTypeChip, formatVisitDate, type VisitExtra } from "./submissionTypes";
 
 // The login-free submissions inbox (Phase 20, Plan 07, FRM-03). A campus-scoped master-detail
 // list of anonymous prayer/contact submissions in the standard B1Admin list style
@@ -29,6 +31,7 @@ interface InboxRow {
   submitterName?: string | null;
   submissionDate?: string | Date | null;
   unread?: boolean;
+  extra?: VisitExtra | null;
 }
 
 const fmtDate = (d: string | Date | null | undefined): string => {
@@ -37,8 +40,6 @@ const fmtDate = (d: string | Date | null | undefined): string => {
   if (isNaN(date.getTime())) return "";
   return date.toLocaleDateString(undefined, { dateStyle: "medium" } as any);
 };
-
-const typeLabel = (t?: string) => (t === "prayer" ? "Prayer" : t === "contact" ? "Contact" : t || "");
 
 export const InboxPage: React.FC = () => {
   const canView = UserHelper.checkAccess(Permissions.membershipApi.forms.admin) || UserHelper.checkAccess(Permissions.membershipApi.forms.edit);
@@ -113,7 +114,7 @@ export const InboxPage: React.FC = () => {
   return (
     <>
       <PageBreadcrumbs items={[{ label: "Inbox" }]} />
-      <PageHeader title="Inbox" subtitle="Login-free prayer requests and contact messages from your campus pages." icon="inbox" />
+      <PageHeader title="Inbox" subtitle="Prayer requests, messages and next steps from your public website." icon={<InboxIcon />} />
 
       <Box sx={{ p: { xs: 1, md: 2 } }}>
         {inboxQuery.isLoading ? (
@@ -157,7 +158,10 @@ export const InboxPage: React.FC = () => {
                             }
                             secondary={
                               <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5, flexWrap: "wrap" }}>
-                                <Chip size="small" label={typeLabel(r.submissionType)} color={r.submissionType === "prayer" ? "secondary" : "default"} sx={{ height: 20 }} />
+                                <SubmissionTypeChip type={r.submissionType} small />
+                                {r.submissionType === "visit" && r.extra?.visitDate && (
+                                  <Typography component="span" variant="caption" sx={{ fontWeight: 600 }}>Visiting {formatVisitDate(r.extra.visitDate)}</Typography>
+                                )}
                                 {campusName && <Typography component="span" variant="caption" sx={{ color: "var(--text-muted)" }}>{campusName}</Typography>}
                                 <Typography component="span" variant="caption" sx={{ color: "var(--text-muted)" }}>{fmtDate(r.submissionDate)}</Typography>
                               </Stack>
