@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent, Box, Stack, Typography, Chip, Button, CircularProgress, Divider, Link } from "@mui/material";
 import { ApiHelper } from "@churchapps/apphelper";
-import { SubmissionTypeChip, formatVisitDate, type VisitExtra } from "./submissionTypes";
+import { SubmissionTypeChip, formatVisitDate, type VisitExtra, type LinkReviewExtra } from "./submissionTypes";
 
 // Detail pane for the login-free submissions inbox (Phase 20, Plan 07, FRM-03). Fetches
 // GET /formsubmissions/inbox/:id (the 20-03 scoped detail read — an out-of-scope or absent
@@ -20,7 +20,7 @@ export interface InboxDetailDto {
   message?: string | null;
   submissionDate?: string | Date | null;
   unread?: boolean;
-  extra?: VisitExtra | null;
+  extra?: (VisitExtra & LinkReviewExtra) | null;
 }
 
 interface Props {
@@ -166,6 +166,16 @@ export const SubmissionDetail: React.FC<Props> = ({ submissionId, campusNameById
                 {detail.extra.partySize && <Typography variant="body2"><strong>Party size:</strong> {detail.extra.partySize} {detail.extra.partySize === 1 ? "person" : "people"}</Typography>}
                 {detail.extra.notes && <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}><strong>Notes:</strong> {detail.extra.notes}</Typography>}
               </Stack>
+            </Box>
+          )}
+
+          {detail.submissionType === "link_review" && detail.extra?.personId && (
+            <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: "rgba(93, 64, 55, 0.06)", border: "1px solid rgba(93, 64, 55, 0.25)" }} data-testid="link-review-details">
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>Record link review</Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                A member signed in with a Mary Banks ID and says this church record is theirs, but it is already linked to another account. Check with them before changing anything.
+              </Typography>
+              <Button size="small" variant="outlined" href={"/people/" + detail.extra.personId}>Open the record</Button>
             </Box>
           )}
 

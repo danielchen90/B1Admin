@@ -6,6 +6,7 @@ import UserContext from "./UserContext";
 import { LoginPage } from "@churchapps/apphelper/login";
 import { Alert } from "@mui/material";
 import { LoginHeroPanel } from "./components/LoginHeroPanel";
+import { MaryBanksIdButton } from "./components/MaryBanksIdButton";
 
 export const Login: React.FC = () => {
   const [errors] = React.useState<string[]>([]);
@@ -59,6 +60,7 @@ export const Login: React.FC = () => {
             <span dangerouslySetInnerHTML={{ __html: Locale.label("app.login.demoCredentials").replace("{email}", "<b>demo@huro.church</b>").replace("{password}", "<b>password</b>") }} />
           </Alert>
         )}
+        {!jwt && !auth && <MaryBanksIdButton />}
         <LoginPage
           auth={auth}
           context={context}

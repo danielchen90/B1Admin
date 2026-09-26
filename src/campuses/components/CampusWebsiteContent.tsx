@@ -4,6 +4,8 @@ import {
   AddPhotoAlternate as AddPhotoIcon,
   ArrowBack as ArrowBackIcon,
   ArrowForward as ArrowForwardIcon,
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
   DeleteOutline as DeleteIcon,
   Add as AddIcon,
   Save as SaveIcon
@@ -14,8 +16,14 @@ import { ApiHelper, ImageEditor } from "@churchapps/apphelper";
 // override means "use the network default"; HIDDEN means "hide on this center".
 export const HIDDEN = "__HIDDEN__";
 export const MAX_PHOTOS = 12;
+export const MAX_ANNOUNCEMENTS = 10;
+const ANN_TITLE_MAX = 120;
+const ANN_BODY_MAX = 1500;
 
 interface ServiceTime { day: string; time: string; label?: string }
+
+// A center announcement: plain text, optional show-from / show-until days (inclusive).
+export interface Announcement { id?: string; title: string; body: string; startsOn?: string | null; endsOn?: string | null }
 
 export interface CampusContentFields {
   mission?: string;
@@ -35,6 +43,7 @@ export interface CampusContentFields {
   phone?: string;
   email?: string;
   whatToExpect?: string;
+  announcements?: Announcement[] | string;
 }
 
 interface AdminRead {
@@ -73,6 +82,19 @@ const toJpeg = (dataUrl: string): Promise<string> => new Promise((resolve) => {
 });
 
 function asList<T>(v: any): T[] { return Array.isArray(v) ? v : []; }
+
+const todayIso = () => {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+};
+
+// Where an announcement stands today, for the status chip.
+const announcementState = (a: Announcement): { label: string; color: "success" | "info" | "default" } => {
+  const t = todayIso();
+  if (a.startsOn && a.startsOn > t) return { label: "Scheduled from " + a.startsOn, color: "info" };
+  if (a.endsOn && a.endsOn < t) return { label: "Ended " + a.endsOn, color: "default" };
+  return { label: a.endsOn ? "Showing until " + a.endsOn : "Showing now", color: "success" };
+};
 const asText = (v: any): string => (typeof v === "string" && v !== HIDDEN ? v : "");
 
 // Card section wrapper to keep the editor readable.
@@ -158,6 +180,18 @@ export const CampusWebsiteContent: React.FC<Props> = ({ campusId, campusName }) 
     }
   };
 
+  const announcements = asList<Announcement>(content.announcements);
+  const announcementsHidden = content.announcements === HIDDEN;
+  const inheritedAnnouncements = !isOrg && announcements.length === 0 ? asList<Announcement>(org.announcements) : [];
+  const setAnnouncement = (i: number, patch: Partial<Announcement>) => set("announcements", announcements.map((a, idx) => (idx === i ? { ...a, ...patch } : a)));
+  const moveAnnouncement = (i: number, delta: number) => {
+    const list = [...announcements];
+    const target = i + delta;
+    if (target < 0 || target >= list.length) return;
+    [list[i], list[target]] = [list[target], list[i]];
+    set("announcements", list);
+  };
+
   const serviceTimes = asList<ServiceTime>(content.serviceTimes);
   const setServiceTime = (i: number, patch: Partial<ServiceTime>) => set("serviceTimes", serviceTimes.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
 
@@ -166,6 +200,7 @@ export const CampusWebsiteContent: React.FC<Props> = ({ campusId, campusName }) 
     setErrors([]);
     try {
       const body: any = { campusId, content: { ...content, serviceTimes: serviceTimes.filter((s) => s.day || s.time) } };
+      if (!announcementsHidden) body.content.announcements = announcements.filter((a) => (a.title || "").trim() || (a.body || "").trim());
       if (version !== null) body.version = version;
       const result = await ApiHelper.post("/campusContent", body, "MembershipApi");
       if (result?.errors) { setErrors(result.errors); return; }
@@ -230,6 +265,60 @@ export const CampusWebsiteContent: React.FC<Props> = ({ campusId, campusName }) 
           {errors.map((e, i) => <div key={i}>{e}</div>)}
         </Alert>
       )}
+
+      <Section
+        title="Announcements"
+        helper={isOrg
+          ? "Network announcements show on every center's page and in My Church, unless a center posts its own."
+          : "Short notices for this center's page and for members in My Church. Each one can have a first and last day to show; leave them blank to show it until you remove it."}
+        testId="campus-content-announcements"
+      >
+        {announcementsHidden && (
+          <Alert severity="info" sx={{ mb: 2 }} action={<Button color="inherit" size="small" onClick={() => set("announcements", [])}>Show them again</Button>}>
+            Network announcements are hidden on this center.
+          </Alert>
+        )}
+        {!announcementsHidden && inheritedAnnouncements.length > 0 && (
+          <Alert severity="info" sx={{ mb: 2 }} action={<Button color="inherit" size="small" onClick={() => set("announcements", HIDDEN)} data-testid="announcements-hide-network">Hide them here</Button>}>
+            This center is showing {inheritedAnnouncements.length} network announcement{inheritedAnnouncements.length === 1 ? "" : "s"}: {inheritedAnnouncements.map((a) => a.title).join(", ")}. Adding your own replaces them on this center.
+          </Alert>
+        )}
+        {!announcementsHidden && announcements.map((a, i) => {
+          const state = announcementState(a);
+          return (
+            <Card key={a.id || "new" + i} variant="outlined" sx={{ mb: 2, p: 2 }} data-testid="announcement-row">
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Typography variant="subtitle2" color="text.secondary">Announcement {i + 1}</Typography>
+                  <Chip size="small" color={state.color} label={state.label} />
+                </Stack>
+                <Box>
+                  <Tooltip title="Move up"><span><IconButton size="small" onClick={() => moveAnnouncement(i, -1)} disabled={i === 0} aria-label="Move announcement up"><ArrowUpwardIcon fontSize="small" /></IconButton></span></Tooltip>
+                  <Tooltip title="Move down"><span><IconButton size="small" onClick={() => moveAnnouncement(i, 1)} disabled={i === announcements.length - 1} aria-label="Move announcement down"><ArrowDownwardIcon fontSize="small" /></IconButton></span></Tooltip>
+                  <Tooltip title="Remove"><IconButton size="small" onClick={() => set("announcements", announcements.filter((_, idx) => idx !== i))} aria-label="Remove announcement"><DeleteIcon fontSize="small" /></IconButton></Tooltip>
+                </Box>
+              </Stack>
+              <TextField fullWidth size="small" label="Title" value={a.title || ""} onChange={(e) => setAnnouncement(i, { title: e.target.value })}
+                helperText={`${(a.title || "").length}/${ANN_TITLE_MAX}`} inputProps={{ maxLength: ANN_TITLE_MAX, "data-testid": "announcement-title" }} sx={{ mb: 1.5 }} />
+              <TextField fullWidth size="small" label="Text" multiline minRows={2} value={a.body || ""} onChange={(e) => setAnnouncement(i, { body: e.target.value })}
+                helperText={`Plain text. ${(a.body || "").length}/${ANN_BODY_MAX}`} inputProps={{ maxLength: ANN_BODY_MAX, "data-testid": "announcement-body" }} sx={{ mb: 1.5 }} />
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <TextField size="small" type="date" label="Show from (optional)" InputLabelProps={{ shrink: true }} value={a.startsOn || ""} onChange={(e) => setAnnouncement(i, { startsOn: e.target.value || null })} inputProps={{ "data-testid": "announcement-starts" }} />
+                <TextField size="small" type="date" label="Show until (optional)" InputLabelProps={{ shrink: true }} value={a.endsOn || ""} onChange={(e) => setAnnouncement(i, { endsOn: e.target.value || null })} inputProps={{ "data-testid": "announcement-ends", min: a.startsOn || undefined }} />
+              </Stack>
+            </Card>
+          );
+        })}
+        {!announcementsHidden && (
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Button size="small" variant="outlined" startIcon={<AddIcon />} disabled={announcements.length >= MAX_ANNOUNCEMENTS}
+              onClick={() => set("announcements", [...announcements, { title: "", body: "", startsOn: null, endsOn: null }])} data-testid="announcement-add">
+              Add announcement
+            </Button>
+            <Typography variant="body2" color="text.secondary">{announcements.length} of {MAX_ANNOUNCEMENTS}</Typography>
+          </Stack>
+        )}
+      </Section>
 
       <Section
         title="Photos"

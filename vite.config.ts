@@ -65,6 +65,8 @@ export default defineConfig(({ mode }) => {
       'process.env.NEXT_PUBLIC_B1ADMIN_ROOT': JSON.stringify(env.REACT_APP_B1ADMIN_ROOT),
       'process.env.NEXT_PUBLIC_LESSONS_ROOT': JSON.stringify(env.REACT_APP_LESSONS_ROOT),
       'process.env.REACT_APP_CHAT_MODE': JSON.stringify(env.REACT_APP_CHAT_MODE),
+      // Public church site that runs the Mary Banks ID sign-in (/api/auth/mbid/start).
+      'process.env.REACT_APP_MBID_SITE_URL': JSON.stringify(env.REACT_APP_MBID_SITE_URL),
     },
   } satisfies UserConfig;
 });

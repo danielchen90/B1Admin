@@ -10,7 +10,9 @@ export const SUBMISSION_TYPES = [
   { value: "salvation", label: "Follow Jesus", color: "#C62828" },
   { value: "baptism", label: "Baptism", color: "#00838F" },
   { value: "serve", label: "Serve", color: "#2E7D32" },
-  { value: "discipleship", label: "Discipleship class", color: "#E65100" }
+  { value: "discipleship", label: "Discipleship class", color: "#E65100" },
+  // Members round: a member claimed a church record that is linked to another account.
+  { value: "link_review", label: "Record link review", color: "#5D4037" }
 ] as const;
 
 export type SubmissionType = (typeof SUBMISSION_TYPES)[number]["value"];
@@ -31,6 +33,9 @@ export const SubmissionTypeChip: React.FC<{ type?: string; small?: boolean }> = 
 
 // "visit" extras stored with the submission (Api `extra` JSON).
 export interface VisitExtra { visitDate?: string; partySize?: number; notes?: string }
+
+// "link_review" extras: the claimed record and the accounts involved (Api MeController claim).
+export interface LinkReviewExtra { personId?: string; requestedByUserId?: string; linkedUserIds?: string[] }
 
 export const formatVisitDate = (d?: string): string => {
   if (!d) return "";
