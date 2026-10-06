@@ -22,6 +22,14 @@ const ANN_BODY_MAX = 1500;
 
 interface ServiceTime { day: string; time: string; label?: string }
 
+// The public site accepts a UC... channel id, an @handle, or a youtube.com channel link.
+const youtubeChannelLooksWrong = (v: string): boolean => {
+  const t = (v || "").trim();
+  if (!t || t === HIDDEN) return false;
+  if (/^UC[A-Za-z0-9_-]{22}$/.test(t) || /^@[\w.-]+$/.test(t)) return false;
+  return !/^(https?:\/\/)?(www\.|m\.)?youtube\.com\/(@[\w.-]+|channel\/UC[A-Za-z0-9_-]{22}|c\/[\w.-]+|user\/[\w.-]+)/i.test(t);
+};
+
 // A center announcement: plain text, optional show-from / show-until days (inclusive).
 export interface Announcement { id?: string; title: string; body: string; startsOn?: string | null; endsOn?: string | null }
 
@@ -396,11 +404,16 @@ export const CampusWebsiteContent: React.FC<Props> = ({ campusId, campusName }) 
           {textField("facebookUrl", "Facebook page")}
           {textField("instagramUrl", "Instagram")}
         </Stack>
-        <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-          {textField("youtubeUrl", "YouTube page")}
-          {textField("sermonYoutubeChannel", "Sermon YouTube channel")}
-        </Stack>
+        {textField("youtubeUrl", "YouTube page", { helper: "Shown with the center's social links." })}
         {textField("givingUrl", "Online giving link")}
+      </Section>
+
+      <Section title="Watch">
+        {textField("sermonYoutubeChannel", "YouTube channel for the Watch page", {
+          helper: youtubeChannelLooksWrong(asText(content.sermonYoutubeChannel))
+            ? "This doesn't look like a YouTube channel. Paste the channel's link, like https://www.youtube.com/@channelname."
+            : "Paste the channel's link (youtube.com/@name or youtube.com/channel/UC...). Its latest message and past 10 messages show on this center's page and Watch page. Leave blank to use the YouTube page above."
+        })}
       </Section>
 
       {editor && (
