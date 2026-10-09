@@ -2799,7 +2799,35 @@
       "youtubeId": "YouTube ID"
     },
     "subtitle": "Manage your sermon library and live streams",
-    "title": "Sermons"
+    "title": "Sermons",
+    "chatReports": {
+      "tab": "Chat reports",
+      "title": "Chat reports",
+      "help": "Messages people reported from livestream chat, group chat and private messages. Please review each one within 24 hours: Remove deletes the message for everyone; Dismiss keeps it.",
+      "open": "Open",
+      "resolved": "Resolved",
+      "reported": "Reported",
+      "where": "Where",
+      "reason": "Reason",
+      "sender": "Sent by",
+      "message": "Message",
+      "remove": "Remove message",
+      "dismiss": "Dismiss",
+      "removed": "Removed",
+      "dismissed": "Dismissed",
+      "unknownSender": "Unknown",
+      "confirmRemove": "Remove this message for everyone?",
+      "noneOpen": "No open reports.",
+      "noneResolved": "No resolved reports yet.",
+      "loadFailed": "Could not load chat reports.",
+      "actionFailed": "That did not work. Please try again.",
+      "reasons": {
+        "offensive": "Offensive or hateful",
+        "harassment": "Harassment",
+        "spam": "Spam",
+        "other": "Something else"
+      }
+    }
   },
   "serverAdmin": {
     "adminPage": {

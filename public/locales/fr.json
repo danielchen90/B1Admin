@@ -2763,7 +2763,35 @@
       "youtubeId": "ID YouTube"
     },
     "subtitle": "Gérer votre bibliothèque de sermons et diffusions en direct",
-    "title": "Sermons"
+    "title": "Sermons",
+    "chatReports": {
+      "tab": "Signalements du chat",
+      "title": "Signalements du chat",
+      "help": "Messages signalés dans le chat de la diffusion, les discussions de groupe et les messages privés. Examinez chacun sous 24 heures : Supprimer efface le message pour tous ; Ignorer le conserve.",
+      "open": "Ouverts",
+      "resolved": "Traités",
+      "reported": "Signalé",
+      "where": "Où",
+      "reason": "Motif",
+      "sender": "Envoyé par",
+      "message": "Message",
+      "remove": "Supprimer le message",
+      "dismiss": "Ignorer",
+      "removed": "Supprimé",
+      "dismissed": "Ignoré",
+      "unknownSender": "Inconnu",
+      "confirmRemove": "Supprimer ce message pour tout le monde ?",
+      "noneOpen": "Aucun signalement ouvert.",
+      "noneResolved": "Aucun signalement traité pour l'instant.",
+      "loadFailed": "Impossible de charger les signalements du chat.",
+      "actionFailed": "Cela n'a pas fonctionné. Veuillez réessayer.",
+      "reasons": {
+        "offensive": "Offensant ou haineux",
+        "harassment": "Harcèlement",
+        "spam": "Spam",
+        "other": "Autre chose"
+      }
+    }
   },
   "serverAdmin": {
     "adminPage": {

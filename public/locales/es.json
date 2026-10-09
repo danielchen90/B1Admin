@@ -2763,7 +2763,35 @@
       "youtubeId": "ID de YouTube"
     },
     "subtitle": "Administre su biblioteca de sermones y transmisiones en vivo",
-    "title": "Sermones"
+    "title": "Sermones",
+    "chatReports": {
+      "tab": "Denuncias del chat",
+      "title": "Denuncias del chat",
+      "help": "Mensajes que las personas denunciaron en el chat de la transmisión, los chats de grupo y los mensajes privados. Revisa cada uno en un plazo de 24 horas: Eliminar borra el mensaje para todos; Descartar lo conserva.",
+      "open": "Abiertas",
+      "resolved": "Resueltas",
+      "reported": "Denunciado",
+      "where": "Dónde",
+      "reason": "Motivo",
+      "sender": "Enviado por",
+      "message": "Mensaje",
+      "remove": "Eliminar mensaje",
+      "dismiss": "Descartar",
+      "removed": "Eliminado",
+      "dismissed": "Descartado",
+      "unknownSender": "Desconocido",
+      "confirmRemove": "¿Eliminar este mensaje para todos?",
+      "noneOpen": "No hay denuncias abiertas.",
+      "noneResolved": "Todavía no hay denuncias resueltas.",
+      "loadFailed": "No se pudieron cargar las denuncias del chat.",
+      "actionFailed": "No funcionó. Inténtalo de nuevo.",
+      "reasons": {
+        "offensive": "Ofensivo o de odio",
+        "harassment": "Acoso",
+        "spam": "Spam",
+        "other": "Otra cosa"
+      }
+    }
   },
   "serverAdmin": {
     "adminPage": {

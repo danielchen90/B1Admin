@@ -4,15 +4,20 @@ import { Box, Button, Grid } from "@mui/material";
 import {
   PlayArrow as PlayArrowIcon,
   Settings as SettingsIcon,
-  LiveTv as LiveTvIcon
+  LiveTv as LiveTvIcon,
+  Flag as FlagIcon
 } from "@mui/icons-material";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import type { StreamingServiceInterface } from "@churchapps/helpers";
 import { Services, Tabs } from "./components";
+import { ChatReports } from "./components/ChatReports";
 import { NavigationTabs } from "../components/ui/NavigationTabs";
 
 export const LiveStreamTimesPage = memo(() => {
-  const [selectedTab, setSelectedTab] = React.useState("services");
+  const [searchParams] = useSearchParams();
+  // ?tab=reports opens Chat reports (the link in the staff report email).
+  const [selectedTab, setSelectedTab] = React.useState(searchParams.get("tab") === "reports" ? "reports" : "services");
 
   useQuery<StreamingServiceInterface[]>({
     queryKey: ["/streamingServices", "ContentApi"],
@@ -23,7 +28,8 @@ export const LiveStreamTimesPage = memo(() => {
 
   const tabs = [
     { value: "services", label: Locale.label("sermons.liveStreamTimes.services"), icon: <PlayArrowIcon /> },
-    { value: "settings", label: Locale.label("sermons.liveStreamTimes.settings"), icon: <SettingsIcon /> }
+    { value: "settings", label: Locale.label("sermons.liveStreamTimes.settings"), icon: <SettingsIcon /> },
+    { value: "reports", label: Locale.label("sermons.chatReports.tab"), icon: <FlagIcon /> }
   ];
 
   const streamUrl = CommonEnvironmentHelper.B1Root.replace("{key}", UserHelper.currentUserChurch.church.subDomain) + "/stream";
@@ -43,6 +49,7 @@ export const LiveStreamTimesPage = memo(() => {
           </Grid>
         </Grid>
       );
+      case "reports": return <ChatReports />;
       default: return <Services />;
     }
   };
