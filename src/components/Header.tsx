@@ -40,6 +40,7 @@ export const Header: React.FC = () => {
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/people", icon: "person", label: Locale.label("components.wrapper.ppl") });
     // Ministry-wide CRM: every Mary Banks ID plus people met anywhere (API: org-wide staff only).
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/crm", icon: "hub", label: "CRM" });
+    if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/crm/events", icon: "event", label: "Events" });
     else if (formPermission || isFormMember) menuItems.push({ url: "/forms", icon: "person", label: Locale.label("components.wrapper.ppl") });
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/ordinations", icon: "workspace_premium", label: "Ordinations" });
     if (UserHelper.checkAccess(Permissions.membershipApi.people.view)) menuItems.push({ url: "/campuses", icon: "location_on", label: "Campuses" });
@@ -83,6 +84,7 @@ export const Header: React.FC = () => {
     const path = window.location.pathname;
     let result = Locale.label("dashboard.dashboardPage.dash");
     if (path.startsWith("/people")) result = Locale.label("components.wrapper.ppl");
+    else if (path.startsWith("/crm/events")) result = "Events";
     else if (path.startsWith("/crm")) result = "CRM";
     else if (path.startsWith("/campuses")) result = "Campuses";
     else if (path.startsWith("/auxiliaries")) result = "Auxiliaries";
