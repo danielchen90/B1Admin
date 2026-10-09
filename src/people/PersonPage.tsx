@@ -1,4 +1,5 @@
 import React, { useContext, useCallback, useMemo } from "react";
+import { CrmProfileTab } from "../crm/CrmProfileTab";
 import { Groups, PersonAttendance, PersonNotes, PersonDonations, GdprActions } from "./components";
 import { type PersonInterface, type ConversationInterface } from "@churchapps/helpers";
 import { ApiHelper, Locale, SocketHelper, SubscriptionManager, UserHelper } from "@churchapps/apphelper";
@@ -122,7 +123,8 @@ export const PersonPage = () => {
     return result[0].id;
   };
 
-  const defaultTab: string = "details";
+  // ?tab=profile (links from the CRM) opens that tab first.
+  const defaultTab: string = new URLSearchParams(window.location.search).get("tab") || "details";
 
   React.useEffect(() => {
     if (selectedTab === "" && defaultTab !== "") {
@@ -152,6 +154,7 @@ export const PersonPage = () => {
           />
         );
         break;
+      case "profile": currentTab = <CrmProfileTab key="profile" personId={person.id} />; break;
       case "notes": currentTab = <PersonNotes key={`notes-${person?.conversationId || "new"}`} context={context} conversationId={person?.conversationId} createConversation={handleCreateConversation} />; break;
       case "attendance": currentTab = <PersonAttendance key="attendance" personId={person.id} updatedFunction={refetch} />; break;
       case "donations": currentTab = <PersonDonations key="donations" personId={person.id} />; break;

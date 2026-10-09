@@ -3,6 +3,7 @@ import {
   VolunteerActivism as DonationIcon,
   CalendarMonth as AttendanceIcon,
   Notes as NotesIcon,
+  Hub as ProfileIcon,
   Person as PersonIcon,
   WorkspacePremium as OrdinationIcon
 } from "@mui/icons-material";
@@ -22,6 +23,7 @@ export const PersonNavigation = memo((props: Props) => {
   const tabs: NavigationTab[] = useMemo(() => {
     const t: NavigationTab[] = [
       { value: "details", label: Locale.label("people.personNavigation.details"), icon: <PersonIcon /> },
+      { value: "profile", label: "Profile", icon: <ProfileIcon /> },
       { value: "notes", label: Locale.label("people.personNavigation.notes"), icon: <NotesIcon /> },
       { value: "groups", label: Locale.label("people.personNavigation.groups"), icon: <GroupIcon /> },
       { value: "attendance", label: Locale.label("people.personNavigation.attendance"), icon: <AttendanceIcon /> },

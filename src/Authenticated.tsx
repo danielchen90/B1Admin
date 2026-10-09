@@ -9,6 +9,7 @@ import { canWriteOrdinations } from "./helpers/OrdinationHelper";
 
 // Lazy load all page components for code splitting
 const PeoplePage = React.lazy(() => import("./people/PeoplePage").then((module) => ({ default: module.PeoplePage })));
+const CrmPage = React.lazy(() => import("./crm/CrmPage").then((module) => ({ default: module.CrmPage })));
 const PersonPage = React.lazy(() => import("./people/PersonPage").then((module) => ({ default: module.PersonPage })));
 const DemographicsPage = React.lazy(() => import("./people/demographics/DemographicsPage").then((module) => ({ default: module.DemographicsPage })));
 const CampusesPage = React.lazy(() => import("./campuses/CampusesPage").then((module) => ({ default: module.CampusesPage })));
@@ -138,6 +139,7 @@ export const Authenticated: React.FC = () => {
           <Route path="/people/demographics" element={<DemographicsPage />} />
           <Route path="/people/:id" element={<PersonPage />} />
           <Route path="/people" element={<PeoplePage />} />
+          <Route path="/crm" element={<CrmPage />} />
           <Route path="/campuses/website" element={<CampusWebsiteDefaultsPage />} />
           <Route path="/campuses/:id" element={<CampusPage />} />
           <Route path="/campuses" element={<CampusesPage />} />
