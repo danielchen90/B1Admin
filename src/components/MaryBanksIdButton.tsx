@@ -4,7 +4,7 @@ import { Box, Button, Divider, Typography } from "@mui/material";
 // Mary Banks ID sign-in for church staff. The public church site runs the whole sign-in
 // (Keycloak code exchange + the Api's mbidLogin) and then sends the browser back to this
 // app's /login?jwt=..., where the stock ChurchApps login finishes the session.
-const DEFAULT_SITE = "https://church.chensolutions.com";
+const DEFAULT_SITE = "https://churches.marybanks.net";
 
 export const mbidStartUrl = (): string => {
   const site = (process.env.REACT_APP_MBID_SITE_URL || DEFAULT_SITE).replace(/\/+$/, "");
