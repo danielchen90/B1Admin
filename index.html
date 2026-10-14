@@ -2,6 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- The church admin lives at admin.marybanks.net; the old huro.church host forwards (path and query kept, so /login?jwt= hand-offs still land). -->
+    <script>
+      if (location.hostname === "admin.huro.church") location.replace("https://admin.marybanks.net" + location.pathname + location.search + location.hash);
+    </script>
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
