@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, Button, Card, CardContent, Chip, Dialog, DialogContent, DialogTitle, IconButton, MenuItem, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, CardContent, Chip, Dialog, DialogContent, DialogTitle, IconButton, InputAdornment, Link, MenuItem, Stack, TextField, Tooltip, Typography } from "@mui/material";
 import {
   AddPhotoAlternate as AddPhotoIcon,
   ArrowBack as ArrowBackIcon,
@@ -8,9 +8,11 @@ import {
   ArrowDownward as ArrowDownwardIcon,
   DeleteOutline as DeleteIcon,
   Add as AddIcon,
-  Save as SaveIcon
+  Save as SaveIcon,
+  OpenInNew as OpenInNewIcon
 } from "@mui/icons-material";
 import { ApiHelper, ImageEditor } from "@churchapps/apphelper";
+import { EnvironmentHelper } from "../../helpers";
 
 // The public-website content model (mirrors the Api's CampusContentFields). Blank on a campus
 // override means "use the network default"; HIDDEN means "hide on this center".
@@ -52,6 +54,7 @@ export interface CampusContentFields {
   email?: string;
   whatToExpect?: string;
   announcements?: Announcement[] | string;
+  friendlyUrl?: string;
 }
 
 interface AdminRead {
@@ -66,6 +69,12 @@ interface Props {
   campusId: string | null;
   campusName?: string;
 }
+
+// The public site's address without the scheme, e.g. "bibleteachers.com".
+const siteHost = (): string => (EnvironmentHelper.B1Url || "").replace(/^https?:\/\//, "").replace(/\/+$/, "");
+
+// The friendly address as the site will read it (the Api cleans it the same way on save).
+const cleanFriendlyUrl = (v: string): string => v.trim().toLowerCase().replace(/^https?:\/\/[^/]+/, "").replace(/^\/+|\/+$/g, "").replace(/\s+/g, "-");
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -327,6 +336,31 @@ export const CampusWebsiteContent: React.FC<Props> = ({ campusId, campusName }) 
           </Stack>
         )}
       </Section>
+
+      {!isOrg && (() => {
+        const friendly = cleanFriendlyUrl(asText(content.friendlyUrl));
+        const host = siteHost();
+        return (
+          <Section title="Web address" helper="A short, easy address for this center's page to put on flyers, slides and social posts. Visitors who type it land on this center's page." testId="campus-content-web-address">
+            <TextField
+              fullWidth
+              label="Friendly web address"
+              value={asText(content.friendlyUrl)}
+              onChange={(e) => set("friendlyUrl", e.target.value)}
+              placeholder="ftl"
+              helperText="Letters, numbers and hyphens, 2 to 40 characters. Each center's address must be different."
+              InputProps={{ startAdornment: <InputAdornment position="start">{host + "/"}</InputAdornment> }}
+              inputProps={{ maxLength: 60, "data-testid": "campus-friendly-url" }}
+              sx={{ mb: 1 }}
+            />
+            {friendly && host && (
+              <Link href={"https://" + host + "/" + friendly} target="_blank" rel="noopener noreferrer" underline="hover" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
+                {host + "/" + friendly} <OpenInNewIcon sx={{ fontSize: 16 }} />
+              </Link>
+            )}
+          </Section>
+        );
+      })()}
 
       <Section
         title="Photos"
